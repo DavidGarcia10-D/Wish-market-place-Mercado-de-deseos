@@ -1,0 +1,7 @@
+C:\Users\David\Desktop\mi-proyecto\backend\models
+C:\Users\David\Desktop\mi-proyecto\backend\routes
+C:\Users\David\Desktop\mi-proyecto\frontend\node_modules\workbox-core\models
+C:\Users\David\Desktop\mi-proyecto\frontend\node_modules\workbox-core\src\models
+C:\Users\David\Desktop\mi-proyecto\frontend\node_modules\workbox-expiration\models
+C:\Users\David\Desktop\mi-proyecto\frontend\node_modules\workbox-expiration\src\models
+C:\Users\David\Desktop\mi-proyecto\frontend\node_modules\workbox-sw\controllers

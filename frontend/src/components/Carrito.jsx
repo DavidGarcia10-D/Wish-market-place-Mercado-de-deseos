@@ -1,23 +1,19 @@
-// 📌 Importamos React y el contexto global
 import React, { useContext } from "react";
-import { CarritoContext } from "../context/CarritoContext"; // 📌 Accedemos al estado global del carrito
-import axios from "axios"; // 📌 Importamos Axios para manejar la comunicación con el backend
+import { CarritoContext } from "../context/CarritoContext";
+import axios from "axios";
 
 const Carrito = () => {
-  const { carrito, setCarrito } = useContext(CarritoContext); // 📌 Estado global del carrito
+  const { carrito, setCarrito } = useContext(CarritoContext);
 
-    // 🔥 NUEVO: Función para calcular el total del carrito 🔥
-  const calcularTotal = () => {
-    return carrito.reduce((total, producto) => total + producto.precio * producto.cantidad, 0);
-  };
+  // 🔢 Calcula el total acumulado del carrito
+  const calcularTotal = () =>
+    carrito.reduce((total, producto) => total + producto.precio * producto.cantidad, 0);
 
-  // 📌 Función para eliminar productos del carrito
+  // 🗑️ Elimina un producto por ID (también lo elimina del backend)
   const eliminarDelCarrito = (productoId) => {
-    // 🔄 Filtramos el producto a eliminar y actualizamos el estado global
     const nuevoCarrito = carrito.filter((p) => p._id !== productoId);
-    setCarrito(nuevoCarrito); 
+    setCarrito(nuevoCarrito);
 
-    // 📌 Eliminamos también en el backend
     axios.delete(`http://localhost:3000/carrito/${productoId}`)
       .catch(err => console.error("❌ Error al eliminar producto:", err));
   };
@@ -29,24 +25,25 @@ const Carrito = () => {
       {carrito.length === 0 ? (
         <p>Tu carrito está vacío.</p>
       ) : (
-        carrito.map((producto) => (
-          <div key={producto._id} style={{ border: "1px solid #ccc", padding: "10px", marginBottom: "10px" }}>
-            <h3>{producto.nombre}</h3>  {/* 📌 Nombre del producto */}
+        carrito.map((producto, index) => (
+          <div
+            key={`${producto._id}-${index}`} // ✅ Clave única incluso si hay duplicados
+            style={{ border: "1px solid #ccc", padding: "10px", marginBottom: "10px" }}
+          >
+            <h3>{producto.nombre}</h3>
 
             {/* 📸 Imagen del producto */}
             <img src={producto.imagenUrl} alt={producto.nombre} width="100px" />
 
-            <p><strong>Precio:</strong> ${producto.precio} USD</p>  {/* 💲 Precio */}
-            <p><strong>Cantidad:</strong> {producto.cantidad}</p>  {/* 🔢 Cantidad seleccionada */}
+            <p><strong>Precio:</strong> ${producto.precio} USD</p>
+            <p><strong>Cantidad:</strong> {producto.cantidad}</p>
 
-            {/* 📌 Botón para eliminar productos del carrito */}
-            <button onClick={() => eliminarDelCarrito(producto._id)}>❌ Eliminar</button>  
+            <button onClick={() => eliminarDelCarrito(producto._id)}>❌ Eliminar</button>
           </div>
         ))
       )}
 
-          {/* 🔥 NUEVO: Mostramos el total del carrito 🔥 */}
-          <h3>Total a pagar: ${calcularTotal().toFixed(2)} $COP</h3>
+      <h3>Total a pagar: ${calcularTotal().toFixed(2)} $COP</h3>
     </div>
   );
 };

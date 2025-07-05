@@ -1,24 +1,38 @@
-import React from "react"; // 📌 Importamos React
-import Productos from "./components/Productos"; // 📌 Importamos el componente Productos
-import Carrito from "./components/Carrito"; // 📌 Importamos el carrito de compras
-import Pago from "./components/Pago"; // 🔥 NUEVO: Importamos el componente de pago
-import { CarritoProvider } from "./context/CarritoContext"; // 📌 Importamos el contexto global del carrito
+import React from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+
+import Productos from "./components/Productos";
+import Carrito from "./components/Carrito";
+import Pago from "./components/Pago";
+import EstadoPago from "./components/EstadoPago";
+
+import { CarritoProvider } from "./context/CarritoContext";
 
 const App = () => {
   return (
-    // 📌 Envolvemos la aplicación con CarritoProvider para manejar el estado global del carrito
     <CarritoProvider>
-      <div>
-        <h1>Bienvenido a la tienda 🚀</h1>
-        <Productos /> {/* 📌 Mostramos los productos disponibles en la tienda */}
-        <Carrito usuarioId={"123456"} /> {/* 📌 Mostramos el carrito (puede usar un ID dinámico del usuario) */}
+      <Router>
+        <Routes>
+          {/* 🏠 Ruta principal: productos, carrito y pago */}
+          <Route
+            path="/"
+            element={
+              <div>
+                <h1>Bienvenido a la tienda 🚀</h1>
+                <Productos />
+                <Carrito usuarioId={"123456"} />
+                <Pago />
+              </div>
+            }
+          />
 
-        {/* 🔥 NUEVO: Agregamos el formulario de pago debajo del carrito 🔥 */}
-        <Pago />
-
-      </div>
+          {/* 📄 Ruta dinámica para estado del pago */}
+          <Route path="/estado/:reference" element={<EstadoPago />} />
+        </Routes>
+      </Router>
     </CarritoProvider>
   );
 };
 
-export default App; // 📌 Exportamos App para que se pueda renderizar en el navegador
+export default App;
+

@@ -1,38 +1,47 @@
-// 📌 Importamos las librerías necesarias
+// 📌 Importamos librerías base
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const Product = require("./models/Product");
-require("dotenv").config(); // 🔥 NUEVO: Cargamos las variables de entorno
+require("dotenv").config();
 
-// 📌 Importamos módulos adicionales
-const carritoRoutes = require("./routes/carrito"); // 🔄 Rutas del carrito
-const pagoRoutes = require("./routes/pago"); // 🔥 NUEVO: Importamos las rutas de pago
+// 📦 Importamos rutas personalizadas
+const carritoRoutes = require("./routes/carrito");   // 🛒 Carrito
+const pagoRoutes = require("./routes/pago");         // 💰 Pagos (incluye /:reference)
+const webhookRoutes = require("./routes/webhook");   // 📬 Webhook de Wompi
 
-// 📌 Inicializamos la aplicación Express
+// 🚀 Inicializamos la app
 const app = express();
+
+// 🌐 CORS solo permite frontend local (React) — ajusta a tu dominio en producción
 app.use(cors({ origin: "http://localhost:5000" }));
+
+// ⚠️ MUY IMPORTANTE: este raw parser solo aplica a /webhook (para validar firma HMAC)
+app.use("/webhook", express.raw({ type: "application/json" }));
+
+// 📦 Middleware global para JSON
 app.use(express.json());
 
-// 📌 Conectamos a MongoDB con manejo de errores
+// 🌱 Conexión a MongoDB
 const mongoURI = "mongodb://127.0.0.1:27017/miBaseDeDatos";
 mongoose.connect(mongoURI)
-.then(() => console.log("🔗 Conectado a MongoDB"))
-.catch(err => {
-  console.error("❌ Error al conectar a MongoDB:", err);
-  process.exit(1);
-});
+  .then(() => console.log("🔗 Conectado a MongoDB"))
+  .catch(err => {
+    console.error("❌ Error al conectar a MongoDB:", err);
+    process.exit(1);
+  });
 
-// 📌 🔥 NUEVO: Verificamos que las variables de entorno de Wompi están cargando correctamente
+// 🔐 Verificamos variables .env
 console.log("🔑 Llave privada de Wompi:", process.env.PRIVATE_KEY);
 console.log("🔑 Llave pública de Wompi:", process.env.PUBLIC_KEY);
+console.log("🔐 Llave de integridad:", process.env.INTEGRITY_SECRET);
 
-// 📌 Ruta de prueba para confirmar que el backend está corriendo
+// 🧪 Ruta base de prueba
 app.get("/", (req, res) => {
   res.send("🚀 ¡Servidor funcionando correctamente!");
 });
 
-// 📌 Ruta para obtener todos los productos desde MongoDB
+// 📦 Rutas de productos
 app.get("/productos", async (req, res) => {
   try {
     const productos = await Product.find();
@@ -43,7 +52,6 @@ app.get("/productos", async (req, res) => {
   }
 });
 
-// 📌 Ruta para agregar un nuevo producto
 app.post("/productos", async (req, res) => {
   try {
     const nuevoProducto = new Product(req.body);
@@ -55,13 +63,12 @@ app.post("/productos", async (req, res) => {
   }
 });
 
-// 📌 Conectar las rutas del carrito
-app.use("/carrito", carritoRoutes); // 🔄 Agregamos soporte para el carrito
+// 🛠️ Rutas personalizadas montadas en prefijos correctos
+app.use("/carrito", carritoRoutes); // ➝ /carrito/*
+app.use("/pago", pagoRoutes);       // ➝ /pago/pse, /pago/:reference ✅
+app.use("/webhook", webhookRoutes); // ➝ /webhook (raw)
 
-// 📌 🔥 NUEVO: Conectar las rutas de pago con PSE 🔥
-app.use("/pago", pagoRoutes); // 📌 Esto permite que el backend reconozca la ruta "/pago/pse"
-
-// 📌 🔥 NUEVO: Definir la ruta `/bancos` directamente en `server.js` para evitar errores
+// 🏦 Bancos de prueba (útil si usas solo esto en sandbox)
 app.get("/bancos", (req, res) => {
   res.json([
     { nombre: "Bancolombia", codigo: "007" },
@@ -78,6 +85,8 @@ app.get("/bancos", (req, res) => {
   ]);
 });
 
-// 📌 Inicializamos el servidor en el puerto 3000
+// 🚀 Arrancamos el servidor
 const PORT = 3000;
-app.listen(PORT, () => console.log(`🚀 Backend corriendo en http://localhost:${PORT}`));
+app.listen(PORT, () => {
+  console.log(`🚀 Backend corriendo en http://localhost:${PORT}`);
+});
