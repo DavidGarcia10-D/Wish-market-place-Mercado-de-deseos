@@ -22,8 +22,10 @@ app.use("/webhook", express.raw({ type: "*/*" }));
 // 📦 Middleware global para JSON (no afecta /webhook)
 app.use(express.json());
 
-// 🌱 Conexión a MongoDB local
-const mongoURI = "mongodb://127.0.0.1:27017/miBaseDeDatos";
+// 🌱 Conexión a MongoDB
+const mongoURI = process.env.MONGO_URI;
+// const mongoURI = "mongodb://127.0.0.1:27017/miBaseDeDatos"; // 🧪 Para pruebas locales
+
 mongoose.connect(mongoURI)
   .then(() => console.log("🔗 Conectado a MongoDB"))
   .catch(err => {
@@ -129,7 +131,6 @@ app.get("/bancos", (req, res) => {
 
 // 🚀 Inicialización del servidor
 const PORT = process.env.PORT || 3000;
-
 app.listen(PORT, () => {
   console.log(`🚀 Backend corriendo en http://localhost:${PORT}`);
 });
