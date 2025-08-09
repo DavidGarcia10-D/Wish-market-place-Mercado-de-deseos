@@ -4,71 +4,82 @@ const crypto = require("crypto");
 const router = express.Router();
 require("dotenv").config();
 
-// 📦 Modelo de pagos en MongoDB
 const Pago = require("../models/Pago");
 
-// 🌐 URL base de Wompi según entorno
+// 🔧 Determina entorno actual (sandbox o producción)
 const WOMPI_BASE_URL = process.env.WOMPI_ENV === "sandbox"
   ? "https://sandbox.wompi.co/v1"
   : "https://production.wompi.co/v1";
 
+// 🔐 Llaves de Wompi desde .env
 const WOMPI_PUBLIC_KEY = process.env.PUBLIC_KEY;
 const WOMPI_PRIVATE_KEY = process.env.PRIVATE_KEY;
+const INTEGRITY_SECRET = process.env.INTEGRITY_SECRET;
 
-if (!WOMPI_PUBLIC_KEY || !WOMPI_PRIVATE_KEY) {
-  console.error("❌ ERROR: Llaves de Wompi no definidas correctamente en .env");
+if (!WOMPI_PUBLIC_KEY || !WOMPI_PRIVATE_KEY || !INTEGRITY_SECRET) {
+  console.error("❌ Llaves de Wompi faltantes en .env");
   process.exit(1);
 }
 
-console.log("🔑 Llave pública:", WOMPI_PUBLIC_KEY ? "✅ Ok" : "❌ No definida");
-console.log("🔑 Llave privada:", WOMPI_PRIVATE_KEY ? "✅ Ok" : "❌ No definida");
-console.log("🔗 Endpoint Wompi:", WOMPI_BASE_URL);
-
-// 🧪 Función para obtener token de aceptación
+// 🧪 Obtener token de aceptación desde Wompi
 const obtenerTokenAceptacion = async () => {
   try {
     const response = await axios.get(`${WOMPI_BASE_URL}/merchants/${WOMPI_PUBLIC_KEY}`);
-    const tokenAceptacion = response.data?.data?.presigned_acceptance?.acceptance_token;
-    if (!tokenAceptacion) throw new Error("❌ Token inválido");
-    return tokenAceptacion;
+    return response.data?.data?.presigned_acceptance?.acceptance_token;
   } catch (error) {
-    console.error("❌ Error al obtener el token de aceptación:", error.response?.data || error.message);
+    console.error("❌ Error al obtener token:", error.response?.data || error.message);
     return null;
   }
 };
 
-// 📧 Validación de correo
+// 📧 Validador simple de correos
 const validarEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
-// 💳 POST /pse → crear transacción
+// 💳 POST /pago/pse — Iniciar transacción PSE con Wompi
 router.post("/pse", async (req, res) => {
-  console.log("📩 Se recibió POST en /pago/pse");
-  console.log("🔎 Cuerpo recibido:", req.body);
+  console.log("📩 POST recibido en /pago/pse");
 
   try {
-    const { usuario, valor, document, document_type, financial_institution_code, nombre } = req.body;
+    const {
+      usuario,
+      valor,
+      document,
+      document_type,
+      financial_institution_code,
+      nombre_cliente,
+      banco_nombre
+    } = req.body;
 
-    // 🛑 Validaciones
-    if (valor < 1500) {
-      return res.status(400).json({ error: "Monto mínimo $1.500 COP." });
+    // 🛑 Validaciones básicas
+    if (typeof valor !== "number" || valor < 1500) {
+      return res.status(400).json({ error: "Monto mínimo permitido: $1.500 COP." });
     }
-    if (!usuario || !validarEmail(usuario) || !document || !document_type || !financial_institution_code || !nombre) {
-      return res.status(400).json({ error: "❌ Faltan campos o son inválidos." });
+
+    if (
+      !usuario || !validarEmail(usuario) ||
+      !document || !document_type || !financial_institution_code ||
+      !nombre_cliente || !banco_nombre
+    ) {
+      return res.status(400).json({ error: "Faltan campos requeridos o están mal formados." });
     }
+
     if (process.env.WOMPI_ENV === "sandbox" && !["1", "2"].includes(financial_institution_code)) {
-      return res.status(400).json({ error: "Código de banco inválido para Sandbox (usa 1 o 2)." });
+      return res.status(400).json({ error: "Banco inválido en entorno de pruebas (usa código 1 o 2)." });
     }
 
     const tokenAceptacion = await obtenerTokenAceptacion();
-    if (!tokenAceptacion) return res.status(500).json({ error: "❌ No se obtuvo token de aceptación." });
+    if (!tokenAceptacion) {
+      return res.status(500).json({ error: "No se obtuvo token de aceptación desde Wompi." });
+    }
 
-    // 🧾 Construcción de la transacción
     const referencia = `PAGO_${Date.now()}`;
     const redirectURL = `http://localhost:5000/estado/${referencia}`;
+    const montoCentavos = parseInt(valor * 100, 10);
 
+    // 📦 Construir payload para la transacción PSE
     const pagoData = {
       acceptance_token: tokenAceptacion,
-      amount_in_cents: parseInt(valor * 100, 10),
+      amount_in_cents: montoCentavos,
       currency: "COP",
       customer_email: usuario,
       reference: referencia,
@@ -80,16 +91,17 @@ router.post("/pse", async (req, res) => {
         user_legal_id_type: document_type,
         financial_institution_code: String(financial_institution_code),
         payment_description: "Pago a Tienda Wompi"
-      }
+      },
+      signature: crypto.createHash("sha256")
+        .update(`${referencia}${montoCentavos}COP${INTEGRITY_SECRET}`)
+        .digest("hex")
     };
 
-    const firma = crypto.createHash("sha256")
-      .update(`${pagoData.reference}${pagoData.amount_in_cents}${pagoData.currency}${process.env.INTEGRITY_SECRET}`)
-      .digest("hex");
-    pagoData.signature = firma;
+    // 🔍 Log adicional para depuración (ver el payload completo que se envía a Wompi)
+    console.log("📦 Payload enviado a Wompi:", JSON.stringify(pagoData, null, 2));
 
-    console.log("📤 Enviando transacción a Wompi:", pagoData);
-
+    // 🚀 Enviar transacción a Wompi
+    console.log("📤 Enviando transacción a Wompi...");
     const respuesta = await axios.post(`${WOMPI_BASE_URL}/transactions`, pagoData, {
       headers: {
         Authorization: `Bearer ${WOMPI_PRIVATE_KEY}`,
@@ -97,66 +109,70 @@ router.post("/pse", async (req, res) => {
       }
     });
 
-    console.log("✅ Respuesta de Wompi:", respuesta.data);
+    const respuestaData = respuesta.data?.data;
+    console.log("✅ Transacción creada:", respuestaData.reference);
 
-    // 💾 Guardar en base de datos
+    // 💾 Guardar datos del pago en MongoDB
     try {
-      const pagoGuardado = await Pago.create({
+      await Pago.create({
         reference: referencia,
-        status: respuesta.data.data.status || "PENDING",
-        amount_in_cents: pagoData.amount_in_cents,
-        customer_email: pagoData.customer_email
+        status: respuestaData.status || "PENDING",
+        amount_in_cents: montoCentavos,
+        customer_email: usuario,
+        user_email: usuario,
+        payment_method_type: "PSE",
+        bank_name: banco_nombre,
+        // user_name: nombre_cliente, // ⚠️ Este campo no está definido en el modelo. Omitir o agregar si necesario.
+        attempts: 1
       });
-      console.log("💾 Transacción guardada en MongoDB:", pagoGuardado);
     } catch (err) {
-      console.error("❌ Error al guardar en Mongo:", err);
+      console.error("❌ Error guardando pago en MongoDB:", err.message);
     }
 
     res.status(200).json({
-      mensaje: "✅ Pago iniciado",
+      mensaje: "✅ Transacción iniciada",
       reference: referencia,
-      redirect_url: respuesta.data.data.redirect_url
+      redirect_url: respuestaData.redirect_url
     });
 
   } catch (error) {
-    console.error("❌ Error general en POST /pse:", JSON.stringify(error.response?.data || error.message));
-    res.status(500).json({ error: "Error procesando el pago con PSE" });
+    console.error("❌ Error procesando transacción PSE:", error.response?.data || error.message);
+    res.status(500).json({ error: "Error al iniciar el pago con Wompi." });
   }
 });
 
-// 🏦 Lista de bancos (sandbox)
+// 🏦 GET /pago/bancos — Bancos de prueba para entorno Sandbox
 router.get("/bancos", (req, res) => {
   res.json([
-    { nombre: "Banco que aprueba (Sandbox PSE)", codigo: "1" },
-    { nombre: "Banco que rechaza (Sandbox PSE)", codigo: "2" }
+    { nombre: "Banco que aprueba (Sandbox)", codigo: "1" },
+    { nombre: "Banco que rechaza (Sandbox)", codigo: "2" }
   ]);
 });
 
-// 🔍 Consulta de estado por referencia
+// 🔍 GET /pago/:reference — Consultar estado y datos del pago por referencia
 router.get("/:reference", async (req, res) => {
-  const { reference } = req.params;
   try {
-    const pago = await Pago.findOne({ reference });
-    if (!pago) return res.status(404).json({ error: "⚠️ Referencia no encontrada." });
-    res.status(200).json({ status: pago.status });
+    const pago = await Pago.findOne({ reference: req.params.reference });
+    if (!pago) return res.status(404).json({ error: "Referencia no encontrada." });
+    res.status(200).json(pago);
   } catch (error) {
-    console.error("❌ Error en GET /:reference:", error);
-    res.status(500).json({ error: "Error interno al consultar estado." });
+    console.error("❌ Error al buscar referencia:", error.message);
+    res.status(500).json({ error: "Error interno al consultar el pago." });
   }
 });
 
-// 🧾 Últimos registros (debug)
+// 🧾 GET /pago/ultimos-pagos — Listado de últimos pagos
 router.get("/ultimos-pagos", async (req, res) => {
   try {
-    const ultimos = await Pago.find().sort({ created_at: -1 }).limit(5);
-    res.json(ultimos.map(p => ({
+    const pagos = await Pago.find().sort({ createdAt: -1 }).limit(5);
+    res.status(200).json(pagos.map(p => ({
       reference: p.reference,
       status: p.status,
       email: p.customer_email
     })));
   } catch (error) {
-    console.error("❌ Error en GET /ultimos-pagos:", error);
-    res.status(500).json({ error: "Error al consultar pagos recientes." });
+    console.error("❌ Error al consultar últimos pagos:", error.message);
+    res.status(500).json({ error: "No se pudo obtener pagos recientes." });
   }
 });
 

@@ -5,24 +5,24 @@ const cors = require("cors");
 const Product = require("./models/Product");
 require("dotenv").config();
 
-// 📦 Importamos rutas personalizadas
+// 📦 Rutas personalizadas
 const carritoRoutes = require("./routes/carrito");   // 🛒 Carrito
-const pagoRoutes = require("./routes/pago");         // 💰 Pagos (incluye /:reference)
-const webhookRoutes = require("./routes/webhook");   // 📬 Webhook de Wompi
+const pagoRoutes = require("./routes/pago");         // 💰 Pagos
+const webhookRoutes = require("./routes/webhook");   // 📬 Webhook Wompi
 
 // 🚀 Inicializamos la app
 const app = express();
 
-// 🌐 CORS solo permite frontend local (React) — ajusta a tu dominio en producción
+// 🌐 CORS — en producción, cambia por tu dominio real
 app.use(cors({ origin: "http://localhost:5000" }));
 
-// ⚠️ MUY IMPORTANTE: este raw parser solo aplica a /webhook (para validar firma HMAC)
-app.use("/webhook", express.raw({ type: "application/json" }));
+// ⚠️ CORREGIDO: Parser raw necesario SOLO para /webhook → habilita validación HMAC
+app.use("/webhook", express.raw({ type: "*/*" }));
 
-// 📦 Middleware global para JSON
+// 📦 Middleware global para JSON (no afecta /webhook)
 app.use(express.json());
 
-// 🌱 Conexión a MongoDB
+// 🌱 Conexión a MongoDB local
 const mongoURI = "mongodb://127.0.0.1:27017/miBaseDeDatos";
 mongoose.connect(mongoURI)
   .then(() => console.log("🔗 Conectado a MongoDB"))
@@ -31,12 +31,12 @@ mongoose.connect(mongoURI)
     process.exit(1);
   });
 
-// 🔐 Verificamos variables .env
-console.log("🔑 Llave privada de Wompi:", process.env.PRIVATE_KEY);
-console.log("🔑 Llave pública de Wompi:", process.env.PUBLIC_KEY);
-console.log("🔐 Llave de integridad:", process.env.INTEGRITY_SECRET);
+// 🔐 Verificación de variables .env
+console.log("🔑 Llave privada Wompi:", process.env.PRIVATE_KEY);
+console.log("🔑 Llave pública Wompi:", process.env.PUBLIC_KEY);
+console.log("🔐 Llave integridad:", process.env.INTEGRITY_SECRET);
 
-// 🧪 Ruta base de prueba
+// 🧪 Ruta de prueba
 app.get("/", (req, res) => {
   res.send("🚀 ¡Servidor funcionando correctamente!");
 });
@@ -63,29 +63,71 @@ app.post("/productos", async (req, res) => {
   }
 });
 
-// 🛠️ Rutas personalizadas montadas en prefijos correctos
-app.use("/carrito", carritoRoutes); // ➝ /carrito/*
-app.use("/pago", pagoRoutes);       // ➝ /pago/pse, /pago/:reference ✅
-app.use("/webhook", webhookRoutes); // ➝ /webhook (raw)
+// 🛠️ Rutas personalizadas
+app.use("/carrito", carritoRoutes);
+app.use("/pago", pagoRoutes);
+app.use("/webhook", webhookRoutes); // 🧬 Webhook con raw body parser
 
-// 🏦 Bancos de prueba (útil si usas solo esto en sandbox)
+// 🏦 Lista completa de bancos (sandbox + reales)
 app.get("/bancos", (req, res) => {
   res.json([
-    { nombre: "Bancolombia", codigo: "007" },
-    { nombre: "Banco de Bogotá", codigo: "001" },
-    { nombre: "Davivienda", codigo: "051" },
-    { nombre: "Banco Popular", codigo: "002" },
-    { nombre: "Banco Caja Social", codigo: "032" },
-    { nombre: "BBVA", codigo: "013" },
-    { nombre: "Banco de Occidente", codigo: "023" },
-    { nombre: "Citibank", codigo: "009" },
-    { nombre: "Scotiabank Colpatria", codigo: "019" },
-    { nombre: "Nequi", codigo: "507" },
-    { nombre: "Daviplata", codigo: "551" }
+    { nombre: "Banco que aprueba (Sandbox)", codigo: "1" },
+    { nombre: "Banco que rechaza (Sandbox)", codigo: "2" },
+    { nombre: "Banco de Bogotá", codigo: "1001" },
+    { nombre: "Banco Popular", codigo: "1002" },
+    { nombre: "Itaú (antes Corpbanca)", codigo: "1006" },
+    { nombre: "Bancolombia", codigo: "1007" },
+    { nombre: "Citibank", codigo: "1009" },
+    { nombre: "Banco GNB Sudameris", codigo: "1012" },
+    { nombre: "BBVA Colombia", codigo: "1013" },
+    { nombre: "Itaú", codigo: "1014" },
+    { nombre: "Scotiabank Colpatria", codigo: "1019" },
+    { nombre: "Banco de Occidente", codigo: "1023" },
+    { nombre: "Bancóldex", codigo: "1031" },
+    { nombre: "Banco Caja Social", codigo: "1032" },
+    { nombre: "Banco Agrario", codigo: "1040" },
+    { nombre: "Banco Mundo Mujer", codigo: "1047" },
+    { nombre: "Davivienda", codigo: "1051" },
+    { nombre: "Banco AV Villas", codigo: "1052" },
+    { nombre: "Banco W", codigo: "1053" },
+    { nombre: "Bancamía", codigo: "1059" },
+    { nombre: "Banco Pichincha", codigo: "1060" },
+    { nombre: "Bancoomeva", codigo: "1061" },
+    { nombre: "Banco Falabella", codigo: "1062" },
+    { nombre: "Banco Finandina", codigo: "1063" },
+    { nombre: "Banco Santander", codigo: "1065" },
+    { nombre: "Banco Cooperativo Coopcentral", codigo: "1066" },
+    { nombre: "Mibanco", codigo: "1067" },
+    { nombre: "Banco Serfinanza", codigo: "1069" },
+    { nombre: "Lulo Bank", codigo: "1070" },
+    { nombre: "J.P. Morgan", codigo: "1071" },
+    { nombre: "Financiera Juriscoop", codigo: "1121" },
+    { nombre: "Cooperativa de Antioquia", codigo: "1283" },
+    { nombre: "JFK Cooperativa", codigo: "1286" },
+    { nombre: "Cootrafa", codigo: "1289" },
+    { nombre: "Confiar Cooperativa", codigo: "1292" },
+    { nombre: "Banco Unión", codigo: "1303" },
+    { nombre: "Coltefinanciera", codigo: "1370" },
+    { nombre: "Nequi", codigo: "1507" },
+    { nombre: "Daviplata", codigo: "1551" },
+    { nombre: "Banco Credifinanciera", codigo: "1558" },
+    { nombre: "Pibank", codigo: "1560" },
+    { nombre: "Iris", codigo: "1637" },
+    { nombre: "Movii", codigo: "1801" },
+    { nombre: "Ding Tecnipagos", codigo: "1802" },
+    { nombre: "Powwi", codigo: "1803" },
+    { nombre: "Ualá", codigo: "1804" },
+    { nombre: "Banco BTG Pactual", codigo: "1805" },
+    { nombre: "Bold CF", codigo: "1808" },
+    { nombre: "Nu", codigo: "1809" },
+    { nombre: "Rappipay", codigo: "1811" },
+    { nombre: "Coink", codigo: "1812" },
+    { nombre: "Global66", codigo: "1814" },
+    { nombre: "Banco Contactar", codigo: "1819" }
   ]);
 });
 
-// 🚀 Arrancamos el servidor
+// 🚀 Inicialización del servidor
 const PORT = 3000;
 app.listen(PORT, () => {
   console.log(`🚀 Backend corriendo en http://localhost:${PORT}`);

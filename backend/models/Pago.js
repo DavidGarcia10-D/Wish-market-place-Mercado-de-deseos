@@ -1,13 +1,52 @@
-// 	Modelo de Mongoose para MongoDB
 const mongoose = require("mongoose");
 
-// 📄 Esquema del modelo de pago
+// 📄 Esquema para pagos registrados en MongoDB
 const PagoSchema = new mongoose.Schema({
-  reference: { type: String, required: true, unique: true },  // Referencia única (Wompi)
-  status: { type: String, required: true },                   // Estado de la transacción (APPROVED, DECLINED, etc.)
-  amount_in_cents: Number,                                    // Monto total del pago
-  customer_email: String,                                     // Correo del comprador
-  created_at: { type: Date, default: Date.now }               // Fecha de creación del registro
+  reference: {
+    type: String,
+    required: true,
+    unique: true // 🚨 Evita duplicados por referencia de transacción
+  },
+
+  amount_in_cents: {
+    type: Number,
+    required: true // 💰 Monto total en centavos (ej: 160000 = $1.600)
+  },
+
+  status: {
+    type: String,
+    required: true,
+    enum: ["PENDING", "APPROVED", "DECLINED", "VOIDED"], // 🔄 Estados válidos
+    default: "PENDING"
+  },
+
+  payment_method_type: {
+    type: String,
+    default: "PSE" // 💳 Método: PSE, CARD, etc.
+  },
+
+  bank_name: {
+    type: String // 🏦 Banco elegido por el cliente
+  },
+
+  customer_email: {
+    type: String // 📧 Correo registrado en Wompi
+  },
+
+  user_email: {
+    type: String // 🧑 Correo capturado desde tu frontend (si aplica)
+  },
+
+  attempts: {
+    type: Number,
+    default: 1 // 🔁 Intentos con misma referencia (útil para reintentos)
+  },
+
+  reject_reason: {
+    type: String // ❌ Motivo de rechazo (si lo devuelve Wompi)
+  }
+}, {
+  timestamps: true // 🕓 Registra `createdAt` y `updatedAt` automáticamente
 });
 
 // ✅ Exportamos el modelo

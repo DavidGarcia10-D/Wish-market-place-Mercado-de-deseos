@@ -5,6 +5,7 @@ import { CarritoContext } from "../context/CarritoContext";
 const Pago = () => {
   const { carrito } = useContext(CarritoContext);
 
+  // 🧾 Datos del formulario
   const [email, setEmail] = useState("");
   const [nombre, setNombre] = useState("");
   const [total, setTotal] = useState(0);
@@ -14,17 +15,17 @@ const Pago = () => {
   const [bancos, setBancos] = useState([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [mensaje, setMensaje] = useState(""); // ✅ Visualiza estado de redirección
+  const [mensaje, setMensaje] = useState("");
 
-  // 🔍 Obtener bancos desde el backend
+  // 🏦 Obtener lista de bancos desde el backend
   useEffect(() => {
     axios.get("http://localhost:3000/bancos")
       .then(res => {
         if (Array.isArray(res.data)) {
           setBancos([
-            { nombre: "Banco que aprueba (Sandbox PSE)", codigo: "1" },
-            { nombre: "Banco que rechaza (Sandbox PSE)", codigo: "2" },
-            ...res.data
+            { nombre: "Banco que aprueba (Sandbox)", codigo: "1" },
+            { nombre: "Banco que rechaza (Sandbox)", codigo: "2" },
+            ...res.data // 🔗 bancos reales para producción
           ]);
         }
       })
@@ -37,62 +38,70 @@ const Pago = () => {
   // 💰 Calcular total del carrito
   useEffect(() => {
     if (carrito?.length > 0) {
-      setTotal(carrito.reduce((acc, p) => acc + p.precio * p.cantidad, 0));
+      const totalCalculado = carrito.reduce((acc, p) => acc + p.precio * p.cantidad, 0);
+      setTotal(totalCalculado);
     }
   }, [carrito]);
 
-  // 📧 Validar email
   const validarEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
-  // 💳 Iniciar flujo de pago PSE
+  // 💳 Iniciar transacción PSE
   const pagarConPSE = async () => {
     setError("");
     setMensaje("");
     setLoading(true);
 
+    // ⚠️ Validaciones previas
     if (!email || !validarEmail(email)) {
       setError("❌ Ingresa un correo electrónico válido.");
       setLoading(false);
       return;
     }
 
-    if (!nombre || !document || !documentType || !["1", "2"].includes(bankCode)) {
-      setError("❌ Selecciona todos los campos correctamente.");
+    if (!nombre || !document || !documentType || !bankCode) {
+      setError("❌ Completa todos los campos correctamente.");
       setLoading(false);
       return;
     }
 
-    if (total === 0) {
-      setError("❌ Tu carrito está vacío.");
+    if (total < 1500) {
+      setError("❌ Monto mínimo permitido: $1.500 COP.");
       setLoading(false);
       return;
     }
 
     try {
-      // 📤 Enviar datos al backend para generar la transacción
-      const response = await axios.post("http://localhost:3000/pago/pse", {
+      const bancoSeleccionado = bancos.find(b => b.codigo === bankCode);
+
+      // 📦 Armar payload antes de enviarlo
+      const payload = {
         usuario: email,
-        nombre,
+        nombre_cliente: nombre,
+        banco_nombre: bancoSeleccionado?.nombre || "Desconocido",
         valor: total,
         document,
         document_type: documentType,
         financial_institution_code: String(bankCode)
-      });
+      };
+
+      // 🧪 Log para verificar el contenido del payload
+      console.log("📦 Payload enviado a backend:", JSON.stringify(payload, null, 2));
+
+      // 📤 Enviar al backend
+      const response = await axios.post("http://localhost:3000/pago/pse", payload);
 
       const { reference, redirect_url } = response.data;
 
       if (!redirect_url) {
-        throw new Error("⚠️ No se recibió una URL de redirección desde el backend.");
+        throw new Error("⚠️ No se recibió URL de redirección desde el backend.");
       }
 
       console.log("🔁 Redirigiendo a Wompi:", redirect_url);
       setMensaje("✅ Redirigiéndote a Wompi...");
-
-      // 🌐 Redirigir al usuario a la pasarela de Wompi
       window.location.href = redirect_url;
 
     } catch (err) {
-      console.error("❌ Error:", err.response?.data || err.message);
+      console.error("❌ Error en pago:", err.response?.data || err.message);
       setError("❌ No se pudo procesar el pago. Intenta nuevamente.");
     } finally {
       setLoading(false);
@@ -103,13 +112,31 @@ const Pago = () => {
     <div>
       <h2>💳 Pagar con PSE</h2>
 
-      <input type="text" placeholder="Nombre completo" value={nombre} onChange={(e) => setNombre(e.target.value)} />
-      <input type="email" placeholder="Correo electrónico" value={email} onChange={(e) => setEmail(e.target.value)} />
-      <input type="text" placeholder="Número de documento" value={document} onChange={(e) => setDocument(e.target.value)} />
+      <input
+        type="text"
+        placeholder="Nombre completo"
+        value={nombre}
+        onChange={(e) => setNombre(e.target.value)}
+      />
+
+      <input
+        type="email"
+        placeholder="Correo electrónico"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+      />
+
+      <input
+        type="text"
+        placeholder="Número de documento"
+        value={document}
+        onChange={(e) => setDocument(e.target.value)}
+      />
 
       <select value={documentType} onChange={(e) => setDocumentType(e.target.value)}>
         <option value="CC">Cédula</option>
         <option value="CE">Cédula Extranjera</option>
+        <option value="TI">Tarjeta de Identidad</option>
         <option value="NIT">NIT</option>
       </select>
 

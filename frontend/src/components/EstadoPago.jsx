@@ -1,70 +1,90 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
+// 📥 Importamos el componente de resumen del pago (asegúrate que la ruta sea correcta)
+import ResumenPago from "./ResumenPago"; // ajusta la ruta si está en otra carpeta
+
 const EstadoPago = () => {
-  const { reference } = useParams(); // 📦 Referencia capturada de la URL
+  const { reference } = useParams(); // 📦 Capturamos la referencia desde la URL
   const [estado, setEstado] = useState(null); // 🔁 Estado actual del pago
-  const [ultimaConsulta, setUltimaConsulta] = useState(null); // 🕓 Timestamp de última verificación
+  const [ultimaConsulta, setUltimaConsulta] = useState(null); // 🕓 Timestamp del último polling
+  const [errorConsulta, setErrorConsulta] = useState(false); // ⚠️ Si ocurre un error en la consulta
 
   useEffect(() => {
     let intervalo;
     let delayInicial;
 
+    // 🔍 Función que consulta al backend por el estado del pago
     const consultarEstado = async () => {
       try {
         const res = await fetch(`http://localhost:3000/pago/${reference}`);
-
-        if (res.ok) {
-          const data = await res.json();
-          setEstado(data.status); // ✅ Almacenamos el estado
-          setUltimaConsulta(new Date().toLocaleTimeString()); // 🕓 Marcamos hora de consulta
-
-          if (data.status !== "PENDING") {
-            clearInterval(intervalo); // 🛑 Detenemos polling si ya tenemos resultado final
-          }
-        } else if (res.status === 404) {
-          setEstado("NO_ENCONTRADO"); // ⚠️ No se encontró la referencia aún
-          clearInterval(intervalo); // Opcional: detener también si referencia no existe
+        if (!res.ok) {
+          if (res.status === 404) setEstado("NO_ENCONTRADO");
+          else setErrorConsulta(true);
+          clearInterval(intervalo);
+          return;
         }
+
+        const data = await res.json();
+        setEstado(data.status);
+        setUltimaConsulta(new Date().toLocaleTimeString());
+        if (data.status !== "PENDING") clearInterval(intervalo);
       } catch (error) {
-        console.error("❌ Error consultando estado:", error);
+        console.error("❌ Error en la consulta:", error);
+        setErrorConsulta(true);
+        clearInterval(intervalo);
       }
     };
 
-    // ⏱️ Esperamos 1.5 segundos antes de hacer la primera consulta (para dar tiempo a Mongo)
+    // ⏱️ Iniciamos la primera consulta con un delay para evitar conflictos con el guardado en MongoDB
     delayInicial = setTimeout(() => {
       consultarEstado();
-      intervalo = setInterval(consultarEstado, 3000); // 🔁 Polling cada 3s
+      intervalo = setInterval(consultarEstado, 3000); // 🔁 Polling cada 3 segundos
     }, 1500);
 
-    // 🧼 Limpieza de intervalos y timeouts al desmontar
+    // 🧼 Cleanup al desmontar el componente
     return () => {
-      if (intervalo) clearInterval(intervalo);
-      if (delayInicial) clearTimeout(delayInicial);
+      clearInterval(intervalo);
+      clearTimeout(delayInicial);
     };
   }, [reference]);
 
-  // 🎨 Renderizamos según el estado actual
+  // 🎨 Visualización según estado del pago
   const renderEstado = () => {
+    if (errorConsulta) {
+      return <h2 style={{ color: "crimson" }}>🚨 Error al consultar el estado del pago</h2>;
+    }
+
     switch (estado) {
       case "APPROVED":
         return (
           <div>
-            <h2 style={{ color: "green" }}>🎉 ¡Gracias por tu compra!</h2>
-            <p>Tu pago fue aprobado exitosamente.</p>
-            <p>Te redirigiremos pronto o puedes volver a la tienda ahora mismo.</p>
+            <h2 style={{ color: "green" }}>🎉 ¡Pago aprobado!</h2>
+            <p>Gracias por tu compra.</p>
+            {/* 🧾 Resumen detallado de la transacción */}
+            <ResumenPago reference={reference} />
           </div>
         );
+
       case "DECLINED":
-        return <h2 style={{ color: "red" }}>❌ Pago rechazado</h2>;
+        return (
+          <div>
+            <h2 style={{ color: "red" }}>❌ Transacción rechazada</h2>
+            <p>Por favor intenta nuevamente con otro banco.</p>
+          </div>
+        );
+
       case "PENDING":
-        return <h2 style={{ color: "orange" }}>⏳ Esperando confirmación...</h2>;
+        return <h2 style={{ color: "orange" }}>⏳ Esperando confirmación del banco…</h2>;
+
       case "NO_ENCONTRADO":
         return <h2 style={{ color: "gray" }}>⚠️ Referencia no encontrada</h2>;
+
+      case null:
+        return <h2>🔍 Consultando estado del pago…</h2>;
+
       default:
-        return estado === null
-          ? <h2>🔍 Consultando estado...</h2>
-          : <h2 style={{ color: "gray" }}>⚠️ Estado desconocido: {estado}</h2>;
+        return <h2 style={{ color: "gray" }}>📌 Estado desconocido: {estado}</h2>;
     }
   };
 
@@ -73,22 +93,26 @@ const EstadoPago = () => {
       <h1>🧾 Estado del Pago</h1>
       <p>Referencia: <strong>{reference}</strong></p>
 
-      {/* ♿ Accesibilidad para lectores de pantalla */}
-      <div aria-live="polite">
+      {/* ♿ Zona que se actualiza dinámicamente */}
+      <div aria-live="polite" role="status">
         {renderEstado()}
       </div>
 
-      {/* 🕓 Muestra la última hora de verificación */}
+      {/* 🕓 Timestamp útil para debug o UX */}
       {ultimaConsulta && (
         <p style={{ fontSize: "0.85rem", color: "#666", marginTop: "0.5rem" }}>
-          Última consulta: {ultimaConsulta}
+          Última verificación: {ultimaConsulta}
         </p>
       )}
 
-      {/* 🔁 Botón para volver a la tienda */}
+      {/* 🔁 Acción para volver a la tienda */}
       <button
         onClick={() => window.location.href = "/"}
-        style={{ marginTop: "1.5rem", padding: "10px 20px", cursor: "pointer" }}
+        style={{
+          marginTop: "1.5rem",
+          padding: "10px 20px",
+          cursor: "pointer"
+        }}
       >
         🔙 Volver a la tienda
       </button>

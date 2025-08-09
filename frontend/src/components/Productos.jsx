@@ -1,53 +1,74 @@
-// Importamos las dependencias necesarias
-import { useState, useEffect } from "react";
+// 📦 Importamos React y dependencias necesarias
+import { useState, useEffect, useContext } from "react";
 import axios from "axios";
-import { useContext } from "react"; // 📌 Importamos useContext para usar el estado global del carrito
-import { CarritoContext } from "../context/CarritoContext"; // 📌 Importamos el contexto del carrito
+import { CarritoContext } from "../context/CarritoContext"; // 🛒 Accedemos al contexto global del carrito
 
 function Productos() {
-  // Estado para almacenar los productos obtenidos desde la API
+  // 🔐 Estado local para almacenar productos desde el backend
   const [productos, setProductos] = useState([]);
-  const { carrito, setCarrito } = useContext(CarritoContext); // 📌 Accedemos al estado global del carrito
 
-  // Efecto que ejecuta la solicitud a la API cuando el componente se monta
+  // 🧠 Estado del carrito y función para modificarlo
+  const { carrito, setCarrito } = useContext(CarritoContext);
+
+  // 🔄 Obtener productos desde el backend al montar el componente
   useEffect(() => {
-    axios.get("http://localhost:3000/productos")  // 🔍 Llamada a la API
-      .then(res => setProductos(res.data))  // 📥 Guardamos la respuesta en el estado
-      .catch(err => console.error("Error al obtener productos:", err));  // ⚠️ Manejo de errores
-  }, []);  // 📌 El array vacío `[]` asegura que se ejecute solo una vez al montar el componente
+    axios.get("http://localhost:3000/productos")
+      .then(res => setProductos(res.data))
+      .catch(err => console.error("❌ Error al obtener productos:", err));
+  }, []);
 
-  // 📌 Función para agregar productos al carrito
+  // 🛒 Función para agregar un producto al carrito
   const agregarAlCarrito = (producto) => {
-    const nuevoCarrito = [...carrito, { ...producto, cantidad: 1 }]; // 📌 Agregamos el producto con cantidad inicial 1
-    setCarrito(nuevoCarrito); // 📌 Actualizamos el estado global del carrito
+    const nuevoCarrito = [...carrito, { ...producto, cantidad: 1 }];
+    setCarrito(nuevoCarrito);
 
-    // 📌 Enviamos el producto al backend para guardar el carrito
-    axios.post("http://localhost:3000/carrito", { 
-        productoId: producto._id, 
-        cantidad: 1, 
-        total: producto.precio 
-    })  
-      .catch(err => console.error("❌ Error al agregar al carrito:", err));  
+    // 📤 También enviamos la info al backend
+    axios.post("http://localhost:3000/carrito", {
+      productoId: producto._id,
+      cantidad: 1,
+      total: producto.precio
+    })
+    .catch(err => console.error("❌ Error al agregar al carrito:", err));
   };
 
   return (
-    <div>
-      <h1>🚀 Bienvenido a la tienda</h1>
-      
-      {/* Contenedor flexible para mostrar los productos en tarjetas */}
-      <div style={{ display: "flex", gap: "20px", flexWrap: "wrap" }}>
-        {productos.map(prod => (  // 🔄 Iteramos sobre los productos obtenidos
-          <div key={prod._id} style={{ border: "1px solid #ccc", padding: "10px", width: "200px" }}>
-            <h2>{prod.nombre}</h2>  {/* 📌 Nombre del producto */}
-            
-            {/* 📸 Imagen del producto (se asegura que la URL sea válida) */}
-            <img src={prod.imagenUrl} alt={prod.nombre} width="100%" />
-            
-            <p><strong>Precio:</strong> ${prod.precio} USD</p>  {/* 💲 Precio */}
-            <p><strong>Stock:</strong> {prod.stock} unidades</p>  {/* 🔢 Stock disponible */}
-            
-            {/* 📌 Botón para agregar productos al carrito */}
-            <button onClick={() => agregarAlCarrito(prod)}>🛒 Agregar al carrito</button>  
+    <div className="contenedor-tienda">
+      {/* 🛍️ Branding y bienvenida */}
+      <h1 className="titulo-tienda">✨ WISH MARKETPLACE</h1>
+      <p className="subtitulo-tienda">Tu deseo, un clic más cerca</p>
+
+      {/* 🧱 Grilla de productos */}
+      <div className="grid-productos">
+        {productos.map(prod => (
+          <div className="card-producto" key={prod._id}>
+            {/* 📸 Imagen del producto o imagen por defecto */}
+            <img
+              src={prod.imagenUrl || "/imagenes/default.jpg"}
+              alt={prod.nombre}
+              onError={(e) => e.target.src = "/imagenes/default.jpg"}
+            />
+
+            {/* 🏷️ Nombre y precio en pesos colombianos */}
+            <h3>{prod.nombre}</h3>
+            <p className="precio">
+              {new Intl.NumberFormat("es-CO", {
+                style: "currency",
+                currency: "COP",
+                minimumFractionDigits: 0
+              }).format(prod.precio)}
+            </p>
+
+            {/* 🔢 Stock dinámico solo si se desea mostrar */}
+            {typeof prod.stock === "number" && prod.stock > 0 && prod.stock < 6 && (
+              <p className="stock">¡Solo quedan {prod.stock}!</p>
+            )}
+
+            {/* ⛔ Producto agotado vs botón activo */}
+            {typeof prod.stock === "number" && prod.stock === 0 ? (
+              <button className="agotado" disabled>Agotado</button>
+            ) : (
+              <button onClick={() => agregarAlCarrito(prod)}>🛒 Agregar al carrito</button>
+            )}
           </div>
         ))}
       </div>
@@ -55,5 +76,4 @@ function Productos() {
   );
 }
 
-// Exportamos el componente para usarlo en otras partes del frontend
 export default Productos;
