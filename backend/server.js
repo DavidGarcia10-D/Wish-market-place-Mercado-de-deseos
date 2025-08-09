@@ -128,7 +128,8 @@ app.get("/bancos", (req, res) => {
 });
 
 // 🚀 Inicialización del servidor
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
+
 app.listen(PORT, () => {
   console.log(`🚀 Backend corriendo en http://localhost:${PORT}`);
 });
