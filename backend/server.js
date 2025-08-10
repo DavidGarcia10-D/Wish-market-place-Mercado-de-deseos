@@ -13,8 +13,16 @@ const webhookRoutes = require("./routes/webhook");   // 📬 Webhook Wompi
 // 🚀 Inicializamos la app
 const app = express();
 
-// 🌐 CORS — en producción, cambia por tu dominio real
-app.use(cors({ origin: "http://localhost:5000" }));
+// 🌐 CORS — permite frontend local y en producción
+const allowedOrigins = [
+  "http://localhost:5000",
+  "https://wish-market-place-front.onrender.com"
+];
+
+app.use(cors({
+  origin: allowedOrigins,
+  credentials: true
+}));
 
 // ⚠️ CORREGIDO: Parser raw necesario SOLO para /webhook → habilita validación HMAC
 app.use("/webhook", express.raw({ type: "*/*" }));

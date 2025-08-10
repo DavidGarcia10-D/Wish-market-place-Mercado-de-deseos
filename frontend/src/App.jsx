@@ -11,8 +11,11 @@ import EstadoPago from "./components/EstadoPago";
 // 🌍 Contexto global para el carrito
 import { CarritoProvider } from "./context/CarritoContext";
 
-// 🎨 Importamos estilos globales (asegúrate de que App.css existe)
+// 🎨 Importamos estilos globales
 import "./App.css";
+
+// 🔗 Importamos la URL del backend desde .env
+const API_URL = process.env.REACT_APP_API_URL;
 
 const App = () => {
   return (
@@ -24,16 +27,15 @@ const App = () => {
             path="/"
             element={
               <div>
-                {/* 👇 Eliminamos el h1 aquí porque el título ya está incluido en <Productos /> */}
-                <Productos />
-                <Carrito usuarioId={"123456"} />
-                <Pago />
+                <Productos apiUrl={API_URL} />
+                <Carrito apiUrl={API_URL} usuarioId={"123456"} />
+                <Pago apiUrl={API_URL} />
               </div>
             }
           />
 
           {/* 📄 Ruta dinámica para mostrar estado del pago */}
-          <Route path="/estado/:reference" element={<EstadoPago />} />
+          <Route path="/estado/:reference" element={<EstadoPago apiUrl={API_URL} />} />
         </Routes>
       </Router>
     </CarritoProvider>

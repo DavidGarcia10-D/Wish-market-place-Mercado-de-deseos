@@ -3,55 +3,46 @@ import axios from "axios";
 import { CarritoContext } from "../context/CarritoContext";
 
 const Pago = () => {
+  const apiUrl = "https://wish-backend-l681.onrender.com";
   const { carrito } = useContext(CarritoContext);
 
-  // 🧾 Datos del formulario
   const [email, setEmail] = useState("");
   const [nombre, setNombre] = useState("");
-  const [total, setTotal] = useState(0);
   const [document, setDocument] = useState("");
   const [documentType, setDocumentType] = useState("CC");
   const [bankCode, setBankCode] = useState("");
   const [bancos, setBancos] = useState([]);
+  const [total, setTotal] = useState(0);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [mensaje, setMensaje] = useState("");
 
-  // 🏦 Obtener lista de bancos desde el backend
   useEffect(() => {
-    axios.get("http://localhost:3000/bancos")
+    axios.get(`${apiUrl}/bancos`)
       .then(res => {
         if (Array.isArray(res.data)) {
           setBancos([
             { nombre: "Banco que aprueba (Sandbox)", codigo: "1" },
             { nombre: "Banco que rechaza (Sandbox)", codigo: "2" },
-            ...res.data // 🔗 bancos reales para producción
+            ...res.data
           ]);
         }
       })
-      .catch(err => {
-        console.error("❌ Error al obtener bancos:", err);
-        setBancos([]);
-      });
+      .catch(() => setBancos([]));
   }, []);
 
-  // 💰 Calcular total del carrito
   useEffect(() => {
-    if (carrito?.length > 0) {
-      const totalCalculado = carrito.reduce((acc, p) => acc + p.precio * p.cantidad, 0);
-      setTotal(totalCalculado);
-    }
+    const totalCalculado = carrito.reduce((acc, p) => acc + p.precio * p.cantidad, 0);
+    setTotal(totalCalculado);
   }, [carrito]);
 
   const validarEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
-  // 💳 Iniciar transacción PSE
   const pagarConPSE = async () => {
     setError("");
     setMensaje("");
     setLoading(true);
 
-    // ⚠️ Validaciones previas
     if (!email || !validarEmail(email)) {
       setError("❌ Ingresa un correo electrónico válido.");
       setLoading(false);
@@ -73,7 +64,6 @@ const Pago = () => {
     try {
       const bancoSeleccionado = bancos.find(b => b.codigo === bankCode);
 
-      // 📦 Armar payload antes de enviarlo
       const payload = {
         usuario: email,
         nombre_cliente: nombre,
@@ -84,24 +74,15 @@ const Pago = () => {
         financial_institution_code: String(bankCode)
       };
 
-      // 🧪 Log para verificar el contenido del payload
-      console.log("📦 Payload enviado a backend:", JSON.stringify(payload, null, 2));
+      const response = await axios.post(`${apiUrl}/pago/pse`, payload);
+      const { redirect_url } = response.data;
 
-      // 📤 Enviar al backend
-      const response = await axios.post("http://localhost:3000/pago/pse", payload);
+      if (!redirect_url) throw new Error("No se recibió URL de redirección.");
 
-      const { reference, redirect_url } = response.data;
-
-      if (!redirect_url) {
-        throw new Error("⚠️ No se recibió URL de redirección desde el backend.");
-      }
-
-      console.log("🔁 Redirigiendo a Wompi:", redirect_url);
       setMensaje("✅ Redirigiéndote a Wompi...");
       window.location.href = redirect_url;
 
     } catch (err) {
-      console.error("❌ Error en pago:", err.response?.data || err.message);
       setError("❌ No se pudo procesar el pago. Intenta nuevamente.");
     } finally {
       setLoading(false);

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 
-const ResumenPago = ({ reference }) => {
+const ResumenPago = ({ reference, apiUrl }) => {
   const [detalle, setDetalle] = useState(null);     // 📦 Detalle del pago recibido del backend
   const [error, setError] = useState(false);        // ⚠️ Control de errores
   const [cargando, setCargando] = useState(true);   // ⏳ Indicador de carga
@@ -8,7 +8,7 @@ const ResumenPago = ({ reference }) => {
   useEffect(() => {
     const obtenerDetalle = async () => {
       try {
-        const res = await fetch(`http://localhost:3000/pago/${reference}`);
+        const res = await fetch(`${apiUrl}/pago/${reference}`);
         if (!res.ok) throw new Error("No se pudo obtener el detalle");
         const data = await res.json();
         setDetalle(data);
@@ -21,7 +21,7 @@ const ResumenPago = ({ reference }) => {
     };
 
     obtenerDetalle();
-  }, [reference]);
+  }, [reference, apiUrl]);
 
   if (cargando) return <p>⏳ Cargando resumen…</p>;
   if (error || !detalle) return <p style={{ color: "crimson" }}>🚨 No se pudo cargar el resumen del pago.</p>;

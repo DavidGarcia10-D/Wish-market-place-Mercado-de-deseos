@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
-// 📥 Importamos el componente de resumen del pago (asegúrate que la ruta sea correcta)
-import ResumenPago from "./ResumenPago"; // ajusta la ruta si está en otra carpeta
+// 📥 Importamos el componente de resumen del pago
+import ResumenPago from "./ResumenPago";
 
-const EstadoPago = () => {
+const EstadoPago = ({ apiUrl }) => {
   const { reference } = useParams(); // 📦 Capturamos la referencia desde la URL
   const [estado, setEstado] = useState(null); // 🔁 Estado actual del pago
   const [ultimaConsulta, setUltimaConsulta] = useState(null); // 🕓 Timestamp del último polling
@@ -17,7 +17,7 @@ const EstadoPago = () => {
     // 🔍 Función que consulta al backend por el estado del pago
     const consultarEstado = async () => {
       try {
-        const res = await fetch(`http://localhost:3000/pago/${reference}`);
+        const res = await fetch(`${apiUrl}/pago/${reference}`);
         if (!res.ok) {
           if (res.status === 404) setEstado("NO_ENCONTRADO");
           else setErrorConsulta(true);
@@ -47,7 +47,7 @@ const EstadoPago = () => {
       clearInterval(intervalo);
       clearTimeout(delayInicial);
     };
-  }, [reference]);
+  }, [reference, apiUrl]);
 
   // 🎨 Visualización según estado del pago
   const renderEstado = () => {
@@ -62,7 +62,7 @@ const EstadoPago = () => {
             <h2 style={{ color: "green" }}>🎉 ¡Pago aprobado!</h2>
             <p>Gracias por tu compra.</p>
             {/* 🧾 Resumen detallado de la transacción */}
-            <ResumenPago reference={reference} />
+            <ResumenPago reference={reference} apiUrl={apiUrl} />
           </div>
         );
 
