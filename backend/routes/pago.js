@@ -47,7 +47,8 @@ router.post("/pse", async (req, res) => {
       document_type,
       financial_institution_code,
       nombre_cliente,
-      banco_nombre
+      banco_nombre,
+      telefono_cliente // ← opcional, si lo envías desde el frontend
     } = req.body;
 
     // 🛑 Validaciones básicas
@@ -92,16 +93,20 @@ router.post("/pse", async (req, res) => {
         financial_institution_code: String(financial_institution_code),
         payment_description: "Pago a Tienda Wompi"
       },
+      customer_data: {
+        full_name: nombre_cliente,
+        phone_number: telefono_cliente || "3001234567", // ← usa fijo si no lo envías
+        legal_id: String(document),
+        legal_id_type: document_type
+      },
       signature: crypto.createHash("sha256")
         .update(`${referencia}${montoCentavos}COP${INTEGRITY_SECRET}`)
         .digest("hex")
     };
 
-    // 🔍 Log adicional para depuración (ver el payload completo que se envía a Wompi)
     console.log("📦 Payload enviado a Wompi:", JSON.stringify(pagoData, null, 2));
-
-    // 🚀 Enviar transacción a Wompi
     console.log("📤 Enviando transacción a Wompi...");
+
     const respuesta = await axios.post(`${WOMPI_BASE_URL}/transactions`, pagoData, {
       headers: {
         Authorization: `Bearer ${WOMPI_PRIVATE_KEY}`,
@@ -122,7 +127,6 @@ router.post("/pse", async (req, res) => {
         user_email: usuario,
         payment_method_type: "PSE",
         bank_name: banco_nombre,
-        // user_name: nombre_cliente, // ⚠️ Este campo no está definido en el modelo. Omitir o agregar si necesario.
         attempts: 1
       });
     } catch (err) {
