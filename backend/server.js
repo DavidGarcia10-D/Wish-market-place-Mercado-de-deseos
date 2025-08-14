@@ -1,19 +1,15 @@
-// 📌 Importamos librerías base
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const Product = require("./models/Product");
 require("dotenv").config();
 
-// 📦 Rutas personalizadas
-const carritoRoutes = require("./routes/carrito");   // 🛒 Carrito
-const pagoRoutes = require("./routes/pago");         // 💰 Pagos
-const webhookRoutes = require("./routes/webhook");   // 📬 Webhook Wompi
+const carritoRoutes = require("./routes/carrito");
+const pagoRoutes = require("./routes/pago");
+const webhookRoutes = require("./routes/webhook");
 
-// 🚀 Inicializamos la app
 const app = express();
 
-// 🌐 CORS — permite frontend local y en producción
 const allowedOrigins = [
   "http://localhost:5000",
   "https://wish-market-place-front.onrender.com"
@@ -24,15 +20,13 @@ app.use(cors({
   credentials: true
 }));
 
-// ⚠️ CORREGIDO: Parser raw necesario SOLO para /webhook → habilita validación HMAC
+// ⚠️ Raw parser SOLO para /webhook
 app.use("/webhook", express.raw({ type: "*/*" }));
 
-// 📦 Middleware global para JSON (no afecta /webhook)
+// 🌐 JSON parser para el resto
 app.use(express.json());
 
-// 🌱 Conexión a MongoDB
 const mongoURI = process.env.MONGO_URI;
-// const mongoURI = "mongodb://127.0.0.1:27017/miBaseDeDatos"; // 🧪 Para pruebas locales
 
 mongoose.connect(mongoURI)
   .then(() => console.log("🔗 Conectado a MongoDB"))
@@ -41,17 +35,14 @@ mongoose.connect(mongoURI)
     process.exit(1);
   });
 
-// 🔐 Verificación de variables .env
 console.log("🔑 Llave privada Wompi:", process.env.PRIVATE_KEY);
 console.log("🔑 Llave pública Wompi:", process.env.PUBLIC_KEY);
 console.log("🔐 Llave integridad:", process.env.INTEGRITY_SECRET);
 
-// 🧪 Ruta de prueba
 app.get("/", (req, res) => {
   res.send("🚀 ¡Servidor funcionando correctamente!");
 });
 
-// 📦 Rutas de productos
 app.get("/productos", async (req, res) => {
   try {
     const productos = await Product.find();
@@ -73,12 +64,10 @@ app.post("/productos", async (req, res) => {
   }
 });
 
-// 🛠️ Rutas personalizadas
 app.use("/carrito", carritoRoutes);
 app.use("/pago", pagoRoutes);
-app.use("/webhook", webhookRoutes); // 🧬 Webhook con raw body parser
+app.use("/webhook", webhookRoutes);
 
-// 🏦 Lista completa de bancos (sandbox + reales)
 app.get("/bancos", (req, res) => {
   res.json([
     { nombre: "Banco que aprueba (Sandbox)", codigo: "1" },
@@ -137,7 +126,6 @@ app.get("/bancos", (req, res) => {
   ]);
 });
 
-// 🚀 Inicialización del servidor
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`🚀 Backend corriendo en http://localhost:${PORT}`);
