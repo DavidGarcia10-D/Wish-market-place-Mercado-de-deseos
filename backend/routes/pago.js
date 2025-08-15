@@ -74,7 +74,8 @@ router.post("/pse", async (req, res) => {
     }
 
     const referencia = `PAGO_${Date.now()}`;
-    const redirectURL = `http://localhost:5000/estado/${referencia}`;
+    const FRONTEND_BASE_URL = process.env.FRONTEND_URL || "http://localhost:3000";
+    const redirectURL = `${FRONTEND_BASE_URL}/estado/${referencia}`;
     const montoCentavos = parseInt(valor * 100, 10);
 
     // 📦 Construir payload para la transacción PSE

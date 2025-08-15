@@ -1,20 +1,23 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-
-// 📥 Importamos el componente de resumen del pago
+import { useParams, useNavigate } from "react-router-dom";
 import ResumenPago from "./ResumenPago";
 
 const EstadoPago = ({ apiUrl }) => {
-  const { reference } = useParams(); // 📦 Capturamos la referencia desde la URL
-  const [estado, setEstado] = useState(null); // 🔁 Estado actual del pago
-  const [ultimaConsulta, setUltimaConsulta] = useState(null); // 🕓 Timestamp del último polling
-  const [errorConsulta, setErrorConsulta] = useState(false); // ⚠️ Si ocurre un error en la consulta
+  const { reference } = useParams();
+  const navigate = useNavigate();
+  const [estado, setEstado] = useState(null);
+  const [ultimaConsulta, setUltimaConsulta] = useState(null);
+  const [errorConsulta, setErrorConsulta] = useState(false);
 
   useEffect(() => {
+    if (!apiUrl) {
+      console.warn("⚠️ apiUrl no está definido en EstadoPago");
+      return;
+    }
+
     let intervalo;
     let delayInicial;
 
-    // 🔍 Función que consulta al backend por el estado del pago
     const consultarEstado = async () => {
       try {
         const res = await fetch(`${apiUrl}/pago/${reference}`);
@@ -36,20 +39,17 @@ const EstadoPago = ({ apiUrl }) => {
       }
     };
 
-    // ⏱️ Iniciamos la primera consulta con un delay para evitar conflictos con el guardado en MongoDB
     delayInicial = setTimeout(() => {
       consultarEstado();
-      intervalo = setInterval(consultarEstado, 3000); // 🔁 Polling cada 3 segundos
+      intervalo = setInterval(consultarEstado, 3000);
     }, 1500);
 
-    // 🧼 Cleanup al desmontar el componente
     return () => {
       clearInterval(intervalo);
       clearTimeout(delayInicial);
     };
   }, [reference, apiUrl]);
 
-  // 🎨 Visualización según estado del pago
   const renderEstado = () => {
     if (errorConsulta) {
       return <h2 style={{ color: "crimson" }}>🚨 Error al consultar el estado del pago</h2>;
@@ -61,7 +61,6 @@ const EstadoPago = ({ apiUrl }) => {
           <div>
             <h2 style={{ color: "green" }}>🎉 ¡Pago aprobado!</h2>
             <p>Gracias por tu compra.</p>
-            {/* 🧾 Resumen detallado de la transacción */}
             <ResumenPago reference={reference} apiUrl={apiUrl} />
           </div>
         );
@@ -81,7 +80,12 @@ const EstadoPago = ({ apiUrl }) => {
         return <h2 style={{ color: "gray" }}>⚠️ Referencia no encontrada</h2>;
 
       case null:
-        return <h2>🔍 Consultando estado del pago…</h2>;
+        return (
+          <div>
+            <h2>🔍 Consultando estado del pago…</h2>
+            <div className="spinner" />
+          </div>
+        );
 
       default:
         return <h2 style={{ color: "gray" }}>📌 Estado desconocido: {estado}</h2>;
@@ -93,21 +97,18 @@ const EstadoPago = ({ apiUrl }) => {
       <h1>🧾 Estado del Pago</h1>
       <p>Referencia: <strong>{reference}</strong></p>
 
-      {/* ♿ Zona que se actualiza dinámicamente */}
       <div aria-live="polite" role="status">
         {renderEstado()}
       </div>
 
-      {/* 🕓 Timestamp útil para debug o UX */}
       {ultimaConsulta && (
         <p style={{ fontSize: "0.85rem", color: "#666", marginTop: "0.5rem" }}>
           Última verificación: {ultimaConsulta}
         </p>
       )}
 
-      {/* 🔁 Acción para volver a la tienda */}
       <button
-        onClick={() => window.location.href = "/"}
+        onClick={() => navigate("/")}
         style={{
           marginTop: "1.5rem",
           padding: "10px 20px",

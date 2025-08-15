@@ -2,8 +2,7 @@ import React, { useState, useContext, useEffect } from "react";
 import axios from "axios";
 import { CarritoContext } from "../context/CarritoContext";
 
-const Pago = () => {
-  const apiUrl = "https://wish-backend-l681.onrender.com";
+const Pago = ({ apiUrl }) => {
   const { carrito } = useContext(CarritoContext);
 
   const [email, setEmail] = useState("");
@@ -29,7 +28,7 @@ const Pago = () => {
         }
       })
       .catch(() => setBancos([]));
-  }, []);
+  }, [apiUrl]);
 
   useEffect(() => {
     const totalCalculado = carrito.reduce((acc, p) => acc + p.precio * p.cantidad, 0);
@@ -79,7 +78,7 @@ const Pago = () => {
 
       if (!redirect_url) throw new Error("No se recibió URL de redirección.");
 
-      setMensaje("✅ Redirigiéndote a Wompi...");
+      setMensaje("✅ Redirigiéndote a Wompi para completar el pago...");
       window.location.href = redirect_url;
 
     } catch (err) {

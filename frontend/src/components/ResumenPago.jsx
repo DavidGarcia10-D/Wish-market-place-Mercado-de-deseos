@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 
 const ResumenPago = ({ reference, apiUrl }) => {
-  const [detalle, setDetalle] = useState(null);     // 📦 Detalle del pago recibido del backend
-  const [error, setError] = useState(false);        // ⚠️ Control de errores
-  const [cargando, setCargando] = useState(true);   // ⏳ Indicador de carga
+  const [detalle, setDetalle] = useState(null);
+  const [error, setError] = useState(false);
+  const [cargando, setCargando] = useState(true);
 
   useEffect(() => {
     const obtenerDetalle = async () => {
@@ -23,50 +23,42 @@ const ResumenPago = ({ reference, apiUrl }) => {
     obtenerDetalle();
   }, [reference, apiUrl]);
 
-  if (cargando) return <p>⏳ Cargando resumen…</p>;
-  if (error || !detalle) return <p style={{ color: "crimson" }}>🚨 No se pudo cargar el resumen del pago.</p>;
+  if (cargando) return <div className="spinner" />;
+  if (error || !detalle)
+    return <p style={{ color: "crimson" }}>🚨 No se pudo cargar el resumen del pago.</p>;
 
   return (
-    <div style={{
-      marginTop: "2rem",
-      border: "1px solid #ccc",
-      padding: "1rem",
-      borderRadius: "8px",
-      backgroundColor: "#f9f9f9",
-      maxWidth: "450px",
-      marginLeft: "auto",
-      marginRight: "auto"
-    }}>
-      <h3 style={{ marginBottom: "1rem" }}>📋 Detalles del Pago</h3>
-
-      <p><strong>Referencia:</strong> {detalle.reference || "—"}</p>
-      <p><strong>Estado:</strong> {detalle.status || "Desconocido"}</p>
-
-      <p>
-        <strong>Monto:</strong>{" "}
-        {typeof detalle.amount_in_cents === "number"
-          ? `$ ${(detalle.amount_in_cents / 100).toLocaleString("es-CO", { minimumFractionDigits: 2 })} COP`
-          : "No disponible"}
-      </p>
-
-      <p>
-        <strong>Fecha:</strong>{" "}
-        {detalle.createdAt
-          ? new Date(detalle.createdAt).toLocaleString("es-CO")
-          : detalle.created_at
-            ? new Date(detalle.created_at).toLocaleString("es-CO")
-            : "No registrada"}
-      </p>
-
-      {detalle.bank_name && <p><strong>Banco:</strong> {detalle.bank_name}</p>}
-      {detalle.user_email && <p><strong>Correo:</strong> {detalle.user_email}</p>}
-      {detalle.payment_method_type && (
-        <p><strong>Método:</strong> {detalle.payment_method_type.toUpperCase()}</p>
-      )}
-      {typeof detalle.attempts === "number" && (
-        <p><strong>Intentos:</strong> {detalle.attempts}</p>
-      )}
-      {detalle.reject_reason && <p><strong>Motivo del rechazo:</strong> {detalle.reject_reason}</p>}
+    <div className="resumen-pago">
+      <h3>📋 Detalles del Pago</h3>
+      <ul>
+        <li><strong>Referencia:</strong> {detalle.reference || "—"}</li>
+        <li><strong>Estado:</strong> {detalle.status || "Desconocido"}</li>
+        <li>
+          <strong>Monto:</strong>{" "}
+          {typeof detalle.amount_in_cents === "number"
+            ? `$ ${(detalle.amount_in_cents / 100).toLocaleString("es-CO", { minimumFractionDigits: 2 })} COP`
+            : "No disponible"}
+        </li>
+        <li>
+          <strong>Fecha:</strong>{" "}
+          {detalle.createdAt
+            ? new Date(detalle.createdAt).toLocaleString("es-CO")
+            : detalle.created_at
+              ? new Date(detalle.created_at).toLocaleString("es-CO")
+              : "No registrada"}
+        </li>
+        {detalle.bank_name && <li><strong>Banco:</strong> {detalle.bank_name}</li>}
+        {detalle.user_email && <li><strong>Correo:</strong> {detalle.user_email}</li>}
+        {detalle.payment_method_type && (
+          <li><strong>Método:</strong> {detalle.payment_method_type.toUpperCase()}</li>
+        )}
+        {typeof detalle.attempts === "number" && (
+          <li><strong>Intentos:</strong> {detalle.attempts}</li>
+        )}
+        {detalle.reject_reason && (
+          <li><strong>Motivo del rechazo:</strong> {detalle.reject_reason}</li>
+        )}
+      </ul>
     </div>
   );
 };
