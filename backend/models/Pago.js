@@ -44,7 +44,15 @@ const PagoSchema = new mongoose.Schema({
 
   reject_reason: {
     type: String // ❌ Motivo de rechazo (si lo devuelve Wompi)
-  }
+  },
+
+  productos: [
+    {
+      nombre: { type: String },
+      precio: { type: Number },
+      cantidad: { type: Number }
+    }
+  ]
 }, {
   timestamps: true // 🕓 Registra `createdAt` y `updatedAt` automáticamente
 });

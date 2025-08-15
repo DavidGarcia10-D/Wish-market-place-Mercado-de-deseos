@@ -70,16 +70,21 @@ const Pago = ({ apiUrl }) => {
         valor: total,
         document,
         document_type: documentType,
-        financial_institution_code: String(bankCode)
+        financial_institution_code: String(bankCode),
+        carrito: carrito.map(p => ({
+          nombre: p.nombre,
+          precio: p.precio,
+          cantidad: p.cantidad
+        }))
       };
 
       const response = await axios.post(`${apiUrl}/pago/pse`, payload);
-      const { redirect_url } = response.data;
+      const { url_pago } = response.data;
 
-      if (!redirect_url) throw new Error("No se recibió URL de redirección.");
+      if (!url_pago) throw new Error("No se recibió URL de pago.");
 
       setMensaje("✅ Redirigiéndote a Wompi para completar el pago...");
-      window.location.href = redirect_url;
+      window.location.href = url_pago;
 
     } catch (err) {
       setError("❌ No se pudo procesar el pago. Intenta nuevamente.");
@@ -88,8 +93,20 @@ const Pago = ({ apiUrl }) => {
     }
   };
 
+  const campoEstilo = {
+    display: "block",
+    width: "100%",
+    maxWidth: "400px",
+    margin: "12px auto",
+    padding: "10px",
+    fontSize: "1rem",
+    borderRadius: "6px",
+    border: "1px solid #ccc",
+    boxSizing: "border-box"
+  };
+
   return (
-    <div>
+    <div style={{ padding: "2rem", textAlign: "center" }}>
       <h2>💳 Pagar con PSE</h2>
 
       <input
@@ -97,6 +114,7 @@ const Pago = ({ apiUrl }) => {
         placeholder="Nombre completo"
         value={nombre}
         onChange={(e) => setNombre(e.target.value)}
+        style={campoEstilo}
       />
 
       <input
@@ -104,6 +122,7 @@ const Pago = ({ apiUrl }) => {
         placeholder="Correo electrónico"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
+        style={campoEstilo}
       />
 
       <input
@@ -111,16 +130,17 @@ const Pago = ({ apiUrl }) => {
         placeholder="Número de documento"
         value={document}
         onChange={(e) => setDocument(e.target.value)}
+        style={campoEstilo}
       />
 
-      <select value={documentType} onChange={(e) => setDocumentType(e.target.value)}>
+      <select value={documentType} onChange={(e) => setDocumentType(e.target.value)} style={campoEstilo}>
         <option value="CC">Cédula</option>
         <option value="CE">Cédula Extranjera</option>
         <option value="TI">Tarjeta de Identidad</option>
         <option value="NIT">NIT</option>
       </select>
 
-      <select value={bankCode} onChange={(e) => setBankCode(e.target.value)}>
+      <select value={bankCode} onChange={(e) => setBankCode(e.target.value)} style={campoEstilo}>
         <option value="">Selecciona tu banco</option>
         {bancos.map((banco, index) => (
           <option key={`${banco.codigo}-${index}`} value={banco.codigo}>
@@ -129,7 +149,9 @@ const Pago = ({ apiUrl }) => {
         ))}
       </select>
 
-      <h3>Total a pagar: ${total.toFixed(2)} COP</h3>
+      <h3 style={{ marginTop: "20px" }}>
+        Total a pagar: ${total.toFixed(2)} COP
+      </h3>
 
       {error && <p style={{ color: "red", fontWeight: "bold" }}>{error}</p>}
       {mensaje && <p style={{ color: "green", fontWeight: "bold" }}>{mensaje}</p>}
@@ -139,9 +161,11 @@ const Pago = ({ apiUrl }) => {
         style={{
           backgroundColor: loading ? "#ccc" : "#4CAF50",
           color: "white",
-          padding: "10px",
+          padding: "12px 24px",
           border: "none",
-          cursor: loading ? "not-allowed" : "pointer"
+          borderRadius: "6px",
+          cursor: loading ? "not-allowed" : "pointer",
+          marginTop: "20px"
         }}
         disabled={loading}
       >

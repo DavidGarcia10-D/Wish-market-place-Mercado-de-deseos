@@ -48,10 +48,10 @@ router.post("/pse", async (req, res) => {
       financial_institution_code,
       nombre_cliente,
       banco_nombre,
-      telefono_cliente // ← opcional, si lo envías desde el frontend
+      telefono_cliente,
+      carrito // 🛒 nuevo campo recibido desde el frontend
     } = req.body;
 
-    // 🛑 Validaciones básicas
     if (typeof valor !== "number" || valor < 1500) {
       return res.status(400).json({ error: "Monto mínimo permitido: $1.500 COP." });
     }
@@ -78,7 +78,6 @@ router.post("/pse", async (req, res) => {
     const redirectURL = `${FRONTEND_BASE_URL}/estado/${referencia}`;
     const montoCentavos = parseInt(valor * 100, 10);
 
-    // 📦 Construir payload para la transacción PSE
     const pagoData = {
       acceptance_token: tokenAceptacion,
       amount_in_cents: montoCentavos,
@@ -96,7 +95,7 @@ router.post("/pse", async (req, res) => {
       },
       customer_data: {
         full_name: nombre_cliente,
-        phone_number: telefono_cliente || "3001234567", // ← usa fijo si no lo envías
+        phone_number: telefono_cliente || "3001234567",
         legal_id: String(document),
         legal_id_type: document_type
       },
@@ -116,9 +115,10 @@ router.post("/pse", async (req, res) => {
     });
 
     const respuestaData = respuesta.data?.data;
+    const urlPago = respuestaData?.payment_method?.extra?.async_payment_url;
+
     console.log("✅ Transacción creada:", respuestaData.reference);
 
-    // 💾 Guardar datos del pago en MongoDB
     try {
       await Pago.create({
         reference: referencia,
@@ -128,7 +128,8 @@ router.post("/pse", async (req, res) => {
         user_email: usuario,
         payment_method_type: "PSE",
         bank_name: banco_nombre,
-        attempts: 1
+        attempts: 1,
+        productos: Array.isArray(carrito) ? carrito : []
       });
     } catch (err) {
       console.error("❌ Error guardando pago en MongoDB:", err.message);
@@ -137,7 +138,8 @@ router.post("/pse", async (req, res) => {
     res.status(200).json({
       mensaje: "✅ Transacción iniciada",
       reference: referencia,
-      redirect_url: respuestaData.redirect_url
+      redirect_url: respuestaData.redirect_url,
+      url_pago: urlPago
     });
 
   } catch (error) {

@@ -8,6 +8,7 @@ const EstadoPago = ({ apiUrl }) => {
   const [estado, setEstado] = useState(null);
   const [ultimaConsulta, setUltimaConsulta] = useState(null);
   const [errorConsulta, setErrorConsulta] = useState(false);
+  const [pago, setPago] = useState(null); // 🧾 Detalles completos del pago
 
   useEffect(() => {
     if (!apiUrl) {
@@ -30,6 +31,7 @@ const EstadoPago = ({ apiUrl }) => {
 
         const data = await res.json();
         setEstado(data.status);
+        setPago(data); // 🧾 Guardamos todo el objeto del pago
         setUltimaConsulta(new Date().toLocaleTimeString());
         if (data.status !== "PENDING") clearInterval(intervalo);
       } catch (error) {
@@ -61,7 +63,7 @@ const EstadoPago = ({ apiUrl }) => {
           <div>
             <h2 style={{ color: "green" }}>🎉 ¡Pago aprobado!</h2>
             <p>Gracias por tu compra.</p>
-            <ResumenPago reference={reference} apiUrl={apiUrl} />
+            <ResumenPago pago={pago} />
           </div>
         );
 
