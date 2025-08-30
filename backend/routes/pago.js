@@ -6,12 +6,10 @@ require("dotenv").config();
 
 const Pago = require("../models/Pago");
 
-// 🔧 Determina entorno actual (sandbox o producción)
 const WOMPI_BASE_URL = process.env.WOMPI_ENV === "sandbox"
   ? "https://sandbox.wompi.co/v1"
   : "https://production.wompi.co/v1";
 
-// 🔐 Llaves de Wompi desde .env
 const WOMPI_PUBLIC_KEY = process.env.PUBLIC_KEY;
 const WOMPI_PRIVATE_KEY = process.env.PRIVATE_KEY;
 const INTEGRITY_SECRET = process.env.INTEGRITY_SECRET;
@@ -21,7 +19,6 @@ if (!WOMPI_PUBLIC_KEY || !WOMPI_PRIVATE_KEY || !INTEGRITY_SECRET) {
   process.exit(1);
 }
 
-// 🧪 Obtener token de aceptación desde Wompi
 const obtenerTokenAceptacion = async () => {
   try {
     const response = await axios.get(`${WOMPI_BASE_URL}/merchants/${WOMPI_PUBLIC_KEY}`);
@@ -32,10 +29,9 @@ const obtenerTokenAceptacion = async () => {
   }
 };
 
-// 📧 Validador simple de correos
 const validarEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+const validarTelefono = (telefono) => /^3\d{9}$/.test(telefono);
 
-// 💳 POST /pago/pse — Iniciar transacción PSE con Wompi
 router.post("/pse", async (req, res) => {
   console.log("📩 POST recibido en /pago/pse");
 
@@ -49,7 +45,8 @@ router.post("/pse", async (req, res) => {
       nombre_cliente,
       banco_nombre,
       telefono_cliente,
-      carrito
+      carrito,
+      user_type
     } = req.body;
 
     if (typeof valor !== "number" || valor < 1500) {
@@ -77,6 +74,8 @@ router.post("/pse", async (req, res) => {
     const FRONTEND_BASE_URL = process.env.FRONTEND_URL || "http://localhost:3000";
     const redirectURL = `${FRONTEND_BASE_URL}/estado/${referencia}`;
     const montoCentavos = parseInt(valor * 100, 10);
+    const tipoUsuario = [0, 1].includes(user_type) ? user_type : 0;
+    const telefonoValidado = validarTelefono(telefono_cliente) ? telefono_cliente : "3001234567";
 
     const pagoData = {
       acceptance_token: tokenAceptacion,
@@ -87,7 +86,7 @@ router.post("/pse", async (req, res) => {
       redirect_url: redirectURL,
       payment_method: {
         type: "PSE",
-        user_type: 0,
+        user_type: tipoUsuario,
         user_legal_id: String(document),
         user_legal_id_type: document_type,
         financial_institution_code: String(financial_institution_code),
@@ -95,9 +94,10 @@ router.post("/pse", async (req, res) => {
       },
       customer_data: {
         full_name: nombre_cliente,
-        phone_number: telefono_cliente || "3001234567",
+        phone_number: telefonoValidado,
         legal_id: String(document),
-        legal_id_type: document_type
+        legal_id_type: document_type,
+        payment_description: "Pago a Tienda Wompi"
       },
       signature: crypto.createHash("sha256")
         .update(`${referencia}${montoCentavos}COP${INTEGRITY_SECRET}`)
@@ -135,7 +135,10 @@ router.post("/pse", async (req, res) => {
         payment_method_type: "PSE",
         bank_name: banco_nombre,
         attempts: 1,
-        productos: Array.isArray(carrito) ? carrito : []
+        productos: Array.isArray(carrito) ? carrito : [],
+        user_type: tipoUsuario,
+        phone_number: telefonoValidado,
+        payment_description: "Pago a Tienda Wompi"
       });
     } catch (err) {
       console.error("❌ Error guardando pago en MongoDB:", err.message);
@@ -154,7 +157,6 @@ router.post("/pse", async (req, res) => {
   }
 });
 
-// 🏦 GET /pago/bancos — Bancos de prueba para entorno Sandbox
 router.get("/bancos", (req, res) => {
   res.json([
     { nombre: "Banco que aprueba (Sandbox)", codigo: "1" },
@@ -162,7 +164,6 @@ router.get("/bancos", (req, res) => {
   ]);
 });
 
-// 🔍 GET /pago/:reference — Consultar estado y datos del pago por referencia
 router.get("/:reference", async (req, res) => {
   try {
     const pago = await Pago.findOne({ reference: req.params.reference });
@@ -174,7 +175,6 @@ router.get("/:reference", async (req, res) => {
   }
 });
 
-// 🧾 GET /pago/ultimos-pagos — Listado de últimos pagos
 router.get("/ultimos-pagos", async (req, res) => {
   try {
     const pagos = await Pago.find().sort({ createdAt: -1 }).limit(5);

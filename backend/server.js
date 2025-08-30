@@ -21,8 +21,8 @@ app.use(cors({
   credentials: true
 }));
 
-// ⚠️ Raw parser SOLO para /webhook (firma de Wompi)
-app.use("/webhook", express.raw({ type: "*/*" }));
+// ⚠️ Raw parser + rutas para /webhook (firma de Wompi)
+app.use("/webhook", express.raw({ type: "*/*" }), webhookRoutes);
 
 // 🌐 JSON parser para el resto de rutas
 app.use(express.json());
@@ -78,7 +78,6 @@ app.post("/productos", async (req, res) => {
 // 🛒 Rutas principales
 app.use("/carrito", carritoRoutes);
 app.use("/pago", pagoRoutes);
-app.use("/webhook", webhookRoutes);
 
 // 🏦 Bancos disponibles
 app.get("/bancos", (req, res) => {

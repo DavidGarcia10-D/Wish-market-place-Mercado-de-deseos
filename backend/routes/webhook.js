@@ -10,11 +10,12 @@ router.post("/", async (req, res) => {
     const rawBody = req.body;
     const signature = req.header("X-Wompi-Signature");
 
+    console.log("📥 Webhook recibido");
     console.log("📏 Tipo de req.body:", typeof rawBody);
     console.log("📦 ¿Es Buffer?:", Buffer.isBuffer(rawBody));
 
     if (!Buffer.isBuffer(rawBody)) {
-      console.error("❌ El cuerpo no es un Buffer. Revisa express.raw()");
+      console.error("❌ El cuerpo no es un Buffer. Revisa express.raw() en server.js");
       return res.status(500).send("Formato de cuerpo inválido");
     }
 
@@ -23,7 +24,7 @@ router.post("/", async (req, res) => {
       .update(rawBody)
       .digest("hex");
 
-    console.log("📦 Firma de Wompi:", signature);
+    console.log("📦 Firma recibida:", signature);
     console.log("🔐 Firma calculada:", localSignature);
 
     if (localSignature !== signature) {

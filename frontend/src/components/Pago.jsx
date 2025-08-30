@@ -10,6 +10,7 @@ const Pago = ({ apiUrl }) => {
   const [document, setDocument] = useState("");
   const [documentType, setDocumentType] = useState("CC");
   const [bankCode, setBankCode] = useState("");
+  const [userType, setUserType] = useState(1); // 1 = Natural, 2 = Jurídica
   const [bancos, setBancos] = useState([]);
   const [total, setTotal] = useState(0);
   const [error, setError] = useState("");
@@ -54,6 +55,12 @@ const Pago = ({ apiUrl }) => {
       return;
     }
 
+    if (![1, 2].includes(userType)) {
+      setError("❌ Selecciona si eres persona natural o jurídica.");
+      setLoading(false);
+      return;
+    }
+
     if (total < 1500) {
       setError("❌ Monto mínimo permitido: $1.500 COP.");
       setLoading(false);
@@ -71,6 +78,7 @@ const Pago = ({ apiUrl }) => {
         document,
         document_type: documentType,
         financial_institution_code: String(bankCode),
+        user_type: userType,
         carrito: carrito.map(p => ({
           nombre: p.nombre,
           precio: p.precio,
@@ -137,6 +145,11 @@ const Pago = ({ apiUrl }) => {
         onChange={(e) => setDocument(e.target.value)}
         style={campoEstilo}
       />
+
+      <select value={userType} onChange={(e) => setUserType(Number(e.target.value))} style={campoEstilo}>
+        <option value={1}>Persona Natural</option>
+        <option value={2}>Persona Jurídica</option>
+      </select>
 
       <select value={documentType} onChange={(e) => setDocumentType(e.target.value)} style={campoEstilo}>
         <option value="CC">Cédula</option>

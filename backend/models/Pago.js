@@ -42,6 +42,22 @@ const PagoSchema = new mongoose.Schema({
     trim: true
   },
 
+  user_type: {
+    type: Number, // 🔢 0 = Natural, 1 = Jurídica
+    enum: [0, 1],
+    default: 0
+  },
+
+  phone_number: {
+    type: String, // 📞 Teléfono del cliente
+    trim: true
+  },
+
+  payment_description: {
+    type: String, // 🧾 Descripción del pago
+    trim: true
+  },
+
   attempts: {
     type: Number,
     default: 1 // 🔁 Intentos con misma referencia (útil para reintentos)
