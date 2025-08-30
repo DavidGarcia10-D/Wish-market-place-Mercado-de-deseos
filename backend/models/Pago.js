@@ -5,12 +5,14 @@ const PagoSchema = new mongoose.Schema({
   reference: {
     type: String,
     required: true,
-    unique: true // 🚨 Evita duplicados por referencia de transacción
+    unique: true, // 🚨 Evita duplicados por referencia de transacción
+    trim: true
   },
 
   amount_in_cents: {
     type: Number,
-    required: true // 💰 Monto total en centavos (ej: 160000 = $1.600)
+    required: true, // 💰 Monto total en centavos (ej: 160000 = $1.600)
+    min: 1500
   },
 
   status: {
@@ -26,15 +28,18 @@ const PagoSchema = new mongoose.Schema({
   },
 
   bank_name: {
-    type: String // 🏦 Banco elegido por el cliente
+    type: String, // 🏦 Banco elegido por el cliente
+    trim: true
   },
 
   customer_email: {
-    type: String // 📧 Correo registrado en Wompi
+    type: String, // 📧 Correo registrado en Wompi
+    trim: true
   },
 
   user_email: {
-    type: String // 🧑 Correo capturado desde tu frontend (si aplica)
+    type: String, // 🧑 Correo capturado desde tu frontend (si aplica)
+    trim: true
   },
 
   attempts: {
@@ -46,11 +51,16 @@ const PagoSchema = new mongoose.Schema({
     type: String // ❌ Motivo de rechazo (si lo devuelve Wompi)
   },
 
+  updated_by_webhook: {
+    type: Boolean,
+    default: false // 📡 Indica si el estado fue actualizado por webhook
+  },
+
   productos: [
     {
-      nombre: { type: String },
-      precio: { type: Number },
-      cantidad: { type: Number }
+      nombre: { type: String, required: true, trim: true },
+      precio: { type: Number, required: true, min: 0 },
+      cantidad: { type: Number, required: true, min: 1 }
     }
   ]
 }, {

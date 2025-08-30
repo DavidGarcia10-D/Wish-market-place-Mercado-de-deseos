@@ -79,15 +79,20 @@ const Pago = ({ apiUrl }) => {
       };
 
       const response = await axios.post(`${apiUrl}/pago/pse`, payload);
-      const { url_pago } = response.data;
+      console.log("📥 Respuesta del backend:", response.data);
 
-      if (!url_pago) throw new Error("No se recibió URL de pago.");
+      const { success, url_pago } = response.data;
+
+      if (!success || !url_pago) {
+        throw new Error("No se recibió URL de pago válida.");
+      }
 
       setMensaje("✅ Redirigiéndote a Wompi para completar el pago...");
       window.location.href = url_pago;
 
     } catch (err) {
-      setError("❌ No se pudo procesar el pago. Intenta nuevamente.");
+      console.error("❌ Error al procesar el pago:", err);
+      setError(`❌ No se pudo procesar el pago. ${err.message || "Intenta nuevamente."}`);
     } finally {
       setLoading(false);
     }

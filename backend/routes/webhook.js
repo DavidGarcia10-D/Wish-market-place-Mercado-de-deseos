@@ -50,7 +50,11 @@ router.post("/", async (req, res) => {
 
     const actualizado = await Pago.findOneAndUpdate(
       { reference: transaction.reference },
-      { status: transaction.status },
+      {
+        status: transaction.status,
+        reject_reason: transaction.reject_reason || undefined,
+        updated_by_webhook: true
+      },
       { new: true }
     );
 

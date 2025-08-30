@@ -10,6 +10,7 @@ const webhookRoutes = require("./routes/webhook");
 
 const app = express();
 
+// 🌍 Orígenes permitidos para CORS
 const allowedOrigins = [
   "http://localhost:5000",
   "https://wish-market-place-front.onrender.com"
@@ -20,11 +21,17 @@ app.use(cors({
   credentials: true
 }));
 
-// ⚠️ Raw parser SOLO para /webhook
+// ⚠️ Raw parser SOLO para /webhook (firma de Wompi)
 app.use("/webhook", express.raw({ type: "*/*" }));
 
-// 🌐 JSON parser para el resto
+// 🌐 JSON parser para el resto de rutas
 app.use(express.json());
+
+// 🔐 Validación de llaves y URI
+if (!process.env.MONGO_URI || !process.env.PRIVATE_KEY || !process.env.PUBLIC_KEY || !process.env.INTEGRITY_SECRET) {
+  console.error("❌ Faltan variables de entorno (.env)");
+  process.exit(1);
+}
 
 const mongoURI = process.env.MONGO_URI;
 
@@ -35,14 +42,18 @@ mongoose.connect(mongoURI)
     process.exit(1);
   });
 
+// 🔍 Mostrar llaves y entorno actual
 console.log("🔑 Llave privada Wompi:", process.env.PRIVATE_KEY);
 console.log("🔑 Llave pública Wompi:", process.env.PUBLIC_KEY);
 console.log("🔐 Llave integridad:", process.env.INTEGRITY_SECRET);
+console.log("🌐 Entorno Wompi:", process.env.WOMPI_ENV || "sandbox");
 
+// 🏁 Ruta base
 app.get("/", (req, res) => {
   res.send("🚀 ¡Servidor funcionando correctamente!");
 });
 
+// 📦 Productos
 app.get("/productos", async (req, res) => {
   try {
     const productos = await Product.find();
@@ -64,10 +75,12 @@ app.post("/productos", async (req, res) => {
   }
 });
 
+// 🛒 Rutas principales
 app.use("/carrito", carritoRoutes);
 app.use("/pago", pagoRoutes);
 app.use("/webhook", webhookRoutes);
 
+// 🏦 Bancos disponibles
 app.get("/bancos", (req, res) => {
   res.json([
     { nombre: "Banco que aprueba (Sandbox)", codigo: "1" },
@@ -126,6 +139,7 @@ app.get("/bancos", (req, res) => {
   ]);
 });
 
+// 🚀 Inicio del servidor
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`🚀 Backend corriendo en http://localhost:${PORT}`);

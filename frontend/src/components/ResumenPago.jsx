@@ -6,13 +6,14 @@ const ResumenPago = ({ reference, apiUrl, pago }) => {
   const [cargando, setCargando] = useState(!pago);
 
   useEffect(() => {
-    if (pago) return; // Ya tenemos los datos desde EstadoPago
+    if (pago) return;
 
     const obtenerDetalle = async () => {
       try {
         const res = await fetch(`${apiUrl}/pago/${reference}`);
         if (!res.ok) throw new Error("No se pudo obtener el detalle");
         const data = await res.json();
+        console.log("🧾 Resumen del pago:", data);
         setDetalle(data);
       } catch (err) {
         console.error("❌ Error obteniendo el resumen:", err);
@@ -25,9 +26,34 @@ const ResumenPago = ({ reference, apiUrl, pago }) => {
     obtenerDetalle();
   }, [reference, apiUrl, pago]);
 
-  if (cargando) return <div className="spinner" />;
-  if (error || !detalle)
-    return <p style={{ color: "crimson" }}>🚨 No se pudo cargar el resumen del pago.</p>;
+  if (cargando) {
+    return (
+      <div style={{ margin: "2rem auto", textAlign: "center" }}>
+        <div className="spinner" style={{
+          width: "40px",
+          height: "40px",
+          border: "4px solid #ccc",
+          borderTop: "4px solid #333",
+          borderRadius: "50%",
+          animation: "spin 1s linear infinite"
+        }} />
+        <style>{`
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        `}</style>
+      </div>
+    );
+  }
+
+  if (error || !detalle) {
+    return (
+      <p style={{ color: "crimson", textAlign: "center", marginTop: "2rem" }}>
+        🚨 No se pudo cargar el resumen del pago.
+      </p>
+    );
+  }
 
   return (
     <div className="resumen-pago" style={{ marginTop: "2rem", textAlign: "left" }}>
@@ -76,11 +102,15 @@ const ResumenPago = ({ reference, apiUrl, pago }) => {
             <tbody>
               {detalle.productos.map((p, index) => (
                 <tr key={index}>
-                  <td>{p.nombre}</td>
+                  <td>{p.nombre || "—"}</td>
                   <td style={{ textAlign: "right" }}>
-                    $ {p.precio.toLocaleString("es-CO", { minimumFractionDigits: 2 })}
+                    {typeof p.precio === "number"
+                      ? `$ ${p.precio.toLocaleString("es-CO", { minimumFractionDigits: 2 })}`
+                      : "—"}
                   </td>
-                  <td style={{ textAlign: "right" }}>{p.cantidad}</td>
+                  <td style={{ textAlign: "right" }}>
+                    {typeof p.cantidad === "number" ? p.cantidad : "—"}
+                  </td>
                 </tr>
               ))}
             </tbody>

@@ -8,11 +8,11 @@ const EstadoPago = ({ apiUrl }) => {
   const [estado, setEstado] = useState(null);
   const [ultimaConsulta, setUltimaConsulta] = useState(null);
   const [errorConsulta, setErrorConsulta] = useState(false);
-  const [pago, setPago] = useState(null); // 🧾 Detalles completos del pago
+  const [pago, setPago] = useState(null);
 
   useEffect(() => {
-    if (!apiUrl) {
-      console.warn("⚠️ apiUrl no está definido en EstadoPago");
+    if (!apiUrl || !reference) {
+      console.warn("⚠️ apiUrl o reference no están definidos en EstadoPago");
       return;
     }
 
@@ -23,17 +23,26 @@ const EstadoPago = ({ apiUrl }) => {
       try {
         const res = await fetch(`${apiUrl}/pago/${reference}`);
         if (!res.ok) {
-          if (res.status === 404) setEstado("NO_ENCONTRADO");
-          else setErrorConsulta(true);
+          if (res.status === 404) {
+            setEstado("NO_ENCONTRADO");
+          } else {
+            setErrorConsulta(true);
+          }
           clearInterval(intervalo);
           return;
         }
 
         const data = await res.json();
+        console.log("📥 Estado del pago:", data.status);
+        console.log("🧾 Detalles del pago:", data);
+
         setEstado(data.status);
-        setPago(data); // 🧾 Guardamos todo el objeto del pago
+        setPago(data);
         setUltimaConsulta(new Date().toLocaleTimeString());
-        if (data.status !== "PENDING") clearInterval(intervalo);
+
+        if (data.status !== "PENDING") {
+          clearInterval(intervalo);
+        }
       } catch (error) {
         console.error("❌ Error en la consulta:", error);
         setErrorConsulta(true);
@@ -76,7 +85,20 @@ const EstadoPago = ({ apiUrl }) => {
         );
 
       case "PENDING":
-        return <h2 style={{ color: "orange" }}>⏳ Esperando confirmación del banco…</h2>;
+        return (
+          <div>
+            <h2 style={{ color: "orange" }}>⏳ Esperando confirmación del banco…</h2>
+            <div className="spinner" style={{
+              margin: "1rem auto",
+              width: "40px",
+              height: "40px",
+              border: "4px solid #ccc",
+              borderTop: "4px solid orange",
+              borderRadius: "50%",
+              animation: "spin 1s linear infinite"
+            }} />
+          </div>
+        );
 
       case "NO_ENCONTRADO":
         return <h2 style={{ color: "gray" }}>⚠️ Referencia no encontrada</h2>;
@@ -119,6 +141,13 @@ const EstadoPago = ({ apiUrl }) => {
       >
         🔙 Volver a la tienda
       </button>
+
+      <style>{`
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
   );
 };

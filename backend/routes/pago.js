@@ -49,7 +49,7 @@ router.post("/pse", async (req, res) => {
       nombre_cliente,
       banco_nombre,
       telefono_cliente,
-      carrito // 🛒 nuevo campo recibido desde el frontend
+      carrito
     } = req.body;
 
     if (typeof valor !== "number" || valor < 1500) {
@@ -117,7 +117,13 @@ router.post("/pse", async (req, res) => {
     const respuestaData = respuesta.data?.data;
     const urlPago = respuestaData?.payment_method?.extra?.async_payment_url;
 
+    if (!urlPago) {
+      console.error("❌ No se recibió async_payment_url desde Wompi.");
+      return res.status(500).json({ error: "No se pudo obtener la URL de pago desde Wompi." });
+    }
+
     console.log("✅ Transacción creada:", respuestaData.reference);
+    console.log("🔗 URL de pago:", urlPago);
 
     try {
       await Pago.create({
@@ -136,9 +142,9 @@ router.post("/pse", async (req, res) => {
     }
 
     res.status(200).json({
+      success: true,
       mensaje: "✅ Transacción iniciada",
       reference: referencia,
-      redirect_url: respuestaData.redirect_url,
       url_pago: urlPago
     });
 
