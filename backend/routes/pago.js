@@ -61,7 +61,7 @@ router.post("/pse", async (req, res) => {
       return res.status(400).json({ error: "Faltan campos requeridos o están mal formados." });
     }
 
-    if (process.env.WOMPI_ENV === "sandbox" && !["1", "2"].includes(financial_institution_code)) {
+    if (process.env.WOMPI_ENV === "sandbox" && !["1", "2"].includes(String(financial_institution_code))) {
       return res.status(400).json({ error: "Banco inválido en entorno de pruebas (usa código 1 o 2)." });
     }
 
@@ -74,7 +74,9 @@ router.post("/pse", async (req, res) => {
     const FRONTEND_BASE_URL = process.env.FRONTEND_URL || "http://localhost:3000";
     const redirectURL = `${FRONTEND_BASE_URL}/estado/${referencia}`;
     const montoCentavos = parseInt(valor * 100, 10);
-    const tipoUsuario = [0, 1].includes(user_type) ? user_type : 0;
+
+    // ✅ Validación correcta: 1 = Natural, 2 = Jurídica
+    const tipoUsuario = [1, 2].includes(Number(user_type)) ? Number(user_type) : 1;
     const telefonoValidado = validarTelefono(telefono_cliente) ? telefono_cliente : "3001234567";
 
     const pagoData = {

@@ -21,8 +21,8 @@ app.use(cors({
   credentials: true
 }));
 
-// ⚠️ Raw parser + rutas para /webhook (firma de Wompi)
-app.use("/webhook", express.raw({ type: "*/*" }), webhookRoutes);
+// ⚠️ Raw parser SOLO para /webhook (firma de Wompi)
+app.use("/webhook", express.raw({ type: "application/json" }), webhookRoutes);
 
 // 🌐 JSON parser para el resto de rutas
 app.use(express.json());
