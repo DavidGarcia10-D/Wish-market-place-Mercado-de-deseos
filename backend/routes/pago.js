@@ -75,7 +75,6 @@ router.post("/pse", async (req, res) => {
     const redirectURL = `${FRONTEND_BASE_URL}/estado/${referencia}`;
     const montoCentavos = parseInt(valor * 100, 10);
 
-    // ✅ Validación correcta: 1 = Natural, 2 = Jurídica
     const tipoUsuario = [1, 2].includes(Number(user_type)) ? Number(user_type) : 1;
     const telefonoValidado = validarTelefono(telefono_cliente) ? telefono_cliente : "3001234567";
 
@@ -116,12 +115,18 @@ router.post("/pse", async (req, res) => {
       }
     });
 
+    console.log("📥 Respuesta completa de Wompi:", JSON.stringify(respuesta.data, null, 2));
+
     const respuestaData = respuesta.data?.data;
     const urlPago = respuestaData?.payment_method?.extra?.async_payment_url;
 
     if (!urlPago) {
-      console.error("❌ No se recibió async_payment_url desde Wompi.");
-      return res.status(500).json({ error: "No se pudo obtener la URL de pago desde Wompi." });
+      const wompiError = respuesta.data?.error?.reason || respuesta.data?.error?.messages || "No se recibió async_payment_url";
+      console.error("❌ Error de Wompi:", wompiError);
+      return res.status(500).json({
+        success: false,
+        wompi_error: wompiError
+      });
     }
 
     console.log("✅ Transacción creada:", respuestaData.reference);
@@ -155,7 +160,11 @@ router.post("/pse", async (req, res) => {
 
   } catch (error) {
     console.error("❌ Error procesando transacción PSE:", error.response?.data || error.message);
-    res.status(500).json({ error: "Error al iniciar el pago con Wompi." });
+    res.status(500).json({
+      success: false,
+      error: "Error al iniciar el pago con Wompi.",
+      wompi_error: error.response?.data || error.message
+    });
   }
 });
 

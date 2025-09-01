@@ -100,7 +100,12 @@ const Pago = ({ apiUrl }) => {
 
     } catch (err) {
       console.error("❌ Error al procesar el pago:", err);
-      setError(`❌ No se pudo procesar el pago. ${err.message || "Intenta nuevamente."}`);
+
+      // Captura mensajes detallados del backend o de Wompi
+      const backendMsg = err.response?.data?.message || err.response?.data?.error || "";
+      const wompiMsg = err.response?.data?.wompi_error || "";
+
+      setError(`❌ No se pudo procesar el pago. ${backendMsg || wompiMsg || err.message || "Intenta nuevamente."}`);
     } finally {
       setLoading(false);
     }
