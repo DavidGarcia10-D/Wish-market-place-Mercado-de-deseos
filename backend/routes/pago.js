@@ -22,7 +22,12 @@ if (!WOMPI_PUBLIC_KEY || !WOMPI_PRIVATE_KEY || !INTEGRITY_SECRET) {
 const obtenerTokenAceptacion = async () => {
   try {
     const response = await axios.get(`${WOMPI_BASE_URL}/merchants/${WOMPI_PUBLIC_KEY}`);
-    return response.data?.data?.presigned_acceptance?.acceptance_token;
+    const token = response.data?.data?.presigned_acceptance?.acceptance_token;
+    const contractId = response.data?.data?.presigned_acceptance?.contract_id;
+    console.log("🕒 Token obtenido en:", new Date().toISOString());
+    console.log("🔍 acceptance_token recibido:", token);
+    console.log("🔍 contract_id recibido:", contractId);
+    return token;
   } catch (error) {
     console.error("❌ Error al obtener token:", error.response?.data || error.message);
     return null;
@@ -78,6 +83,12 @@ router.post("/pse", async (req, res) => {
     const tipoUsuario = [1, 2].includes(Number(user_type)) ? Number(user_type) : 1;
     const telefonoValidado = validarTelefono(telefono_cliente) ? telefono_cliente : "3001234567";
 
+    console.log("📌 Datos clave antes de enviar a Wompi:");
+    console.log("🔍 acceptance_token:", tokenAceptacion);
+    console.log("🏦 Banco:", financial_institution_code, banco_nombre);
+    console.log("💰 Monto en centavos:", montoCentavos);
+    console.log("📄 Referencia:", referencia);
+
     const pagoData = {
       acceptance_token: tokenAceptacion,
       amount_in_cents: montoCentavos,
@@ -118,6 +129,11 @@ router.post("/pse", async (req, res) => {
     console.log("📥 Respuesta completa de Wompi:", JSON.stringify(respuesta.data, null, 2));
 
     const respuestaData = respuesta.data?.data;
+    console.log("🆔 Transaction ID:", respuestaData?.id);
+    console.log("📌 Status:", respuestaData?.status);
+    console.log("📌 Status message:", respuestaData?.status_message);
+    console.log("🔗 async_payment_url:", respuestaData?.payment_method?.extra?.async_payment_url);
+
     const urlPago = respuestaData?.payment_method?.extra?.async_payment_url;
 
     if (!urlPago) {
