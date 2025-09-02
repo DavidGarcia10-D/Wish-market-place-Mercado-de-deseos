@@ -19,18 +19,31 @@ if (!WOMPI_PUBLIC_KEY || !WOMPI_PRIVATE_KEY || !INTEGRITY_SECRET) {
   process.exit(1);
 }
 
+// 🔹 Ahora devuelve token y contract_id
 const obtenerTokenAceptacion = async () => {
   try {
     const response = await axios.get(`${WOMPI_BASE_URL}/merchants/${WOMPI_PUBLIC_KEY}`);
     const token = response.data?.data?.presigned_acceptance?.acceptance_token;
-    const contractId = response.data?.data?.presigned_acceptance?.contract_id;
-    console.log("🕒 Token obtenido en:", new Date().toISOString());
-    console.log("🔍 acceptance_token recibido:", token);
-    console.log("🔍 contract_id recibido:", contractId);
-    return token;
+
+    // Intentar leer contract_id directo o decodificarlo del token
+    let contractId = response.data?.data?.presigned_acceptance?.contract_id;
+    if (!contractId && token) {
+      try {
+        const payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
+        contractId = payload.contract_id;
+      } catch (err) {
+        console.error("❌ No se pudo decodificar contract_id del token:", err.message);
+      }
+    }
+
+    console.log("🕒 [obtenerTokenAceptacion] Token obtenido en:", new Date().toISOString());
+    console.log("🔍 [obtenerTokenAceptacion] acceptance_token:", token);
+    console.log("🔍 [obtenerTokenAceptacion] contract_id:", contractId);
+
+    return { token, contractId };
   } catch (error) {
-    console.error("❌ Error al obtener token:", error.response?.data || error.message);
-    return null;
+    console.error("❌ [obtenerTokenAceptacion] Error:", error.response?.data || error.message);
+    return { token: null, contractId: null };
   }
 };
 
@@ -38,7 +51,7 @@ const validarEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 const validarTelefono = (telefono) => /^3\d{9}$/.test(telefono);
 
 router.post("/pse", async (req, res) => {
-  console.log("📩 POST recibido en /pago/pse");
+  console.log("📩 [POST /pago/pse] Petición recibida");
 
   try {
     const {
@@ -70,9 +83,10 @@ router.post("/pse", async (req, res) => {
       return res.status(400).json({ error: "Banco inválido en entorno de pruebas (usa código 1 o 2)." });
     }
 
-    const tokenAceptacion = await obtenerTokenAceptacion();
-    if (!tokenAceptacion) {
-      return res.status(500).json({ error: "No se obtuvo token de aceptación desde Wompi." });
+    // 🔹 Obtener token y contract_id
+    const { token: tokenAceptacion, contractId } = await obtenerTokenAceptacion();
+    if (!tokenAceptacion || !contractId) {
+      return res.status(500).json({ error: "No se obtuvo token de aceptación o contract_id desde Wompi." });
     }
 
     const referencia = `PAGO_${Date.now()}`;
@@ -83,11 +97,12 @@ router.post("/pse", async (req, res) => {
     const tipoUsuario = [1, 2].includes(Number(user_type)) ? Number(user_type) : 1;
     const telefonoValidado = validarTelefono(telefono_cliente) ? telefono_cliente : "3001234567";
 
-    console.log("📌 Datos clave antes de enviar a Wompi:");
-    console.log("🔍 acceptance_token:", tokenAceptacion);
-    console.log("🏦 Banco:", financial_institution_code, banco_nombre);
+    console.log("📌 [Datos clave]");
     console.log("💰 Monto en centavos:", montoCentavos);
     console.log("📄 Referencia:", referencia);
+    console.log("🏦 Banco:", financial_institution_code, banco_nombre);
+    console.log("👤 Tipo usuario:", tipoUsuario);
+    console.log("📞 Teléfono validado:", telefonoValidado);
 
     const pagoData = {
       acceptance_token: tokenAceptacion,
@@ -96,6 +111,7 @@ router.post("/pse", async (req, res) => {
       customer_email: usuario,
       reference: referencia,
       redirect_url: redirectURL,
+      contract_id: contractId, // 🔹 agregado
       payment_method: {
         type: "PSE",
         user_type: tipoUsuario,
@@ -116,7 +132,7 @@ router.post("/pse", async (req, res) => {
         .digest("hex")
     };
 
-    console.log("📦 Payload enviado a Wompi:", JSON.stringify(pagoData, null, 2));
+    console.log("📦 [Payload enviado a Wompi]:", JSON.stringify(pagoData, null, 2));
     console.log("📤 Enviando transacción a Wompi...");
 
     const respuesta = await axios.post(`${WOMPI_BASE_URL}/transactions`, pagoData, {
@@ -126,7 +142,7 @@ router.post("/pse", async (req, res) => {
       }
     });
 
-    console.log("📥 Respuesta completa de Wompi:", JSON.stringify(respuesta.data, null, 2));
+    console.log("📥 [Respuesta completa de Wompi]:", JSON.stringify(respuesta.data, null, 2));
 
     const respuestaData = respuesta.data?.data;
     console.log("🆔 Transaction ID:", respuestaData?.id);
@@ -138,7 +154,7 @@ router.post("/pse", async (req, res) => {
 
     if (!urlPago) {
       const wompiError = respuesta.data?.error?.reason || respuesta.data?.error?.messages || "No se recibió async_payment_url";
-      console.error("❌ Error de Wompi:", wompiError);
+      console.error("❌ [Error de Wompi]:", wompiError);
       return res.status(500).json({
         success: false,
         wompi_error: wompiError
@@ -175,7 +191,7 @@ router.post("/pse", async (req, res) => {
     });
 
   } catch (error) {
-    console.error("❌ Error procesando transacción PSE:", error.response?.data || error.message);
+    console.error("❌ [Error procesando transacción PSE]:", error.response?.data || error.message);
     res.status(500).json({
       success: false,
       error: "Error al iniciar el pago con Wompi.",
@@ -194,25 +210,13 @@ router.get("/bancos", (req, res) => {
 router.get("/:reference", async (req, res) => {
   try {
     const pago = await Pago.findOne({ reference: req.params.reference });
-    if (!pago) return res.status(404).json({ error: "Referencia no encontrada." });
+    if (!pago) {
+      return res.status(404).json({ error: "Referencia no encontrada." });
+    }
     res.status(200).json(pago);
   } catch (error) {
     console.error("❌ Error al buscar referencia:", error.message);
     res.status(500).json({ error: "Error interno al consultar el pago." });
-  }
-});
-
-router.get("/ultimos-pagos", async (req, res) => {
-  try {
-    const pagos = await Pago.find().sort({ createdAt: -1 }).limit(5);
-    res.status(200).json(pagos.map(p => ({
-      reference: p.reference,
-      status: p.status,
-      email: p.customer_email
-    })));
-  } catch (error) {
-    console.error("❌ Error al consultar últimos pagos:", error.message);
-    res.status(500).json({ error: "No se pudo obtener pagos recientes." });
   }
 });
 
