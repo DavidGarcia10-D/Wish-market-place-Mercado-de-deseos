@@ -1,16 +1,9 @@
 // frontend/src/components/Categoria.jsx
 
-import { useNavigate } from "react-router-dom";
-import "./Categoria.css"; // ← opcional si quieres estilos separados
+import "./Categoria.css";
 
-function Categoria() {
-  const navigate = useNavigate();
-
-  const categorias = ["Electrónica", "Hogar", "Ropa", "Otros","Accesorios"];
-
-  const irACategoria = (nombre) => {
-    navigate(`/productos/${nombre}`);
-  };
+function Categoria({ setCategoria, categoriaSeleccionada }) {
+  const categorias = ["Electrónica", "Hogar", "Ropa", "Otros"];
 
   return (
     <div className="contenedor-categorias">
@@ -19,8 +12,10 @@ function Categoria() {
         {categorias.map((cat) => (
           <button
             key={cat}
-            className="boton-categoria"
-            onClick={() => irACategoria(cat)}
+            className={`boton-categoria ${
+              cat === categoriaSeleccionada ? "activa" : ""
+            }`}
+            onClick={() => setCategoria(cat)}
           >
             {cat}
           </button>

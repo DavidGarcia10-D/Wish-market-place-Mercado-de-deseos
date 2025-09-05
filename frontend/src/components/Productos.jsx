@@ -1,65 +1,63 @@
-import { useState, useEffect, useContext } from "react";
+import { useEffect, useState, useContext } from "react";
 import axios from "axios";
+import "./Productos.css";
 import { CarritoContext } from "../context/CarritoContext";
 
-function Productos() {
-  const apiUrl = "https://wish-backend-l681.onrender.com";
-
+function Productos({ apiUrl, categoria }) {
   const [productos, setProductos] = useState([]);
-  const { carrito, setCarrito } = useContext(CarritoContext);
+  const { agregarAlCarrito } = useContext(CarritoContext);
 
   useEffect(() => {
-    axios.get(`${apiUrl}/productos`)
-      .then(res => setProductos(res.data))
-      .catch(err => console.error("❌ Error al obtener productos:", err));
-  }, []);
+    const obtenerProductos = async () => {
+      try {
+        const endpoint = categoria
+          ? `${apiUrl}/api/productos/categoria/${categoria}`
+          : `${apiUrl}/productos`;
 
-  const agregarAlCarrito = (producto) => {
-    const nuevoCarrito = [...carrito, { ...producto, cantidad: 1 }];
-    setCarrito(nuevoCarrito);
+        const res = await axios.get(endpoint);
+        setProductos(res.data);
+      } catch (error) {
+        console.error("❌ Error al obtener productos:", error);
+      }
+    };
 
-    axios.post(`${apiUrl}/carrito`, {
-      productoId: producto._id,
-      cantidad: 1,
-      total: producto.precio
-    })
-    .catch(err => console.error("❌ Error al agregar al carrito:", err));
-  };
+    obtenerProductos();
+  }, [categoria]);
 
   return (
-    <div className="contenedor-tienda">
-      <h1 className="titulo-tienda">✨ WISH MARKETPLACE</h1>
-      <p className="subtitulo-tienda">Tu deseo, un clic más cerca</p>
+    <div className="contenedor-productos">
+      <h2 className="titulo-productos">
+        {categoria ? `🛍️ Productos de ${categoria}` : "🛍️ Todos los productos"}
+      </h2>
 
       <div className="grid-productos">
-        {productos.map(prod => (
-          <div className="card-producto" key={prod._id}>
-            <img
-              src={prod.imagenUrl || "/imagenes/default.jpg"}
-              alt={prod.nombre}
-              onError={(e) => e.target.src = "/imagenes/default.jpg"}
-            />
-            <h3>{prod.nombre}</h3>
-            <p className="precio">
-              {new Intl.NumberFormat("es-CO", {
-                style: "currency",
-                currency: "COP",
-                minimumFractionDigits: 0
-              }).format(prod.precio)}
-            </p>
-            {typeof prod.stock === "number" && prod.stock > 0 && prod.stock < 6 && (
-              <p className="stock">¡Solo quedan {prod.stock}!</p>
-            )}
-            {typeof prod.stock === "number" && prod.stock === 0 ? (
-              <button className="agotado" disabled>Agotado</button>
-            ) : (
-              <button onClick={() => agregarAlCarrito(prod)}>🛒 Agregar al carrito</button>
-            )}
-          </div>
-        ))}
+        {productos.length === 0 ? (
+          <p>No hay productos disponibles en esta categoría.</p>
+        ) : (
+          productos.map((prod) => (
+            <div key={prod._id} className="card-producto">
+              <img
+                src={prod.imagenUrl}
+                alt={prod.nombre}
+                onError={(e) => (e.target.src = "/imagenes/default.jpg")}
+              />
+              <h3>{prod.nombre}</h3>
+              <p>{prod.descripcion}</p>
+              <p><strong>${prod.precio.toLocaleString()}</strong></p>
+              <p>Stock: {prod.stock}</p>
+              <button
+                className="boton-agregar"
+                onClick={() => agregarAlCarrito(prod)}
+              >
+                Agregar al carrito
+              </button>
+            </div>
+          ))
+        )}
       </div>
     </div>
   );
 }
 
 export default Productos;
+  

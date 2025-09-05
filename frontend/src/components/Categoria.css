@@ -1,10 +1,10 @@
 .contenedor-categorias {
+  padding: 1.5rem;
   text-align: center;
-  margin: 2rem 0;
 }
 
 .titulo-categorias {
-  font-size: 1.8rem;
+  font-size: 1.6rem;
   margin-bottom: 1rem;
   color: #333;
 }
@@ -17,16 +17,22 @@
 }
 
 .boton-categoria {
-  background-color: #4f46e5;
-  color: white;
-  border: none;
-  padding: 0.8rem 1.2rem;
-  border-radius: 8px;
-  cursor: pointer;
+  padding: 0.6rem 1.2rem;
   font-size: 1rem;
-  transition: background-color 0.3s ease;
+  border: 2px solid #ccc;
+  border-radius: 8px;
+  background-color: #f0f0f0;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .boton-categoria:hover {
-  background-color: #3730a3;
+  background-color: #e0e0e0;
+}
+
+.boton-categoria.activa {
+  background-color: #007bff;
+  color: white;
+  font-weight: bold;
+  border: 2px solid #0056b3;
 }
