@@ -1,0 +1,32 @@
+.contenedor-categorias {
+  text-align: center;
+  margin: 2rem 0;
+}
+
+.titulo-categorias {
+  font-size: 1.8rem;
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+.grid-categorias {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.boton-categoria {
+  background-color: #4f46e5;
+  color: white;
+  border: none;
+  padding: 0.8rem 1.2rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.3s ease;
+}
+
+.boton-categoria:hover {
+  background-color: #3730a3;
+}

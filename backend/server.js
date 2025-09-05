@@ -7,6 +7,7 @@ require("dotenv").config();
 const carritoRoutes = require("./routes/carrito");
 const pagoRoutes = require("./routes/pago");
 const webhookRoutes = require("./routes/webhook");
+const productosRoutes = require("./routes/productos"); // ✅ NUEVO IMPORT
 
 const app = express();
 
@@ -28,7 +29,12 @@ app.use("/webhook", express.raw({ type: "application/json" }), webhookRoutes);
 app.use(express.json());
 
 // 🔐 Validación de llaves y URI
-if (!process.env.MONGO_URI || !process.env.PRIVATE_KEY || !process.env.PUBLIC_KEY || !process.env.INTEGRITY_SECRET) {
+if (
+  !process.env.MONGO_URI ||
+  !process.env.PRIVATE_KEY ||
+  !process.env.PUBLIC_KEY ||
+  !process.env.INTEGRITY_SECRET
+) {
   console.error("❌ Faltan variables de entorno (.env)");
   process.exit(1);
 }
@@ -53,7 +59,7 @@ app.get("/", (req, res) => {
   res.send("🚀 ¡Servidor funcionando correctamente!");
 });
 
-// 📦 Productos
+// 📦 Productos (rutas existentes)
 app.get("/productos", async (req, res) => {
   try {
     const productos = await Product.find();
@@ -74,6 +80,9 @@ app.post("/productos", async (req, res) => {
     res.status(400).json({ error: error.message });
   }
 });
+
+// ✅ NUEVA RUTA para productos por categoría y seed
+app.use("/api/productos", productosRoutes);
 
 // 🛒 Rutas principales
 app.use("/carrito", carritoRoutes);
