@@ -213,19 +213,31 @@ router.post("/pse", async (req, res) => {
 
 // 🆕 Endpoint dinámico para bancos activos desde Wompi
 router.get("/bancos-wompi", async (req, res) => {
-  console.log("📥 [GET /bancos-wompi] Petición recibida");
+  console.log("📥 [GET /bancos-wompi] Petición recibida (URL fija)");
 
   try {
-    const response = await axios.get(`${WOMPI_BASE_URL}/pse/financial_institutions`);
-    const bancos = response.data?.data || [];
-    const activos = bancos.filter(b => b.status === "ACTIVE");
-    console.log(`🏦 Bancos activos cargados: ${activos.length}`);
-    res.status(200).json(activos);
+    const response = await fetch("https://production.wompi.co/v1/pse/financial_institutions", {
+      method: "GET",
+      headers: {
+        "User-Agent": "WishMarketPlace/1.0",
+        "Accept": "application/json"
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`Wompi respondió con ${response.status}`);
+    }
+
+    const data = await response.json();
+    const bancos = data?.data || [];
+    console.log(`🏦 Bancos recibidos: ${bancos.length}`);
+    res.status(200).json(bancos);
   } catch (error) {
     console.error("❌ Error al obtener bancos desde Wompi:", error.message);
     res.status(500).json({ error: "No se pudo obtener la lista de bancos." });
   }
 });
+
 
 // 🔍 Consulta por referencia
 router.get("/:reference", async (req, res) => {
