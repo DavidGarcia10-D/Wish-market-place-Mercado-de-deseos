@@ -6,9 +6,11 @@ require("dotenv").config();
 
 const Pago = require("../models/Pago");
 
-const WOMPI_BASE_URL = process.env.WOMPI_ENV === "sandbox"
-  ? "https://sandbox.wompi.co/v1"
-  : "https://production.wompi.co/v1";
+const IS_PRODUCTION = process.env.WOMPI_ENV === "production";
+
+const WOMPI_BASE_URL = IS_PRODUCTION
+  ? "https://production.wompi.co/v1"
+  : "https://sandbox.wompi.co/v1";
 
 const WOMPI_PUBLIC_KEY = process.env.PUBLIC_KEY;
 const WOMPI_PRIVATE_KEY = process.env.PRIVATE_KEY;
@@ -18,6 +20,9 @@ if (!WOMPI_PUBLIC_KEY || !WOMPI_PRIVATE_KEY || !INTEGRITY_SECRET) {
   console.error("❌ Llaves de Wompi faltantes en .env");
   process.exit(1);
 }
+
+console.log(`🌐 Entorno Wompi: ${IS_PRODUCTION ? "Producción" : "Sandbox"}`);
+console.log(`🔗 URL base: ${WOMPI_BASE_URL}`);
 
 const obtenerTokenAceptacion = async () => {
   try {
@@ -65,7 +70,6 @@ router.post("/pse", async (req, res) => {
       user_type
     } = req.body;
 
-    // 🔍 Log de entrada para user_type
     console.log("🔍 [user_type recibido del frontend]:", user_type);
 
     if (typeof valor !== "number" || valor < 1500) {
@@ -80,7 +84,7 @@ router.post("/pse", async (req, res) => {
       return res.status(400).json({ error: "Faltan campos requeridos o están mal formados." });
     }
 
-    if (process.env.WOMPI_ENV === "sandbox" && !["1", "2"].includes(String(financial_institution_code))) {
+    if (!IS_PRODUCTION && !["1", "2"].includes(String(financial_institution_code))) {
       return res.status(400).json({ error: "Banco inválido en entorno de pruebas (usa código 1 o 2)." });
     }
 
@@ -94,12 +98,10 @@ router.post("/pse", async (req, res) => {
     const redirectURL = `${FRONTEND_BASE_URL}/estado/${referencia}`;
     const montoCentavos = parseInt(valor * 100, 10);
 
-    const tipoUsuario = Number(user_type); // ✅ Usamos directamente 0 o 1
+    const tipoUsuario = Number(user_type);
     const telefonoValidado = validarTelefono(telefono_cliente) ? telefono_cliente : "3001234567";
 
-    // 🔍 Log de salida para user_type
     console.log("🔍 [user_type enviado a Wompi]:", tipoUsuario);
-
     console.log("📌 [Datos clave]");
     console.log("💰 Monto en centavos:", montoCentavos);
     console.log("📄 Referencia:", referencia);
