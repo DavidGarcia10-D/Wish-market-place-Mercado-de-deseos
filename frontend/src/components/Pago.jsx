@@ -19,7 +19,7 @@ const Pago = ({ apiUrl }) => {
   const [mensaje, setMensaje] = useState("");
 
   useEffect(() => {
-    axios.get(`${apiUrl}/bancos-wompi`)
+    axios.get(`${apiUrl}/pago/bancos-wompi`)
       .then(res => {
         if (Array.isArray(res.data)) {
           setBancos(res.data);
