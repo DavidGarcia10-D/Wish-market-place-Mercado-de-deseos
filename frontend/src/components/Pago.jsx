@@ -77,19 +77,20 @@ const Pago = ({ apiUrl }) => {
 
     try {
       const payload = {
-        customer_email: email,
-        payment_method: {
-          type: "PSE",
-          user_type: userType,
-          user_legal_id_type: documentType,
-          user_legal_id: document,
-          financial_institution_code: bankCode,
-          payment_description: `Pago a Tienda Wompi, ref: ${Date.now()}`
-        },
-        customer_data: {
-          phone_number: `57${phone}`,
-          full_name: nombre
-        }
+        valor: Number(total), // ✅ Aseguramos que sea número
+        usuario: email,
+        document: document,
+        document_type: documentType,
+        financial_institution_code: bankCode,
+        nombre_cliente: nombre,
+        banco_nombre: bancos.find(b => b.codigo === bankCode)?.nombre || "Desconocido",
+        telefono_cliente: `57${phone}`,
+        user_type: userType,
+        carrito: carrito.map(p => ({
+          nombre: p.nombre,
+          precio: p.precio,
+          cantidad: p.cantidad
+        }))
       };
 
       const response = await axios.post(`${apiUrl}/pago/pse`, payload);
