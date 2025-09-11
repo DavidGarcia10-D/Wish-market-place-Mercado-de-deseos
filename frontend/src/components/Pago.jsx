@@ -80,6 +80,8 @@ const Pago = ({ apiUrl }) => {
     }
 
     try {
+      const bancoSeleccionado = bancos.find(b => b.financial_institution_code === bankCode);
+
       const payload = {
         valor: Number(total),
         usuario: email,
@@ -87,7 +89,7 @@ const Pago = ({ apiUrl }) => {
         document_type: documentType,
         financial_institution_code: bankCode,
         nombre_cliente: nombre,
-        banco_nombre: bancos.find(b => b.code === bankCode)?.name || "Desconocido",
+        banco_nombre: bancoSeleccionado?.financial_institution_name || "Desconocido",
         telefono_cliente: phone,
         user_type: userType,
         carrito: carrito.map(p => ({
@@ -180,8 +182,8 @@ const Pago = ({ apiUrl }) => {
       <select value={bankCode} onChange={(e) => setBankCode(e.target.value)} style={campoEstilo}>
         <option value="">Selecciona tu banco</option>
         {bancos.map((banco, index) => (
-          <option key={`${banco.code}-${index}`} value={banco.code}>
-            {banco.name}
+          <option key={`${banco.financial_institution_code}-${index}`} value={banco.financial_institution_code}>
+            {banco.financial_institution_name}
           </option>
         ))}
       </select>
