@@ -77,14 +77,14 @@ const Pago = ({ apiUrl }) => {
 
     try {
       const payload = {
-        valor: Number(total), // ✅ Aseguramos que sea número
+        valor: Number(total),
         usuario: email,
         document: document,
         document_type: documentType,
         financial_institution_code: bankCode,
         nombre_cliente: nombre,
         banco_nombre: bancos.find(b => b.codigo === bankCode)?.nombre || "Desconocido",
-        telefono_cliente: `57${phone}`,
+        telefono_cliente: phone, // ✅ sin prefijo
         user_type: userType,
         carrito: carrito.map(p => ({
           nombre: p.nombre,
