@@ -22,7 +22,15 @@ function Productos({ apiUrl, categoria }) {
     };
 
     obtenerProductos();
-  }, [categoria]);
+  }, [categoria, apiUrl]);
+
+  const handleAgregar = (producto) => {
+    if (typeof agregarAlCarrito === "function") {
+      agregarAlCarrito(producto);
+    } else {
+      console.error("❌ agregarAlCarrito no está definido como función");
+    }
+  };
 
   return (
     <div className="contenedor-productos">
@@ -47,7 +55,7 @@ function Productos({ apiUrl, categoria }) {
               <p>Stock: {prod.stock}</p>
               <button
                 className="boton-agregar"
-                onClick={() => agregarAlCarrito(prod)}
+                onClick={() => handleAgregar(prod)}
               >
                 Agregar al carrito
               </button>
@@ -60,4 +68,3 @@ function Productos({ apiUrl, categoria }) {
 }
 
 export default Productos;
-  
