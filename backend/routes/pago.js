@@ -213,6 +213,8 @@ router.post("/pse", async (req, res) => {
 
 // 🆕 Endpoint dinámico para bancos activos desde Wompi
 router.get("/bancos-wompi", async (req, res) => {
+  console.log("📥 [GET /bancos-wompi] Petición recibida");
+
   try {
     const response = await axios.get(`${WOMPI_BASE_URL}/pse/financial_institutions`);
     const bancos = response.data?.data || [];
