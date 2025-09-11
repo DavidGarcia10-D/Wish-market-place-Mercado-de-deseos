@@ -10,7 +10,8 @@ const Pago = ({ apiUrl }) => {
   const [document, setDocument] = useState("");
   const [documentType, setDocumentType] = useState("CC");
   const [bankCode, setBankCode] = useState("");
-  const [userType, setUserType] = useState(0); // 0 = Natural, 1 = Jurídica
+  const [userType, setUserType] = useState(0);
+  const [phone, setPhone] = useState("");
   const [bancos, setBancos] = useState([]);
   const [total, setTotal] = useState(0);
   const [error, setError] = useState("");
@@ -37,6 +38,7 @@ const Pago = ({ apiUrl }) => {
   }, [carrito]);
 
   const validarEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const validarTelefono = (tel) => /^3\d{9}$/.test(tel);
 
   const pagarConPSE = async () => {
     setError("");
@@ -49,8 +51,14 @@ const Pago = ({ apiUrl }) => {
       return;
     }
 
-    if (!nombre || !document || !documentType || !bankCode) {
+    if (!nombre || !document || !documentType || !bankCode || !phone) {
       setError("❌ Completa todos los campos correctamente.");
+      setLoading(false);
+      return;
+    }
+
+    if (!validarTelefono(phone)) {
+      setError("❌ Ingresa un número de teléfono válido (10 dígitos, inicia con 3).");
       setLoading(false);
       return;
     }
@@ -68,27 +76,23 @@ const Pago = ({ apiUrl }) => {
     }
 
     try {
-      const bancoSeleccionado = bancos.find(b => b.codigo === bankCode);
-
       const payload = {
-        usuario: email,
-        nombre_cliente: nombre,
-        banco_nombre: bancoSeleccionado?.nombre || "Desconocido",
-        valor: total,
-        document,
-        document_type: documentType,
-        financial_institution_code: String(bankCode),
-        user_type: Number(userType), // ✅ Forzado como número
-        carrito: carrito.map(p => ({
-          nombre: p.nombre,
-          precio: p.precio,
-          cantidad: p.cantidad
-        }))
+        customer_email: email,
+        payment_method: {
+          type: "PSE",
+          user_type: userType,
+          user_legal_id_type: documentType,
+          user_legal_id: document,
+          financial_institution_code: bankCode,
+          payment_description: `Pago a Tienda Wompi, ref: ${Date.now()}`
+        },
+        customer_data: {
+          phone_number: `57${phone}`,
+          full_name: nombre
+        }
       };
 
       const response = await axios.post(`${apiUrl}/pago/pse`, payload);
-      console.log("📥 Respuesta del backend:", response.data);
-
       const { success, url_pago } = response.data;
 
       if (!success || !url_pago) {
@@ -99,11 +103,8 @@ const Pago = ({ apiUrl }) => {
       window.location.href = url_pago;
 
     } catch (err) {
-      console.error("❌ Error al procesar el pago:", err);
-
       const backendMsg = err.response?.data?.message || err.response?.data?.error || "";
       const wompiMsg = err.response?.data?.wompi_error || "";
-
       setError(`❌ No se pudo procesar el pago. ${backendMsg || wompiMsg || err.message || "Intenta nuevamente."}`);
     } finally {
       setLoading(false);
@@ -139,6 +140,14 @@ const Pago = ({ apiUrl }) => {
         placeholder="Correo electrónico"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
+        style={campoEstilo}
+      />
+
+      <input
+        type="tel"
+        placeholder="Número de teléfono"
+        value={phone}
+        onChange={(e) => setPhone(e.target.value)}
         style={campoEstilo}
       />
 

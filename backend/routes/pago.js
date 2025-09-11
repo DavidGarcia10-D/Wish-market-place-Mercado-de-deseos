@@ -28,24 +28,11 @@ const obtenerTokenAceptacion = async () => {
   try {
     const response = await axios.get(`${WOMPI_BASE_URL}/merchants/${WOMPI_PUBLIC_KEY}`);
     const token = response.data?.data?.presigned_acceptance?.acceptance_token;
-
-    let contractId = response.data?.data?.presigned_acceptance?.contract_id;
-    if (!contractId && token) {
-      try {
-        const payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
-        contractId = payload.contract_id;
-      } catch (err) {
-        console.error("❌ No se pudo decodificar contract_id del token:", err.message);
-      }
-    }
-
-    console.log("🕒 [obtenerTokenAceptacion] Token obtenido en:", new Date().toISOString());
-    console.log("🔍 [obtenerTokenAceptacion] acceptance_token:", token);
-    console.log("🔍 [obtenerTokenAceptacion] contract_id:", contractId);
-
+    const contractId = response.data?.data?.presigned_acceptance?.contract_id;
+    console.log("🕒 Token de aceptación obtenido:", new Date().toISOString());
     return { token, contractId };
   } catch (error) {
-    console.error("❌ [obtenerTokenAceptacion] Error:", error.response?.data || error.message);
+    console.error("❌ Error al obtener token de aceptación:", error.response?.data || error.message);
     return { token: null, contractId: null };
   }
 };
@@ -70,8 +57,6 @@ router.post("/pse", async (req, res) => {
       user_type
     } = req.body;
 
-    console.log("🔍 [user_type recibido del frontend]:", user_type);
-
     if (typeof valor !== "number" || valor < 1500) {
       return res.status(400).json({ error: "Monto mínimo permitido: $1.500 COP." });
     }
@@ -79,9 +64,13 @@ router.post("/pse", async (req, res) => {
     if (
       !usuario || !validarEmail(usuario) ||
       !document || !document_type || !financial_institution_code ||
-      !nombre_cliente || !banco_nombre
+      !nombre_cliente || !banco_nombre || !telefono_cliente
     ) {
       return res.status(400).json({ error: "Faltan campos requeridos o están mal formados." });
+    }
+
+    if (!validarTelefono(telefono_cliente)) {
+      return res.status(400).json({ error: "Número de teléfono inválido o faltante." });
     }
 
     if (!IS_PRODUCTION && !["1", "2"].includes(String(financial_institution_code))) {
@@ -97,26 +86,10 @@ router.post("/pse", async (req, res) => {
     const FRONTEND_BASE_URL = process.env.FRONTEND_URL || "http://localhost:3000";
     const redirectURL = `${FRONTEND_BASE_URL}/estado/${referencia}`;
     const montoCentavos = parseInt(valor * 100, 10);
-
     const tipoUsuario = Number(user_type);
-    const telefonoValidado = validarTelefono(telefono_cliente) ? telefono_cliente : "3001234567";
-
-    console.log("🔍 [user_type enviado a Wompi]:", tipoUsuario);
-    console.log("📌 [Datos clave]");
-    console.log("💰 Monto en centavos:", montoCentavos);
-    console.log("📄 Referencia:", referencia);
-    console.log("🏦 Banco:", financial_institution_code, banco_nombre);
-    console.log("👤 Tipo usuario:", tipoUsuario);
-    console.log("📞 Teléfono validado:", telefonoValidado);
 
     const pagoData = {
-      acceptance_token: tokenAceptacion,
-      amount_in_cents: montoCentavos,
-      currency: "COP",
       customer_email: usuario,
-      reference: referencia,
-      redirect_url: redirectURL,
-      contract_id: contractId,
       payment_method: {
         type: "PSE",
         user_type: tipoUsuario,
@@ -127,18 +100,20 @@ router.post("/pse", async (req, res) => {
       },
       customer_data: {
         full_name: nombre_cliente,
-        phone_number: telefonoValidado,
-        legal_id: String(document),
-        legal_id_type: document_type,
-        payment_description: "Pago a Tienda Wompi"
+        phone_number: telefono_cliente
       },
+      acceptance_token: tokenAceptacion,
+      amount_in_cents: montoCentavos,
+      currency: "COP",
+      reference: referencia,
+      redirect_url: redirectURL,
+      contract_id: contractId,
       signature: crypto.createHash("sha256")
         .update(`${referencia}${montoCentavos}COP${INTEGRITY_SECRET}`)
         .digest("hex")
     };
 
-    console.log("📦 [Payload enviado a Wompi]:", JSON.stringify(pagoData, null, 2));
-    console.log("📤 Enviando transacción a Wompi...");
+    console.log("📦 Payload enviado a Wompi:", JSON.stringify(pagoData, null, 2));
 
     const respuesta = await axios.post(`${WOMPI_BASE_URL}/transactions`, pagoData, {
       headers: {
@@ -147,19 +122,12 @@ router.post("/pse", async (req, res) => {
       }
     });
 
-    console.log("📥 [Respuesta completa de Wompi]:", JSON.stringify(respuesta.data, null, 2));
-
     const respuestaData = respuesta.data?.data;
-    console.log("🆔 Transaction ID:", respuestaData?.id);
-    console.log("📌 Status:", respuestaData?.status);
-    console.log("📌 Status message:", respuestaData?.status_message);
-    console.log("🔗 async_payment_url:", respuestaData?.payment_method?.extra?.async_payment_url);
-
     const urlPago = respuestaData?.payment_method?.extra?.async_payment_url;
 
     if (!urlPago) {
       const wompiError = respuesta.data?.error?.reason || respuesta.data?.error?.messages || "No se recibió async_payment_url";
-      console.error("❌ [Error de Wompi]:", wompiError);
+      console.error("❌ Error desde Wompi:", wompiError);
       return res.status(500).json({
         success: false,
         wompi_error: wompiError
@@ -181,7 +149,7 @@ router.post("/pse", async (req, res) => {
         attempts: 1,
         productos: Array.isArray(carrito) ? carrito : [],
         user_type: tipoUsuario,
-        phone_number: telefonoValidado,
+        phone_number: telefono_cliente,
         payment_description: "Pago a Tienda Wompi"
       });
     } catch (err) {
@@ -196,7 +164,7 @@ router.post("/pse", async (req, res) => {
     });
 
   } catch (error) {
-    console.error("❌ [Error procesando transacción PSE]:", error.response?.data || error.message);
+    console.error("❌ Error procesando transacción PSE:", error.response?.data || error.message);
     res.status(500).json({
       success: false,
       error: "Error al iniciar el pago con Wompi.",
