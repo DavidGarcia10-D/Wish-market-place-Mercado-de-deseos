@@ -28,11 +28,25 @@ const obtenerTokenAceptacion = async () => {
   try {
     const response = await axios.get(`${WOMPI_BASE_URL}/merchants/${WOMPI_PUBLIC_KEY}`);
     const token = response.data?.data?.presigned_acceptance?.acceptance_token;
-    const contractId = response.data?.data?.presigned_acceptance?.contract_id;
-    console.log("🕒 Token de aceptación obtenido:", new Date().toISOString());
+
+    let contractId = response.data?.data?.presigned_acceptance?.contract_id;
+
+    if (!contractId && token) {
+      try {
+        const payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
+        contractId = payload.contract_id;
+      } catch (err) {
+        console.error("❌ No se pudo decodificar contract_id del token:", err.message);
+      }
+    }
+
+    console.log("🕒 [obtenerTokenAceptacion] Token obtenido en:", new Date().toISOString());
+    console.log("🔍 [obtenerTokenAceptacion] acceptance_token:", token);
+    console.log("🔍 [obtenerTokenAceptacion] contract_id:", contractId);
+
     return { token, contractId };
   } catch (error) {
-    console.error("❌ Error al obtener token de aceptación:", error.response?.data || error.message);
+    console.error("❌ [obtenerTokenAceptacion] Error:", error.response?.data || error.message);
     return { token: null, contractId: null };
   }
 };
@@ -100,7 +114,7 @@ router.post("/pse", async (req, res) => {
       },
       customer_data: {
         full_name: nombre_cliente,
-        phone_number: telefono_cliente
+        phone_number: `57${telefono_cliente}`
       },
       acceptance_token: tokenAceptacion,
       amount_in_cents: montoCentavos,
