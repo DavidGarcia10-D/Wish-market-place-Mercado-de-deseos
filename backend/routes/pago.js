@@ -137,7 +137,31 @@ router.post("/pse", async (req, res) => {
     });
 
     const respuestaData = respuesta.data?.data;
-    const urlPago = respuestaData?.payment_method?.extra?.async_payment_url;
+    const transaccionId = respuestaData?.id;
+    let urlPago = null;
+
+    for (let intento = 0; intento < 5; intento++) {
+      try {
+        const consulta = await axios.get(`${WOMPI_BASE_URL}/transactions/${transaccionId}`, {
+          headers: {
+            Authorization: `Bearer ${WOMPI_PRIVATE_KEY}`
+          }
+        });
+
+        urlPago = consulta.data?.data?.payment_method?.extra?.async_payment_url;
+
+        if (urlPago) {
+          console.log(`🔗 [Polling] async_payment_url obtenido en intento ${intento + 1}:`, urlPago);
+          break;
+        }
+
+        console.log(`⏳ [Polling] Intento ${intento + 1}: URL aún no disponible`);
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      } catch (err) {
+        console.error(`❌ [Polling] Error en intento ${intento + 1}:`, err.message);
+        break;
+      }
+    }
 
     if (!urlPago) {
       const wompiError = respuesta.data?.error?.reason || respuesta.data?.error?.messages || "No se recibió async_payment_url";
@@ -187,13 +211,21 @@ router.post("/pse", async (req, res) => {
   }
 });
 
-router.get("/bancos", (req, res) => {
-  res.json([
-    { nombre: "Banco que aprueba (Sandbox)", codigo: "1" },
-    { nombre: "Banco que rechaza (Sandbox)", codigo: "2" }
-  ]);
+// 🆕 Endpoint dinámico para bancos activos desde Wompi
+router.get("/bancos-wompi", async (req, res) => {
+  try {
+    const response = await axios.get(`${WOMPI_BASE_URL}/pse/financial_institutions`);
+    const bancos = response.data?.data || [];
+    const activos = bancos.filter(b => b.status === "ACTIVE");
+    console.log(`🏦 Bancos activos cargados: ${activos.length}`);
+    res.status(200).json(activos);
+  } catch (error) {
+    console.error("❌ Error al obtener bancos desde Wompi:", error.message);
+    res.status(500).json({ error: "No se pudo obtener la lista de bancos." });
+  }
 });
 
+// 🔍 Consulta por referencia
 router.get("/:reference", async (req, res) => {
   try {
     const pago = await Pago.findOne({ reference: req.params.reference });

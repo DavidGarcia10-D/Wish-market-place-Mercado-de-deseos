@@ -19,17 +19,16 @@ const Pago = ({ apiUrl }) => {
   const [mensaje, setMensaje] = useState("");
 
   useEffect(() => {
-    axios.get(`${apiUrl}/bancos`)
+    axios.get(`${apiUrl}/bancos-wompi`)
       .then(res => {
         if (Array.isArray(res.data)) {
-          setBancos([
-            { nombre: "Banco que aprueba (Sandbox)", codigo: "1" },
-            { nombre: "Banco que rechaza (Sandbox)", codigo: "2" },
-            ...res.data
-          ]);
+          setBancos(res.data);
         }
       })
-      .catch(() => setBancos([]));
+      .catch(() => {
+        setBancos([]);
+        setError("❌ No se pudo cargar la lista de bancos. Intenta más tarde.");
+      });
   }, [apiUrl]);
 
   useEffect(() => {
@@ -42,36 +41,41 @@ const Pago = ({ apiUrl }) => {
 
   const pagarConPSE = async () => {
     setError("");
-    setMensaje("");
+    setMensaje("⏳ Estamos preparando tu redirección segura al banco...");
     setLoading(true);
 
     if (!email || !validarEmail(email)) {
       setError("❌ Ingresa un correo electrónico válido.");
       setLoading(false);
+      setMensaje("");
       return;
     }
 
     if (!nombre || !document || !documentType || !bankCode || !phone) {
       setError("❌ Completa todos los campos correctamente.");
       setLoading(false);
+      setMensaje("");
       return;
     }
 
     if (!validarTelefono(phone)) {
       setError("❌ Ingresa un número de teléfono válido (10 dígitos, inicia con 3).");
       setLoading(false);
+      setMensaje("");
       return;
     }
 
     if (![0, 1].includes(userType)) {
       setError("❌ Selecciona si eres persona natural o jurídica.");
       setLoading(false);
+      setMensaje("");
       return;
     }
 
     if (total < 1500) {
       setError("❌ Monto mínimo permitido: $1.500 COP.");
       setLoading(false);
+      setMensaje("");
       return;
     }
 
@@ -83,8 +87,8 @@ const Pago = ({ apiUrl }) => {
         document_type: documentType,
         financial_institution_code: bankCode,
         nombre_cliente: nombre,
-        banco_nombre: bancos.find(b => b.codigo === bankCode)?.nombre || "Desconocido",
-        telefono_cliente: phone, // ✅ sin prefijo
+        banco_nombre: bancos.find(b => b.code === bankCode)?.name || "Desconocido",
+        telefono_cliente: phone,
         user_type: userType,
         carrito: carrito.map(p => ({
           nombre: p.nombre,
@@ -107,6 +111,7 @@ const Pago = ({ apiUrl }) => {
       const backendMsg = err.response?.data?.message || err.response?.data?.error || "";
       const wompiMsg = err.response?.data?.wompi_error || "";
       setError(`❌ No se pudo procesar el pago. ${backendMsg || wompiMsg || err.message || "Intenta nuevamente."}`);
+      setMensaje("");
     } finally {
       setLoading(false);
     }
@@ -175,8 +180,8 @@ const Pago = ({ apiUrl }) => {
       <select value={bankCode} onChange={(e) => setBankCode(e.target.value)} style={campoEstilo}>
         <option value="">Selecciona tu banco</option>
         {bancos.map((banco, index) => (
-          <option key={`${banco.codigo}-${index}`} value={banco.codigo}>
-            {banco.nombre}
+          <option key={`${banco.code}-${index}`} value={banco.code}>
+            {banco.name}
           </option>
         ))}
       </select>
@@ -186,7 +191,13 @@ const Pago = ({ apiUrl }) => {
       </h3>
 
       {error && <p style={{ color: "red", fontWeight: "bold" }}>{error}</p>}
-      {mensaje && <p style={{ color: "green", fontWeight: "bold" }}>{mensaje}</p>}
+      {mensaje && <p style={{ color: loading ? "#555" : "green", fontWeight: "bold" }}>{mensaje}</p>}
+
+      {loading && (
+        <div style={{ marginTop: "20px" }}>
+          <p>🔄 Procesando tu transacción con Wompi...</p>
+        </div>
+      )}
 
       <button
         onClick={pagarConPSE}
