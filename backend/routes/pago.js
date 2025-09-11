@@ -19,13 +19,11 @@ if (!WOMPI_PUBLIC_KEY || !WOMPI_PRIVATE_KEY || !INTEGRITY_SECRET) {
   process.exit(1);
 }
 
-// 🔹 Ahora devuelve token y contract_id
 const obtenerTokenAceptacion = async () => {
   try {
     const response = await axios.get(`${WOMPI_BASE_URL}/merchants/${WOMPI_PUBLIC_KEY}`);
     const token = response.data?.data?.presigned_acceptance?.acceptance_token;
 
-    // Intentar leer contract_id directo o decodificarlo del token
     let contractId = response.data?.data?.presigned_acceptance?.contract_id;
     if (!contractId && token) {
       try {
@@ -67,6 +65,9 @@ router.post("/pse", async (req, res) => {
       user_type
     } = req.body;
 
+    // 🔍 Log de entrada para user_type
+    console.log("🔍 [user_type recibido del frontend]:", user_type);
+
     if (typeof valor !== "number" || valor < 1500) {
       return res.status(400).json({ error: "Monto mínimo permitido: $1.500 COP." });
     }
@@ -83,7 +84,6 @@ router.post("/pse", async (req, res) => {
       return res.status(400).json({ error: "Banco inválido en entorno de pruebas (usa código 1 o 2)." });
     }
 
-    // 🔹 Obtener token y contract_id
     const { token: tokenAceptacion, contractId } = await obtenerTokenAceptacion();
     if (!tokenAceptacion || !contractId) {
       return res.status(500).json({ error: "No se obtuvo token de aceptación o contract_id desde Wompi." });
@@ -94,8 +94,11 @@ router.post("/pse", async (req, res) => {
     const redirectURL = `${FRONTEND_BASE_URL}/estado/${referencia}`;
     const montoCentavos = parseInt(valor * 100, 10);
 
-    const tipoUsuario = [1, 2].includes(Number(user_type)) ? Number(user_type) : 1;
+    const tipoUsuario = Number(user_type); // ✅ Usamos directamente 0 o 1
     const telefonoValidado = validarTelefono(telefono_cliente) ? telefono_cliente : "3001234567";
+
+    // 🔍 Log de salida para user_type
+    console.log("🔍 [user_type enviado a Wompi]:", tipoUsuario);
 
     console.log("📌 [Datos clave]");
     console.log("💰 Monto en centavos:", montoCentavos);
@@ -111,7 +114,7 @@ router.post("/pse", async (req, res) => {
       customer_email: usuario,
       reference: referencia,
       redirect_url: redirectURL,
-      contract_id: contractId, // 🔹 agregado
+      contract_id: contractId,
       payment_method: {
         type: "PSE",
         user_type: tipoUsuario,

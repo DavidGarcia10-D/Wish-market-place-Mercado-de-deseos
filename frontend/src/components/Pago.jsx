@@ -10,7 +10,7 @@ const Pago = ({ apiUrl }) => {
   const [document, setDocument] = useState("");
   const [documentType, setDocumentType] = useState("CC");
   const [bankCode, setBankCode] = useState("");
-  const [userType, setUserType] = useState(1); // 1 = Natural, 2 = Jurídica
+  const [userType, setUserType] = useState(0); // 0 = Natural, 1 = Jurídica
   const [bancos, setBancos] = useState([]);
   const [total, setTotal] = useState(0);
   const [error, setError] = useState("");
@@ -55,7 +55,7 @@ const Pago = ({ apiUrl }) => {
       return;
     }
 
-    if (![1, 2].includes(userType)) {
+    if (![0, 1].includes(userType)) {
       setError("❌ Selecciona si eres persona natural o jurídica.");
       setLoading(false);
       return;
@@ -78,7 +78,7 @@ const Pago = ({ apiUrl }) => {
         document,
         document_type: documentType,
         financial_institution_code: String(bankCode),
-        user_type: userType,
+        user_type: Number(userType), // ✅ Forzado como número
         carrito: carrito.map(p => ({
           nombre: p.nombre,
           precio: p.precio,
@@ -101,7 +101,6 @@ const Pago = ({ apiUrl }) => {
     } catch (err) {
       console.error("❌ Error al procesar el pago:", err);
 
-      // Captura mensajes detallados del backend o de Wompi
       const backendMsg = err.response?.data?.message || err.response?.data?.error || "";
       const wompiMsg = err.response?.data?.wompi_error || "";
 
@@ -152,8 +151,8 @@ const Pago = ({ apiUrl }) => {
       />
 
       <select value={userType} onChange={(e) => setUserType(Number(e.target.value))} style={campoEstilo}>
-        <option value={1}>Persona Natural</option>
-        <option value={2}>Persona Jurídica</option>
+        <option value={0}>Persona Natural</option>
+        <option value={1}>Persona Jurídica</option>
       </select>
 
       <select value={documentType} onChange={(e) => setDocumentType(e.target.value)} style={campoEstilo}>
