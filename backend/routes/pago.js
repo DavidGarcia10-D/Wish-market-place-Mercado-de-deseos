@@ -213,23 +213,18 @@ router.post("/pse", async (req, res) => {
 
 // 🆕 Endpoint dinámico para bancos activos desde Wompi
 router.get("/bancos-wompi", async (req, res) => {
-  console.log("📥 [GET /bancos-wompi] Petición recibida (URL fija)");
+  console.log("📥 [GET /bancos-wompi] Petición recibida (con autenticación)");
 
   try {
-    const response = await fetch("https://production.wompi.co/v1/pse/financial_institutions", {
-      method: "GET",
+    const response = await axios.get("https://production.wompi.co/v1/pse/financial_institutions", {
       headers: {
+        Authorization: `Bearer ${process.env.PRIVATE_KEY}`, // ✅ clave privada
         "User-Agent": "WishMarketPlace/1.0",
         "Accept": "application/json"
       }
     });
 
-    if (!response.ok) {
-      throw new Error(`Wompi respondió con ${response.status}`);
-    }
-
-    const data = await response.json();
-    const bancos = data?.data || [];
+    const bancos = response.data?.data || [];
     console.log(`🏦 Bancos recibidos: ${bancos.length}`);
     res.status(200).json(bancos);
   } catch (error) {
