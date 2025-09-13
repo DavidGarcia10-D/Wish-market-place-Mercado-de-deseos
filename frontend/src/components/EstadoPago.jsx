@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import ResumenPago from "./ResumenPago";
 
 const EstadoPago = ({ apiUrl }) => {
@@ -25,8 +26,10 @@ const EstadoPago = ({ apiUrl }) => {
         if (!res.ok) {
           if (res.status === 404) {
             setEstado("NO_ENCONTRADO");
+            toast.warn("⚠️ Referencia no encontrada");
           } else {
             setErrorConsulta(true);
+            toast.error("❌ Error al consultar el estado del pago");
           }
           clearInterval(intervalo);
           return;
@@ -43,9 +46,20 @@ const EstadoPago = ({ apiUrl }) => {
         if (data.status !== "PENDING") {
           clearInterval(intervalo);
         }
+
+        // ✅ Toast según estado
+        if (data.status === "APPROVED") {
+          toast.success("✅ Pago aprobado");
+        } else if (data.status === "DECLINED") {
+          toast.error("❌ Pago rechazado");
+        } else if (data.status === "PENDING") {
+          toast.info("⏳ Pago en proceso");
+        }
+
       } catch (error) {
         console.error("❌ Error en la consulta:", error);
         setErrorConsulta(true);
+        toast.error("❌ Error al consultar el estado del pago");
         clearInterval(intervalo);
       }
     };

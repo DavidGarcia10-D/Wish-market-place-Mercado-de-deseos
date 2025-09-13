@@ -8,6 +8,7 @@ const carritoRoutes = require("./routes/carrito");
 const pagoRoutes = require("./routes/pago");
 const webhookRoutes = require("./routes/webhook");
 const productosRoutes = require("./routes/productos");
+const rutaEnvios = require('./routes/envios');
 
 const app = express();
 
@@ -23,10 +24,14 @@ app.use(cors({
 }));
 
 // ⚠️ Raw parser SOLO para /pago/webhook (firma de Wompi)
-app.use("/pago/webhook", express.raw({ type: "*/*" }), webhookRoutes);
+app.use("/webhook", express.raw({ type: "*/*" }), webhookRoutes);
 
 // 🌐 JSON parser para el resto de rutas
 app.use(express.json());
+
+// 🔁 Módulo de envíos: recibe datos logísticos del cliente (dirección, ciudad, etc.)
+// Se conecta con el modelo Envio.js y se vincula a cada pago mediante id_pago
+app.use('/envios', rutaEnvios);
 
 // 🔐 Validación de llaves y URI
 if (

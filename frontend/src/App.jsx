@@ -1,4 +1,5 @@
-// frontend/src/App.jsx
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 import React, { useState } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
@@ -35,6 +36,7 @@ const App = () => {
                 />
                 <Carrito apiUrl={API_URL} usuarioId={"123456"} />
                 <Pago apiUrl={API_URL} />
+                <ToastContainer position="top-right" autoClose={3000} /> {/* ✅ Aquí va */}
               </div>
             }
           />

@@ -1,6 +1,7 @@
 import React, { useState, useContext, useEffect } from "react";
 import axios from "axios";
 import { CarritoContext } from "../context/CarritoContext";
+import DatosEnvio from "./DatosEnvio";
 
 const Pago = ({ apiUrl }) => {
   const { carrito } = useContext(CarritoContext);
@@ -12,22 +13,22 @@ const Pago = ({ apiUrl }) => {
   const [bankCode, setBankCode] = useState("");
   const [userType, setUserType] = useState(0);
   const [phone, setPhone] = useState("");
+  const [ciudad, setCiudad] = useState("");
   const [bancos, setBancos] = useState([]);
   const [total, setTotal] = useState(0);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [mensaje, setMensaje] = useState("");
+  const [idPago, setIdPago] = useState(null);
 
   useEffect(() => {
     axios.get(`${apiUrl}/pago/bancos-wompi`)
       .then(res => {
-        if (Array.isArray(res.data)) {
-          setBancos(res.data);
-        }
+        if (Array.isArray(res.data)) setBancos(res.data);
       })
       .catch(() => {
         setBancos([]);
-        setError("❌ No se pudo cargar la lista de bancos. Intenta más tarde.");
+        setError("❌ No se pudo cargar la lista de bancos.");
       });
   }, [apiUrl]);
 
@@ -41,42 +42,32 @@ const Pago = ({ apiUrl }) => {
 
   const pagarConPSE = async () => {
     setError("");
-    setMensaje("⏳ Estamos preparando tu redirección segura al banco...");
+    setMensaje("⏳ Preparando redirección segura...");
     setLoading(true);
 
     if (!email || !validarEmail(email)) {
-      setError("❌ Ingresa un correo electrónico válido.");
-      setLoading(false);
-      setMensaje("");
-      return;
+      setError("❌ Correo inválido.");
+      setLoading(false); setMensaje(""); return;
     }
 
-    if (!nombre || !document || !documentType || !bankCode || !phone) {
-      setError("❌ Completa todos los campos correctamente.");
-      setLoading(false);
-      setMensaje("");
-      return;
+    if (!nombre || !document || !documentType || !bankCode || !phone || !ciudad) {
+      setError("❌ Completa todos los campos.");
+      setLoading(false); setMensaje(""); return;
     }
 
     if (!validarTelefono(phone)) {
-      setError("❌ Ingresa un número de teléfono válido (10 dígitos, inicia con 3).");
-      setLoading(false);
-      setMensaje("");
-      return;
+      setError("❌ Teléfono inválido.");
+      setLoading(false); setMensaje(""); return;
     }
 
     if (![0, 1].includes(userType)) {
-      setError("❌ Selecciona si eres persona natural o jurídica.");
-      setLoading(false);
-      setMensaje("");
-      return;
+      setError("❌ Selecciona tipo de usuario.");
+      setLoading(false); setMensaje(""); return;
     }
 
     if (total < 1500) {
-      setError("❌ Monto mínimo permitido: $1.500 COP.");
-      setLoading(false);
-      setMensaje("");
-      return;
+      setError("❌ Monto mínimo: $1.500 COP.");
+      setLoading(false); setMensaje(""); return;
     }
 
     try {
@@ -85,7 +76,7 @@ const Pago = ({ apiUrl }) => {
       const payload = {
         valor: Number(total),
         usuario: email,
-        document: document,
+        document,
         document_type: documentType,
         financial_institution_code: bankCode,
         nombre_cliente: nombre,
@@ -100,19 +91,18 @@ const Pago = ({ apiUrl }) => {
       };
 
       const response = await axios.post(`${apiUrl}/pago/pse`, payload);
-      const { success, url_pago } = response.data;
+      const { success, url_pago, id_pago } = response.data;
 
-      if (!success || !url_pago) {
-        throw new Error("No se recibió URL de pago válida.");
-      }
+      if (!success || !url_pago) throw new Error("URL de pago inválida.");
 
-      setMensaje("✅ Redirigiéndote a Wompi para completar el pago...");
+      setIdPago(id_pago);
+      setMensaje("✅ Redirigiendo a Wompi...");
       window.location.href = url_pago;
 
     } catch (err) {
       const backendMsg = err.response?.data?.message || err.response?.data?.error || "";
       const wompiMsg = err.response?.data?.wompi_error || "";
-      setError(`❌ No se pudo procesar el pago. ${backendMsg || wompiMsg || err.message || "Intenta nuevamente."}`);
+      setError(`❌ Error: ${backendMsg || wompiMsg || err.message}`);
       setMensaje("");
     } finally {
       setLoading(false);
@@ -123,7 +113,7 @@ const Pago = ({ apiUrl }) => {
     display: "block",
     width: "100%",
     maxWidth: "400px",
-    margin: "12px auto",
+    margin: "8px auto",
     padding: "10px",
     fontSize: "1rem",
     borderRadius: "6px",
@@ -131,58 +121,47 @@ const Pago = ({ apiUrl }) => {
     boxSizing: "border-box"
   };
 
+  const etiqueta = (emoji, texto) => (
+    <label style={{ display: "block", textAlign: "left", maxWidth: "400px", margin: "0 auto", fontWeight: "bold" }}>
+      {emoji} {texto}
+    </label>
+  );
+
   return (
     <div style={{ padding: "2rem", textAlign: "center" }}>
       <h2>💳 Pagar con PSE</h2>
 
-      <input
-        type="text"
-        placeholder="Nombre completo"
-        value={nombre}
-        onChange={(e) => {
-          const soloLetras = e.target.value.replace(/[^A-Za-zÁÉÍÓÚáéíóúÑñ\s]/g, '');
-          setNombre(soloLetras);
-        }}
-        style={campoEstilo}
-      />
+      {etiqueta("👤", "Nombre completo")}
+      <input type="text" value={nombre} onChange={(e) => {
+        const soloLetras = e.target.value.replace(/[^A-Za-zÁÉÍÓÚáéíóúÑñ\s]/g, '');
+        setNombre(soloLetras);
+      }} style={campoEstilo} />
 
-      <input
-        type="email"
-        placeholder="Correo electrónico"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        style={campoEstilo}
-      />
+      {etiqueta("📧", "Correo electrónico")}
+      <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} style={campoEstilo} />
 
-      <input
-        type="tel"
-        placeholder="Número de teléfono"
-        value={phone}
-        maxLength={10}
-        onChange={(e) => {
-          const soloNumeros = e.target.value.replace(/[^0-9]/g, '');
-          setPhone(soloNumeros);
-        }}
-        style={campoEstilo}
-      />
+      {etiqueta("📱", "Teléfono")}
+      <input type="tel" value={phone} maxLength={10} onChange={(e) => {
+        const soloNumeros = e.target.value.replace(/[^0-9]/g, '');
+        setPhone(soloNumeros);
+      }} style={campoEstilo} />
 
-      <input
-        type="text"
-        placeholder="Número de documento"
-        value={document}
-        maxLength={10}
-        onChange={(e) => {
-          const soloNumeros = e.target.value.replace(/[^0-9]/g, '');
-          setDocument(soloNumeros);
-        }}
-        style={campoEstilo}
-      />
+      {etiqueta("🪪", "Documento")}
+      <input type="text" value={document} maxLength={10} onChange={(e) => {
+        const soloNumeros = e.target.value.replace(/[^0-9]/g, '');
+        setDocument(soloNumeros);
+      }} style={campoEstilo} />
 
+      {etiqueta("🌆", "Ciudad")}
+      <input type="text" value={ciudad} onChange={(e) => setCiudad(e.target.value)} style={campoEstilo} />
+
+      {etiqueta("🧑‍💼", "Tipo de usuario")}
       <select value={userType} onChange={(e) => setUserType(Number(e.target.value))} style={campoEstilo}>
         <option value={0}>Persona Natural</option>
         <option value={1}>Persona Jurídica</option>
       </select>
 
+      {etiqueta("📄", "Tipo de documento")}
       <select value={documentType} onChange={(e) => setDocumentType(e.target.value)} style={campoEstilo}>
         <option value="CC">Cédula</option>
         <option value="CE">Cédula Extranjera</option>
@@ -190,6 +169,7 @@ const Pago = ({ apiUrl }) => {
         <option value="NIT">NIT</option>
       </select>
 
+      {etiqueta("🏦", "Banco")}
       <select value={bankCode} onChange={(e) => setBankCode(e.target.value)} style={campoEstilo}>
         <option value="">Selecciona tu banco</option>
         {bancos.map((banco, index) => (
@@ -199,18 +179,10 @@ const Pago = ({ apiUrl }) => {
         ))}
       </select>
 
-      <h3 style={{ marginTop: "20px" }}>
-        Total a pagar: ${total.toFixed(2)} COP
-      </h3>
+      <h3 style={{ marginTop: "20px" }}>🧾 Total a pagar: ${total.toFixed(2)} COP</h3>
 
       {error && <p style={{ color: "red", fontWeight: "bold" }}>{error}</p>}
       {mensaje && <p style={{ color: loading ? "#555" : "green", fontWeight: "bold" }}>{mensaje}</p>}
-
-      {loading && (
-        <div style={{ marginTop: "20px" }}>
-          <p>🔄 Procesando tu transacción con Wompi...</p>
-        </div>
-      )}
 
       <button
         onClick={pagarConPSE}
@@ -227,6 +199,17 @@ const Pago = ({ apiUrl }) => {
       >
         {loading ? "⏳ Procesando..." : "💰 Pagar ahora"}
       </button>
+
+      {idPago && (
+        <div style={{ marginTop: "3rem" }}>
+          <DatosEnvio
+            idPago={idPago}
+            nombre={nombre}
+            telefono={phone}
+            ciudad={ciudad}
+          />
+        </div>
+      )}
     </div>
   );
 };

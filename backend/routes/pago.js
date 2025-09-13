@@ -96,36 +96,40 @@ router.post("/pse", async (req, res) => {
       return res.status(500).json({ error: "No se obtuvo token de aceptación o contract_id desde Wompi." });
     }
 
-    const referencia = `PAGO_${Date.now()}`;
-    const FRONTEND_BASE_URL = process.env.FRONTEND_URL || "http://localhost:3000";
-    const redirectURL = `${FRONTEND_BASE_URL}/estado/${referencia}`;
-    const montoCentavos = parseInt(valor * 100, 10);
-    const tipoUsuario = Number(user_type);
+   // ... (todo el código anterior sin cambios)
 
-    const pagoData = {
-      customer_email: usuario,
-      payment_method: {
-        type: "PSE",
-        user_type: tipoUsuario,
-        user_legal_id: String(document),
-        user_legal_id_type: document_type,
-        financial_institution_code: String(financial_institution_code),
-        payment_description: "Pago a Tienda Wompi"
-      },
-      customer_data: {
-        full_name: nombre_cliente,
-        phone_number: `57${telefono_cliente}`
-      },
-      acceptance_token: tokenAceptacion,
-      amount_in_cents: montoCentavos,
-      currency: "COP",
-      reference: referencia,
-      redirect_url: redirectURL,
-      contract_id: contractId,
-      signature: crypto.createHash("sha256")
-        .update(`${referencia}${montoCentavos}COP${INTEGRITY_SECRET}`)
-        .digest("hex")
-    };
+const referencia = `PAGO_${Date.now()}`;
+// const FRONTEND_BASE_URL = process.env.FRONTEND_URL || "http://localhost:3000";
+const redirectURL = "https://wish-market-place-front.onrender.com"; // ✅ Redirección directa al home
+
+const montoCentavos = parseInt(valor * 100, 10);
+const tipoUsuario = Number(user_type);
+
+const pagoData = {
+  customer_email: usuario,
+  payment_method: {
+    type: "PSE",
+    user_type: tipoUsuario,
+    user_legal_id: String(document),
+    user_legal_id_type: document_type,
+    financial_institution_code: String(financial_institution_code),
+    payment_description: "Pago a Tienda Wompi"
+  },
+  customer_data: {
+    full_name: nombre_cliente,
+    phone_number: `57${telefono_cliente}`
+  },
+  acceptance_token: tokenAceptacion,
+  amount_in_cents: montoCentavos,
+  currency: "COP",
+  reference: referencia,
+  redirect_url: redirectURL, // ✅ Aquí se aplica el cambio
+  contract_id: contractId,
+  signature: crypto.createHash("sha256")
+    .update(`${referencia}${montoCentavos}COP${INTEGRITY_SECRET}`)
+    .digest("hex")
+};
+
 
     console.log("📦 Payload enviado a Wompi:", JSON.stringify(pagoData, null, 2));
 

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 
 const ResumenPago = ({ reference, apiUrl, pago }) => {
   const [detalle, setDetalle] = useState(pago || null);
@@ -18,6 +19,7 @@ const ResumenPago = ({ reference, apiUrl, pago }) => {
       } catch (err) {
         console.error("❌ Error obteniendo el resumen:", err);
         setError(true);
+        toast.error("❌ No se pudo cargar el resumen del pago");
       } finally {
         setCargando(false);
       }
