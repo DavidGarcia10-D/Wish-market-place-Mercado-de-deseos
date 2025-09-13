@@ -8,7 +8,7 @@ const Pago = require("../models/Pago");
 router.post("/", async (req, res) => {
   try {
     const rawBody = req.body;
-    const signature = req.header("X-Integrity"); // ✅ Header correcto según Wompi
+    const signature = req.header("X-Integrity");
 
     console.log("📥 Webhook recibido");
     console.log("📏 Tipo de req.body:", typeof rawBody);
@@ -19,7 +19,6 @@ router.post("/", async (req, res) => {
       return res.status(500).send("Formato de cuerpo inválido");
     }
 
-    // 🔐 Calculamos la firma local
     const localSignature = crypto
       .createHmac("sha256", process.env.INTEGRITY_SECRET)
       .update(rawBody)
@@ -33,7 +32,6 @@ router.post("/", async (req, res) => {
       return res.status(401).send("Firma inválida");
     }
 
-    // 📄 Parseamos el JSON original
     const jsonBody = JSON.parse(rawBody.toString("utf8"));
 
     if (jsonBody.event !== "transaction.updated") {
@@ -50,14 +48,16 @@ router.post("/", async (req, res) => {
     console.log("📬 Webhook procesado:");
     console.log(`🔗 Referencia: ${transaction.reference}`);
     console.log(`🔖 Estado: ${transaction.status}`);
+    console.log(`🎫 CUS: ${transaction.cus || "N/A"}`);
 
-    // 🗄 Actualizamos en MongoDB
     const actualizado = await Pago.findOneAndUpdate(
       { reference: transaction.reference },
       {
         status: transaction.status,
+        cus: transaction.cus || undefined,
         reject_reason: transaction.reject_reason || undefined,
-        updated_by_webhook: true
+        updated_by_webhook: true,
+        updatedAt: new Date()
       },
       { new: true }
     );
@@ -70,7 +70,7 @@ router.post("/", async (req, res) => {
 
     res.status(200).send("Webhook recibido y procesado");
   } catch (error) {
-    console.error("❌ Error al procesar webhook:", error);
+    console.error("❌ Error al procesar webhook:", error.message);
     res.status(500).send("Error interno del servidor");
   }
 });

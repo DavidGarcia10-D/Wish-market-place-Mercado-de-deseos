@@ -139,7 +139,10 @@ const Pago = ({ apiUrl }) => {
         type="text"
         placeholder="Nombre completo"
         value={nombre}
-        onChange={(e) => setNombre(e.target.value)}
+        onChange={(e) => {
+          const soloLetras = e.target.value.replace(/[^A-Za-zÁÉÍÓÚáéíóúÑñ\s]/g, '');
+          setNombre(soloLetras);
+        }}
         style={campoEstilo}
       />
 
@@ -155,7 +158,11 @@ const Pago = ({ apiUrl }) => {
         type="tel"
         placeholder="Número de teléfono"
         value={phone}
-        onChange={(e) => setPhone(e.target.value)}
+        maxLength={10}
+        onChange={(e) => {
+          const soloNumeros = e.target.value.replace(/[^0-9]/g, '');
+          setPhone(soloNumeros);
+        }}
         style={campoEstilo}
       />
 
@@ -163,7 +170,11 @@ const Pago = ({ apiUrl }) => {
         type="text"
         placeholder="Número de documento"
         value={document}
-        onChange={(e) => setDocument(e.target.value)}
+        maxLength={10}
+        onChange={(e) => {
+          const soloNumeros = e.target.value.replace(/[^0-9]/g, '');
+          setDocument(soloNumeros);
+        }}
         style={campoEstilo}
       />
 

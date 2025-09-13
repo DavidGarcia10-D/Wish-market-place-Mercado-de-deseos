@@ -7,7 +7,7 @@ require("dotenv").config();
 const carritoRoutes = require("./routes/carrito");
 const pagoRoutes = require("./routes/pago");
 const webhookRoutes = require("./routes/webhook");
-const productosRoutes = require("./routes/productos"); // ✅ NUEVO IMPORT
+const productosRoutes = require("./routes/productos");
 
 const app = express();
 
@@ -22,8 +22,8 @@ app.use(cors({
   credentials: true
 }));
 
-// ⚠️ Raw parser SOLO para /webhook (firma de Wompi)
-app.use("/webhook", express.raw({ type: "application/json" }), webhookRoutes);
+// ⚠️ Raw parser SOLO para /pago/webhook (firma de Wompi)
+app.use("/pago/webhook", express.raw({ type: "*/*" }), webhookRoutes);
 
 // 🌐 JSON parser para el resto de rutas
 app.use(express.json());
@@ -87,65 +87,6 @@ app.use("/api/productos", productosRoutes);
 // 🛒 Rutas principales
 app.use("/carrito", carritoRoutes);
 app.use("/pago", pagoRoutes);
-
-// 🏦 Bancos disponibles
-app.get("/bancos", (req, res) => {
-  res.json([
-    { nombre: "Banco que aprueba (Sandbox)", codigo: "1" },
-    { nombre: "Banco que rechaza (Sandbox)", codigo: "2" },
-    { nombre: "Banco de Bogotá", codigo: "1001" },
-    { nombre: "Banco Popular", codigo: "1002" },
-    { nombre: "Itaú (antes Corpbanca)", codigo: "1006" },
-    { nombre: "Bancolombia", codigo: "1007" },
-    { nombre: "Citibank", codigo: "1009" },
-    { nombre: "Banco GNB Sudameris", codigo: "1012" },
-    { nombre: "BBVA Colombia", codigo: "1013" },
-    { nombre: "Itaú", codigo: "1014" },
-    { nombre: "Scotiabank Colpatria", codigo: "1019" },
-    { nombre: "Banco de Occidente", codigo: "1023" },
-    { nombre: "Bancóldex", codigo: "1031" },
-    { nombre: "Banco Caja Social", codigo: "1032" },
-    { nombre: "Banco Agrario", codigo: "1040" },
-    { nombre: "Banco Mundo Mujer", codigo: "1047" },
-    { nombre: "Davivienda", codigo: "1051" },
-    { nombre: "Banco AV Villas", codigo: "1052" },
-    { nombre: "Banco W", codigo: "1053" },
-    { nombre: "Bancamía", codigo: "1059" },
-    { nombre: "Banco Pichincha", codigo: "1060" },
-    { nombre: "Bancoomeva", codigo: "1061" },
-    { nombre: "Banco Falabella", codigo: "1062" },
-    { nombre: "Banco Finandina", codigo: "1063" },
-    { nombre: "Banco Santander", codigo: "1065" },
-    { nombre: "Banco Cooperativo Coopcentral", codigo: "1066" },
-    { nombre: "Mibanco", codigo: "1067" },
-    { nombre: "Banco Serfinanza", codigo: "1069" },
-    { nombre: "Lulo Bank", codigo: "1070" },
-    { nombre: "J.P. Morgan", codigo: "1071" },
-    { nombre: "Financiera Juriscoop", codigo: "1121" },
-    { nombre: "Cooperativa de Antioquia", codigo: "1283" },
-    { nombre: "JFK Cooperativa", codigo: "1286" },
-    { nombre: "Cootrafa", codigo: "1289" },
-    { nombre: "Confiar Cooperativa", codigo: "1292" },
-    { nombre: "Banco Unión", codigo: "1303" },
-    { nombre: "Coltefinanciera", codigo: "1370" },
-    { nombre: "Nequi", codigo: "1507" },
-    { nombre: "Daviplata", codigo: "1551" },
-    { nombre: "Banco Credifinanciera", codigo: "1558" },
-    { nombre: "Pibank", codigo: "1560" },
-    { nombre: "Iris", codigo: "1637" },
-    { nombre: "Movii", codigo: "1801" },
-    { nombre: "Ding Tecnipagos", codigo: "1802" },
-    { nombre: "Powwi", codigo: "1803" },
-    { nombre: "Ualá", codigo: "1804" },
-    { nombre: "Banco BTG Pactual", codigo: "1805" },
-    { nombre: "Bold CF", codigo: "1808" },
-    { nombre: "Nu", codigo: "1809" },
-    { nombre: "Rappipay", codigo: "1811" },
-    { nombre: "Coink", codigo: "1812" },
-    { nombre: "Global66", codigo: "1814" },
-    { nombre: "Banco Contactar", codigo: "1819" }
-  ]);
-});
 
 // 🚀 Inicio del servidor
 const PORT = process.env.PORT || 3000;
