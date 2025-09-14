@@ -25,17 +25,27 @@ const App = () => {
             path="/"
             element={
               <div>
-                {/* 🛍️ Título principal del sitio */}
-                <h1
-                  style={{
-                    textAlign: "center",
-                    fontSize: "2.5rem",
-                    margin: "2rem 0",
-                    color: "#222"
-                  }}
-                >
-                  🛍️ Wish Marketplace – Mercado de deseos
-                </h1>
+                {/* 🛍️✨ Título mágico del sitio */}
+                <div style={{ textAlign: "center", margin: "2rem 0" }}>
+                  <h1
+                    style={{
+                      fontSize: "2.5rem",
+                      marginBottom: "0.5rem",
+                      color: "#222"
+                    }}
+                  >
+                    🛍️ 🪄✨ Wish Marketplace ✨🪄 🛍️
+                  </h1>
+                  <p
+                    style={{
+                      fontSize: "1.1rem",
+                      color: "#666",
+                      marginTop: "0"
+                    }}
+                  >
+                    Mercado de deseos
+                  </p>
+                </div>
 
                 {/* 🗂️ Selector de categoría */}
                 <Categoria

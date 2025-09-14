@@ -11,6 +11,17 @@ const Carrito = () => {
     showSuccess("❌ Producto eliminado del carrito");
   };
 
+  const modificarCantidad = (id, delta) => {
+    const nuevoCarrito = carrito.map(item => {
+      if (item._id === id) {
+        const nuevaCantidad = Math.max(item.cantidad + delta, 1);
+        return { ...item, cantidad: nuevaCantidad };
+      }
+      return item;
+    });
+    setCarrito(nuevoCarrito);
+  };
+
   const total = carrito.reduce((acc, item) => acc + item.precio * item.cantidad, 0);
 
   const estilos = {
@@ -32,7 +43,6 @@ const Carrito = () => {
     },
     item: {
       display: "flex",
-      flexWrap: "wrap",
       alignItems: "center",
       gap: "1rem",
       backgroundColor: "#fff",
@@ -48,8 +58,10 @@ const Carrito = () => {
       border: "1px solid #ddd"
     },
     info: {
-      flex: "1 1 200px",
-      textAlign: "left"
+      flex: "1",
+      display: "flex",
+      flexDirection: "column",
+      justifyContent: "center"
     },
     nombre: {
       margin: 0,
@@ -60,7 +72,21 @@ const Carrito = () => {
       fontSize: "0.95rem",
       color: "#555"
     },
-    boton: {
+    cantidadControl: {
+      display: "flex",
+      alignItems: "center",
+      gap: "0.5rem",
+      marginTop: "0.5rem"
+    },
+    botonCantidad: {
+      backgroundColor: "#3498db",
+      color: "white",
+      border: "none",
+      padding: "4px 10px",
+      borderRadius: "6px",
+      cursor: "pointer"
+    },
+    botonEliminar: {
       backgroundColor: "#e74c3c",
       color: "white",
       border: "none",
@@ -98,7 +124,6 @@ const Carrito = () => {
               />
               <div style={estilos.info}>
                 <h4 style={estilos.nombre}>{item.nombre}</h4>
-                <p style={estilos.texto}>Cantidad: {item.cantidad}</p>
                 <p style={estilos.texto}>
                   Precio:{" "}
                   {new Intl.NumberFormat("es-CO", {
@@ -107,8 +132,26 @@ const Carrito = () => {
                     minimumFractionDigits: 0
                   }).format(item.precio)}
                 </p>
+
+                {/* 🔢 Control de cantidad */}
+                <div style={estilos.cantidadControl}>
+                  <button
+                    style={estilos.botonCantidad}
+                    onClick={() => modificarCantidad(item._id, -1)}
+                  >
+                    −
+                  </button>
+                  <span>{item.cantidad}</span>
+                  <button
+                    style={estilos.botonCantidad}
+                    onClick={() => modificarCantidad(item._id, 1)}
+                  >
+                    +
+                  </button>
+                </div>
+
                 <button
-                  style={estilos.boton}
+                  style={estilos.botonEliminar}
                   onClick={() => eliminarDelCarrito(item._id)}
                 >
                   ❌ Eliminar

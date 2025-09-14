@@ -58,8 +58,8 @@ function Productos({ apiUrl, categoria }) {
     },
     imagen: {
       width: "100%",
-      height: "180px",
-      objectFit: "cover",
+      height: "220px",         // ✅ Ajustado
+      objectFit: "contain",    // ✅ Ajustado
       borderRadius: "8px",
       marginBottom: "1rem",
       border: "1px solid #eee"
@@ -114,7 +114,6 @@ function Productos({ apiUrl, categoria }) {
               <h3 style={estilos.nombre}>{prod.nombre}</h3>
               <p style={estilos.descripcion}>{prod.descripcion}</p>
               <p style={estilos.precio}>${prod.precio.toLocaleString()}</p>
-              <p style={estilos.stock}>Stock: {prod.stock}</p>
               <button
                 style={estilos.boton}
                 onClick={() => handleAgregar(prod)}
