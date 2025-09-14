@@ -1,8 +1,7 @@
-import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-
 import React, { useState } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 import Productos from "./components/Productos";
 import Carrito from "./components/Carrito";
@@ -26,20 +25,43 @@ const App = () => {
             path="/"
             element={
               <div>
+                {/* 🛍️ Título principal del sitio */}
+                <h1
+                  style={{
+                    textAlign: "center",
+                    fontSize: "2.5rem",
+                    margin: "2rem 0",
+                    color: "#222"
+                  }}
+                >
+                  🛍️ Wish Marketplace – Mercado de deseos
+                </h1>
+
+                {/* 🗂️ Selector de categoría */}
                 <Categoria
                   setCategoria={setCategoriaSeleccionada}
                   categoriaSeleccionada={categoriaSeleccionada}
                 />
+
+                {/* 🛒 Listado de productos */}
                 <Productos
                   apiUrl={API_URL}
                   categoria={categoriaSeleccionada}
                 />
+
+                {/* 🧺 Carrito de compras */}
                 <Carrito apiUrl={API_URL} usuarioId={"123456"} />
+
+                {/* 💳 Formulario de pago */}
                 <Pago apiUrl={API_URL} />
-                <ToastContainer position="top-right" autoClose={3000} /> {/* ✅ Aquí va */}
+
+                {/* 🔔 Toasts de feedback visual */}
+                <ToastContainer position="top-right" autoClose={3000} />
               </div>
             }
           />
+
+          {/* ✅ Ruta para estado de pago */}
           <Route
             path="/estado/:reference"
             element={<EstadoPago apiUrl={API_URL} />}

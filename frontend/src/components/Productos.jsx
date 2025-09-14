@@ -58,10 +58,11 @@ function Productos({ apiUrl, categoria }) {
     },
     imagen: {
       width: "100%",
-      height: "160px",
+      height: "180px",
       objectFit: "cover",
       borderRadius: "8px",
-      marginBottom: "1rem"
+      marginBottom: "1rem",
+      border: "1px solid #eee"
     },
     nombre: {
       fontSize: "1.2rem",

@@ -32,48 +32,45 @@
 
 ## 📁 Estructura del proyecto
 
-mi-proyecto/
-│
-├── backend/ (Node.js + Express)
-│   ├── server.js ───────────────▶ Montaje de rutas + body parsers
-│   ├── .env ────────────────────▶ PRIVATE_KEY, WOMPI_ENV, otros tokens
-│   ├── models/
-│   │   ├── Product.js ──────────▶ Esquema de producto con campo 'categoria'
-│   │   ├── Pago.js ─────────────▶ Esquema de transacción PSE
-│   │   └── Envio.js ────────────▶ Esquema logístico (nuevo)
-│   ├── routes/
-│   │   ├── carrito.js ─────────▶ (pendiente uso)
-│   │   ├── pago.js ────────────▶ POST /pse + GET /bancos-wompi con axios y auth
-│   │   ├── webhook.js ────────▶ Recepción de eventos Wompi
-│   │   ├── productos.js ──────▶ GET /productos + /seed con filtro por categoría
-│   │   └── envios.js ─────────▶ POST /envios (nuevo, conectado a modelo)
-│   ├── scripts/
-│   │   └── Firmador.js ───────▶ Firma de payloads (uso futuro)
-│   ├── utils/
-│   │   └── auditoriaLogger.js ─▶ Logger de acciones por usuario (pendiente)
-│   └── package.json ──────────▶ Dependencias backend
-│
-├── frontend/ (React SPA)
+wish-marketplace/
+├── frontend/
 │   ├── public/
-│   │   └── imagenes/ ──────────▶ Imágenes de productos
+│   │   └── imagenes/
+│   │       └── default.jpg
 │   ├── src/
-│   │   ├── App.jsx ───────────▶ Enrutador principal + estado de categoría
-│   │   ├── index.js ─────────▶ Montaje de ReactDOM
 │   │   ├── components/
-│   │   │   ├── Pago.jsx ─────▶ Formulario PSE con validación y mapeo de bancos
-│   │   │   ├── EstadoPago.jsx ─▶ Página post-pago con estado y referencia
-│   │   │   ├── Productos.jsx ─▶ Renderiza productos filtrados + botón carrito
-│   │   │   ├── Productos.css ─▶ Estilos para cards y botón “Agregar al carrito”
-│   │   │   ├── Categoria.jsx ─▶ Botones para seleccionar categoría
-│   │   │   └── Categoria.css ─▶ Estilos para botones y categoría activa
+│   │   │   ├── App.jsx
+│   │   │   ├── Categoria.jsx
+│   │   │   ├── Productos.jsx
+│   │   │   ├── Carrito.jsx
+│   │   │   ├── Pago.jsx
+│   │   │   └── DatosEnvio.jsx
 │   │   ├── context/
-│   │   │   └── CarritoContext.js ─▶ Estado global del carrito
-│   │   └── utils/
-│   │       └── toast.js ─────▶ Alertas visuales (pendiente encapsulación)
-│   ├── .env ───────────────────▶ REACT_APP_API_URL
-│   └── package.json ──────────▶ Dependencias frontend
+│   │   │   └── CarritoContext.js
+│   │   ├── estilos/
+│   │   │   └── pagoEstilos.js   ← ✅ estilos extraídos de Pago.jsx
+│   │   ├── utils/
+│   │   │   └── toast.js         ← ✅ funciones showSuccess / showError
+│   │   ├── index.js
+│   │   └── main.jsx
+│   └── package.json
+│
+├── backend/
+│   ├── models/
+│   │   └── carrito.js
+│   ├── routes/
+│   │   ├── carrito.js
+│   │   ├── pago.js
+│   │   └── webhook.js
+│   ├── controllers/
+│   │   └── (opcional si decides separar lógica)
+│   ├── server.js
+│   └── package.json
+│
+├── README.md
+├── README-dev.md               ← ✅ (opcional para anclajes técnicos)
+└── wish.code-workspace         ← ✅ (opcional para VS Code)
 
----
 
 ## 🔄 Flujo de pago PSE
 
