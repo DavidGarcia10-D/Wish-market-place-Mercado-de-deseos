@@ -15,13 +15,15 @@ const Carrito = () => {
 
   const estilos = {
     contenedor: {
-      maxWidth: "900px",
+      maxWidth: "1200px",
       margin: "0 auto",
-      padding: "2rem",
-      backgroundColor: "#f9f9f9",
-      borderRadius: "12px",
-      boxShadow: "0 0 10px rgba(0,0,0,0.1)",
-      textAlign: "center"
+      padding: "2rem"
+    },
+    titulo: {
+      textAlign: "center",
+      fontSize: "2rem",
+      marginBottom: "2rem",
+      color: "#333"
     },
     lista: {
       display: "flex",
@@ -30,57 +32,60 @@ const Carrito = () => {
     },
     item: {
       display: "flex",
+      flexWrap: "wrap",
       alignItems: "center",
       gap: "1rem",
       backgroundColor: "#fff",
       padding: "1rem",
-      borderRadius: "8px",
-      boxShadow: "0 0 5px rgba(0,0,0,0.05)"
+      borderRadius: "12px",
+      boxShadow: "0 0 10px rgba(0,0,0,0.05)"
     },
     imagen: {
       width: "100px",
       height: "100px",
       objectFit: "cover",
-      borderRadius: "6px",
+      borderRadius: "8px",
       border: "1px solid #ddd"
     },
     info: {
-      flex: 1,
+      flex: "1 1 200px",
       textAlign: "left"
     },
     nombre: {
       margin: 0,
-      fontSize: "1.1rem"
+      fontSize: "1.2rem"
     },
     texto: {
       margin: "4px 0",
-      fontSize: "0.95rem"
+      fontSize: "0.95rem",
+      color: "#555"
     },
     boton: {
       backgroundColor: "#e74c3c",
       color: "white",
       border: "none",
       padding: "6px 12px",
-      borderRadius: "4px",
-      cursor: "pointer"
-    },
-    botonHover: {
-      backgroundColor: "#c0392b"
+      borderRadius: "6px",
+      cursor: "pointer",
+      marginTop: "0.5rem"
     },
     total: {
       textAlign: "right",
       fontSize: "1.2rem",
       fontWeight: "bold",
-      marginTop: "1rem"
+      marginTop: "2rem",
+      color: "#333"
     }
   };
 
   return (
     <div style={estilos.contenedor}>
-      <h2>🛒 Tu carrito de compras</h2>
+      <h2 style={estilos.titulo}>🛒 Tu carrito de compras</h2>
 
       {carrito.length === 0 ? (
-        <p>🧺 El carrito está vacío. ¡Agrega productos para comenzar!</p>
+        <p style={{ textAlign: "center", color: "#666" }}>
+          🧺 El carrito está vacío. ¡Agrega productos para comenzar!
+        </p>
       ) : (
         <div style={estilos.lista}>
           {carrito.map(item => (

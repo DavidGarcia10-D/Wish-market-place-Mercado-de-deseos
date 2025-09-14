@@ -1,6 +1,5 @@
 import { useEffect, useState, useContext } from "react";
 import axios from "axios";
-import "./Productos.css";
 import { CarritoContext } from "../context/CarritoContext";
 
 function Productos({ apiUrl, categoria }) {
@@ -32,29 +31,91 @@ function Productos({ apiUrl, categoria }) {
     }
   };
 
+  const estilos = {
+    contenedor: {
+      padding: "2rem",
+      maxWidth: "1200px",
+      margin: "0 auto"
+    },
+    titulo: {
+      textAlign: "center",
+      fontSize: "2rem",
+      marginBottom: "2rem",
+      color: "#333"
+    },
+    grid: {
+      display: "grid",
+      gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+      gap: "2rem"
+    },
+    card: {
+      backgroundColor: "#fff",
+      borderRadius: "12px",
+      boxShadow: "0 0 10px rgba(0,0,0,0.05)",
+      padding: "1rem",
+      textAlign: "center",
+      transition: "transform 0.2s ease"
+    },
+    imagen: {
+      width: "100%",
+      height: "160px",
+      objectFit: "cover",
+      borderRadius: "8px",
+      marginBottom: "1rem"
+    },
+    nombre: {
+      fontSize: "1.2rem",
+      margin: "0.5rem 0"
+    },
+    descripcion: {
+      fontSize: "0.9rem",
+      color: "#666",
+      marginBottom: "0.5rem"
+    },
+    precio: {
+      fontWeight: "bold",
+      fontSize: "1rem",
+      marginBottom: "0.5rem"
+    },
+    stock: {
+      fontSize: "0.85rem",
+      color: "#888",
+      marginBottom: "1rem"
+    },
+    boton: {
+      backgroundColor: "#3498db",
+      color: "#fff",
+      border: "none",
+      padding: "0.5rem 1rem",
+      borderRadius: "6px",
+      cursor: "pointer"
+    }
+  };
+
   return (
-    <div className="contenedor-productos">
-      <h2 className="titulo-productos">
+    <div style={estilos.contenedor}>
+      <h2 style={estilos.titulo}>
         {categoria ? `🛍️ Productos de ${categoria}` : "🛍️ Todos los productos"}
       </h2>
 
-      <div className="grid-productos">
+      <div style={estilos.grid}>
         {productos.length === 0 ? (
           <p>No hay productos disponibles en esta categoría.</p>
         ) : (
           productos.map((prod) => (
-            <div key={prod._id} className="card-producto">
+            <div key={prod._id} style={estilos.card}>
               <img
                 src={prod.imagenUrl}
                 alt={prod.nombre}
+                style={estilos.imagen}
                 onError={(e) => (e.target.src = "/imagenes/default.jpg")}
               />
-              <h3>{prod.nombre}</h3>
-              <p>{prod.descripcion}</p>
-              <p><strong>${prod.precio.toLocaleString()}</strong></p>
-              <p>Stock: {prod.stock}</p>
+              <h3 style={estilos.nombre}>{prod.nombre}</h3>
+              <p style={estilos.descripcion}>{prod.descripcion}</p>
+              <p style={estilos.precio}>${prod.precio.toLocaleString()}</p>
+              <p style={estilos.stock}>Stock: {prod.stock}</p>
               <button
-                className="boton-agregar"
+                style={estilos.boton}
                 onClick={() => handleAgregar(prod)}
               >
                 Agregar al carrito

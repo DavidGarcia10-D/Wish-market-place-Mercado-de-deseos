@@ -3,6 +3,7 @@ import axios from "axios";
 import { CarritoContext } from "../context/CarritoContext";
 import DatosEnvio from "./DatosEnvio";
 import { showSuccess, showError } from "../utils/toast";
+import { getPagoEstilos } from "../estilos/pagoEstilos";
 
 const Pago = ({ apiUrl }) => {
   const { carrito } = useContext(CarritoContext);
@@ -20,7 +21,7 @@ const Pago = ({ apiUrl }) => {
   const [loading, setLoading] = useState(false);
   const [mensaje, setMensaje] = useState("");
   const [idPago, setIdPago] = useState(null);
-
+  const estilos = getPagoEstilos(loading);
   useEffect(() => {
     axios.get(`${apiUrl}/pago/bancos-wompi`)
       .then(res => {
