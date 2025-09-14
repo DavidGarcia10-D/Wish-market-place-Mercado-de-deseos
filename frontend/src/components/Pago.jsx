@@ -2,6 +2,7 @@ import React, { useState, useContext, useEffect } from "react";
 import axios from "axios";
 import { CarritoContext } from "../context/CarritoContext";
 import DatosEnvio from "./DatosEnvio";
+import { showSuccess, showError } from "../utils/toast";
 
 const Pago = ({ apiUrl }) => {
   const { carrito } = useContext(CarritoContext);
@@ -16,7 +17,6 @@ const Pago = ({ apiUrl }) => {
   const [ciudad, setCiudad] = useState("");
   const [bancos, setBancos] = useState([]);
   const [total, setTotal] = useState(0);
-  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [mensaje, setMensaje] = useState("");
   const [idPago, setIdPago] = useState(null);
@@ -28,7 +28,7 @@ const Pago = ({ apiUrl }) => {
       })
       .catch(() => {
         setBancos([]);
-        setError("❌ No se pudo cargar la lista de bancos.");
+        showError("❌ No se pudo cargar la lista de bancos.");
       });
   }, [apiUrl]);
 
@@ -41,33 +41,32 @@ const Pago = ({ apiUrl }) => {
   const validarTelefono = (tel) => /^3\d{9}$/.test(tel);
 
   const pagarConPSE = async () => {
-    setError("");
     setMensaje("⏳ Preparando redirección segura...");
     setLoading(true);
 
     if (!email || !validarEmail(email)) {
-      setError("❌ Correo inválido.");
-      setLoading(false); setMensaje(""); return;
+      showError("❌ Correo inválido.");
+      setLoading(false); return;
     }
 
     if (!nombre || !document || !documentType || !bankCode || !phone || !ciudad) {
-      setError("❌ Completa todos los campos.");
-      setLoading(false); setMensaje(""); return;
+      showError("❌ Completa todos los campos.");
+      setLoading(false); return;
     }
 
     if (!validarTelefono(phone)) {
-      setError("❌ Teléfono inválido.");
-      setLoading(false); setMensaje(""); return;
+      showError("❌ Teléfono inválido.");
+      setLoading(false); return;
     }
 
     if (![0, 1].includes(userType)) {
-      setError("❌ Selecciona tipo de usuario.");
-      setLoading(false); setMensaje(""); return;
+      showError("❌ Selecciona tipo de usuario.");
+      setLoading(false); return;
     }
 
     if (total < 1500) {
-      setError("❌ Monto mínimo: $1.500 COP.");
-      setLoading(false); setMensaje(""); return;
+      showError("❌ Monto mínimo: $1.500 COP.");
+      setLoading(false); return;
     }
 
     try {
@@ -102,7 +101,7 @@ const Pago = ({ apiUrl }) => {
     } catch (err) {
       const backendMsg = err.response?.data?.message || err.response?.data?.error || "";
       const wompiMsg = err.response?.data?.wompi_error || "";
-      setError(`❌ Error: ${backendMsg || wompiMsg || err.message}`);
+      showError(`❌ Error: ${backendMsg || wompiMsg || err.message}`);
       setMensaje("");
     } finally {
       setLoading(false);
@@ -181,7 +180,6 @@ const Pago = ({ apiUrl }) => {
 
       <h3 style={{ marginTop: "20px" }}>🧾 Total a pagar: ${total.toFixed(2)} COP</h3>
 
-      {error && <p style={{ color: "red", fontWeight: "bold" }}>{error}</p>}
       {mensaje && <p style={{ color: loading ? "#555" : "green", fontWeight: "bold" }}>{mensaje}</p>}
 
       <button
@@ -208,6 +206,7 @@ const Pago = ({ apiUrl }) => {
             telefono={phone}
             ciudad={ciudad}
           />
+
         </div>
       )}
     </div>

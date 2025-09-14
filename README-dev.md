@@ -1,24 +1,32 @@
 # 🧠 Documentación técnica — Wish Market Place
 
-## 🗓️ Última sesión: 12 de septiembre de 2025
+## 🗓️ Última sesión: 13 de septiembre de 2025
+
+---
 
 ### ✅ Avances realizados
-- Integración exitosa del endpoint `/bancos-wompi` con autenticación por clave privada
-- Eliminación del filtro `status === "ACTIVE"` en producción
-- Corrección de mapeo en `Pago.jsx` (`financial_institution_code` y `financial_institution_name`)
-- Validación funcional del campo banco en el formulario
-- Redirección exitosa al flujo de pago Wompi
-- Eliminación de errores visuales y de validación en el dropdown
-- Commit técnico con mensaje trazable
+
+- 🧩 Separación y modularización de frontend y backend para despliegue limpio en Render
+- 🛠️ Instalación y configuración correcta de `react-toastify` en `frontend/` con estilos y `ToastContainer` funcional
+- 🧼 Eliminación de instalación duplicada de dependencias en la raíz
+- 🧠 Corrección de error `useState` por montaje incorrecto del `ToastContainer`
+- 🚀 Deploy exitoso en Render: frontend SPA y backend Express operativos
+- 🔗 Webhook funcional en producción (`/webhook`) con `express.raw()` y validación de firma
+- 🧭 Redirección post-pago validada y funcional (`EstadoPago.jsx`)
+- 🧱 Reestructuración de `routes/envios.js` con importación correcta del modelo `Envio.js`
+- 🧪 Validación de build y estructura de carpetas para evitar errores en producción
 
 ---
 
 ### 📌 Pendientes
+
 - `env=undefined` en la redirección post-pago → validar `process.env.WOMPI_ENV`
 - Blindaje del backend para evitar respuestas vacías sin log
 - Validación visual del campo banco (estilo rojo si no se selecciona)
 - Auditoría de headers sensibles en todos los endpoints Wompi
 - Implementación de `auditoriaLogger.js` para trazabilidad por usuario
+- Encapsular toasts en componente reutilizable (`toast.js`)
+- Activar ruta `/envios` desde frontend para registrar datos logísticos
 
 ---
 
@@ -31,12 +39,14 @@ mi-proyecto/
 │   ├── .env ────────────────────▶ PRIVATE_KEY, WOMPI_ENV, otros tokens
 │   ├── models/
 │   │   ├── Product.js ──────────▶ Esquema de producto con campo 'categoria'
-│   │   └── Pago.js ─────────────▶ Esquema de transacción PSE
+│   │   ├── Pago.js ─────────────▶ Esquema de transacción PSE
+│   │   └── Envio.js ────────────▶ Esquema logístico (nuevo)
 │   ├── routes/
 │   │   ├── carrito.js ─────────▶ (pendiente uso)
 │   │   ├── pago.js ────────────▶ POST /pse + GET /bancos-wompi con axios y auth
 │   │   ├── webhook.js ────────▶ Recepción de eventos Wompi
-│   │   └── productos.js ──────▶ GET /productos + /seed con filtro por categoría
+│   │   ├── productos.js ──────▶ GET /productos + /seed con filtro por categoría
+│   │   └── envios.js ─────────▶ POST /envios (nuevo, conectado a modelo)
 │   ├── scripts/
 │   │   └── Firmador.js ───────▶ Firma de payloads (uso futuro)
 │   ├── utils/
@@ -59,31 +69,15 @@ mi-proyecto/
 │   │   ├── context/
 │   │   │   └── CarritoContext.js ─▶ Estado global del carrito
 │   │   └── utils/
-│   │       └── toast.js ─────▶ Alertas visuales (pendiente implementación)
+│   │       └── toast.js ─────▶ Alertas visuales (pendiente encapsulación)
 │   ├── .env ───────────────────▶ REACT_APP_API_URL
 │   └── package.json ──────────▶ Dependencias frontend
 
- flujo de pago PSE
-    ├── Frontend: Pago.jsx ─────▶ Captura datos + validación + POST /pse
-    ├── Backend: pago.js ───────▶ Recibe datos + genera async_payment_url
-    ├── Redirección Wompi ──────▶ Usuario va a Wompi
-    └── EstadoPago.jsx ────────▶ Muestra resultado con referencia y estado
-
-
-
-
 ---
 
-## 🔧 Tecnologías clave
+## 🔄 Flujo de pago PSE
 
-| Capa       | Tecnología               | Uso principal                                 |
-|------------|--------------------------|-----------------------------------------------|
-| Frontend   | React + JSX              | SPA, componentes dinámicos                    |
-| Backend    | Node.js + Express        | API REST, manejo de rutas y lógica de pago    |
-| API Pago   | Wompi (PSE)              | Integración de pagos, validación y redirección|
-| Hosting    | Render                   | Deploy backend y frontend                     |
-| Estado     | Context API              | Manejo global del carrito                     |
-| Estilos    | CSS modular              | Estilos por componente                        |
+
 
 ---
 
