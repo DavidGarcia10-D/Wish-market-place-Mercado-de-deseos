@@ -65,3 +65,33 @@
 .boton-agregar:hover {
   background-color: #0056b3;
 }
+
+/* 🌙 Modo oscuro */
+@media (prefers-color-scheme: dark) {
+  .titulo-productos {
+    color: #e0e0e0;
+  }
+
+  .card-producto {
+    background-color: #1e1e1e;
+    border: 1px solid #444;
+    box-shadow: 0 2px 6px rgba(255, 255, 255, 0.05);
+  }
+
+  .card-producto h3 {
+    color: #f0f0f0;
+  }
+
+  .card-producto p {
+    color: #ccc;
+  }
+
+  .boton-agregar {
+    background-color: #3399ff;
+    color: #fff;
+  }
+
+  .boton-agregar:hover {
+    background-color: #267acc;
+  }
+}

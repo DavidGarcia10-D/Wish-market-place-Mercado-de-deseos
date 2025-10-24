@@ -1,3 +1,5 @@
+// frontend/src/App.jsx
+
 import React, { useState } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
@@ -24,28 +26,14 @@ const App = () => {
           <Route
             path="/"
             element={
-              <div>
+              <div className="contenedor-tienda">
                 {/* 🛍️✨ Título mágico del sitio */}
-                <div style={{ textAlign: "center", margin: "2rem 0" }}>
-                  <h1
-                    style={{
-                      fontSize: "2.5rem",
-                      marginBottom: "0.5rem",
-                      color: "#222"
-                    }}
-                  >
+                <header style={{ textAlign: "center", margin: "2rem 0" }}>
+                  <h1 className="titulo-tienda">
                     🛍️ 🪄✨ Wish Marketplace ✨🪄 🛍️
                   </h1>
-                  <p
-                    style={{
-                      fontSize: "1.1rem",
-                      color: "#666",
-                      marginTop: "0"
-                    }}
-                  >
-                    Mercado de deseos
-                  </p>
-                </div>
+                  <p className="subtitulo-tienda">Mercado de deseos</p>
+                </header>
 
                 {/* 🗂️ Selector de categoría */}
                 <Categoria

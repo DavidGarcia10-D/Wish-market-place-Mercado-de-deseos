@@ -1,6 +1,9 @@
+// frontend/src/components/Carrito.jsx
+
 import React, { useContext } from "react";
 import { CarritoContext } from "../context/CarritoContext";
 import { showSuccess } from "../utils/toast";
+import "./Carrito.css";
 
 const Carrito = () => {
   const { carrito, setCarrito } = useContext(CarritoContext);
@@ -24,107 +27,27 @@ const Carrito = () => {
 
   const total = carrito.reduce((acc, item) => acc + item.precio * item.cantidad, 0);
 
-  const estilos = {
-    contenedor: {
-      maxWidth: "1200px",
-      margin: "0 auto",
-      padding: "2rem"
-    },
-    titulo: {
-      textAlign: "center",
-      fontSize: "2rem",
-      marginBottom: "2rem",
-      color: "#333"
-    },
-    lista: {
-      display: "flex",
-      flexDirection: "column",
-      gap: "1.5rem"
-    },
-    item: {
-      display: "flex",
-      alignItems: "center",
-      gap: "1rem",
-      backgroundColor: "#fff",
-      padding: "1rem",
-      borderRadius: "12px",
-      boxShadow: "0 0 10px rgba(0,0,0,0.05)"
-    },
-    imagen: {
-      width: "100px",
-      height: "100px",
-      objectFit: "cover",
-      borderRadius: "8px",
-      border: "1px solid #ddd"
-    },
-    info: {
-      flex: "1",
-      display: "flex",
-      flexDirection: "column",
-      justifyContent: "center"
-    },
-    nombre: {
-      margin: 0,
-      fontSize: "1.2rem"
-    },
-    texto: {
-      margin: "4px 0",
-      fontSize: "0.95rem",
-      color: "#555"
-    },
-    cantidadControl: {
-      display: "flex",
-      alignItems: "center",
-      gap: "0.5rem",
-      marginTop: "0.5rem"
-    },
-    botonCantidad: {
-      backgroundColor: "#3498db",
-      color: "white",
-      border: "none",
-      padding: "4px 10px",
-      borderRadius: "6px",
-      cursor: "pointer"
-    },
-    botonEliminar: {
-      backgroundColor: "#e74c3c",
-      color: "white",
-      border: "none",
-      padding: "6px 12px",
-      borderRadius: "6px",
-      cursor: "pointer",
-      marginTop: "0.5rem"
-    },
-    total: {
-      textAlign: "right",
-      fontSize: "1.2rem",
-      fontWeight: "bold",
-      marginTop: "2rem",
-      color: "#333"
-    }
-  };
-
   return (
-    <div style={estilos.contenedor}>
-      <h2 style={estilos.titulo}>🛒 Tu carrito de compras</h2>
+    <div className="carrito-contenedor">
+      <h2 className="carrito-titulo">🛒 Tu carrito de compras</h2>
 
       {carrito.length === 0 ? (
-        <p style={{ textAlign: "center", color: "#666" }}>
+        <p className="carrito-vacio">
           🧺 El carrito está vacío. ¡Agrega productos para comenzar!
         </p>
       ) : (
-        <div style={estilos.lista}>
+        <div className="carrito-lista">
           {carrito.map(item => (
-            <div key={item._id} style={estilos.item}>
+            <div key={item._id} className="carrito-item">
               <img
                 src={item.imagenUrl || "/imagenes/default.jpg"}
                 alt={item.nombre}
-                style={estilos.imagen}
+                className="carrito-imagen"
                 onError={(e) => e.target.src = "/imagenes/default.jpg"}
               />
-              <div style={estilos.info}>
-                <h4 style={estilos.nombre}>{item.nombre}</h4>
-                <p style={estilos.texto}>
+              <div className="carrito-info">
+                <h4 className="carrito-nombre">{item.nombre}</h4>
+                <p className="carrito-texto">
                   Precio:{" "}
                   {new Intl.NumberFormat("es-CO", {
                     style: "currency",
@@ -133,17 +56,16 @@ const Carrito = () => {
                   }).format(item.precio)}
                 </p>
 
-                {/* 🔢 Control de cantidad */}
-                <div style={estilos.cantidadControl}>
+                <div className="carrito-cantidad-control">
                   <button
-                    style={estilos.botonCantidad}
+                    className="carrito-boton-cantidad"
                     onClick={() => modificarCantidad(item._id, -1)}
                   >
                     −
                   </button>
                   <span>{item.cantidad}</span>
                   <button
-                    style={estilos.botonCantidad}
+                    className="carrito-boton-cantidad"
                     onClick={() => modificarCantidad(item._id, 1)}
                   >
                     +
@@ -151,7 +73,7 @@ const Carrito = () => {
                 </div>
 
                 <button
-                  style={estilos.botonEliminar}
+                  className="carrito-boton-eliminar"
                   onClick={() => eliminarDelCarrito(item._id)}
                 >
                   ❌ Eliminar
@@ -160,7 +82,7 @@ const Carrito = () => {
             </div>
           ))}
 
-          <h3 style={estilos.total}>
+          <h3 className="carrito-total">
             Total:{" "}
             {new Intl.NumberFormat("es-CO", {
               style: "currency",

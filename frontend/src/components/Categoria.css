@@ -36,3 +36,26 @@
   font-weight: bold;
   border: 2px solid #0056b3;
 }
+
+/* 🌙 Modo oscuro */
+@media (prefers-color-scheme: dark) {
+  .titulo-categorias {
+    color: #e0e0e0;
+  }
+
+  .boton-categoria {
+    background-color: #2a2a2a;
+    border: 2px solid #555;
+    color: #ccc;
+  }
+
+  .boton-categoria:hover {
+    background-color: #3a3a3a;
+  }
+
+  .boton-categoria.activa {
+    background-color: #3399ff;
+    color: #fff;
+    border: 2px solid #267acc;
+  }
+}
