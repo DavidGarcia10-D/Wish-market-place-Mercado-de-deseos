@@ -28,9 +28,9 @@ const App = () => {
             element={
               <div className="contenedor-tienda">
                 {/* 🛍️✨ Título mágico del sitio */}
-                <header style={{ textAlign: "center", margin: "2rem 0" }}>
+                <header className="header-tienda">
                   <h1 className="titulo-tienda">
-                    🛍️ 🪄✨ Wish Marketplace ✨🪄 🛍️
+                    🛍️ 🪄✨ Wish Marketplace <br /> ✨🪄 🛍️
                   </h1>
                   <p className="subtitulo-tienda">Mercado de deseos</p>
                 </header>
@@ -54,7 +54,7 @@ const App = () => {
                 <Pago apiUrl={API_URL} />
 
                 {/* 🔔 Toasts de feedback visual */}
-                <ToastContainer position="top-right" autoClose={3000} />
+                <ToastContainer position="top-right" autoClose={3000} theme="auto" />
               </div>
             }
           />

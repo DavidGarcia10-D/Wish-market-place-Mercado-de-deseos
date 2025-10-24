@@ -14,10 +14,13 @@ body {
 
 /* 🛍️ Título principal */
 .titulo-tienda {
+  max-width: 90%;
+  margin: 0 auto 5px;
   text-align: center;
   font-size: 2.8rem;
-  margin-bottom: 5px;
+  line-height: 1.2;
   color: #6a00f4;
+  animation: fadeInTitulo 1.2s ease-out;
 }
 
 /* ✨ Subtítulo */
@@ -26,6 +29,7 @@ body {
   font-style: italic;
   color: #9d4edd;
   margin-bottom: 40px;
+  animation: fadeInSubtitulo 1.5s ease-out;
 }
 
 /* 🧱 Grid de productos */
@@ -145,11 +149,33 @@ button.agotado {
   color: #333;
 }
 
-/* ✨ Animación de entrada */
+/* ✨ Animaciones mágicas */
 @keyframes fadeIn {
   from {
     opacity: 0;
     transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInTitulo {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInSubtitulo {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
   }
   to {
     opacity: 1;
@@ -220,10 +246,7 @@ button.agotado {
     color: #bb86fc;
   }
 
-  .resumen-pago ul {
-    color: #ccc;
-  }
-
+  .resumen-pago ul,
   .resumen-pago li {
     color: #ccc;
   }
