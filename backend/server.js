@@ -23,14 +23,14 @@ app.use(cors({
   credentials: true
 }));
 
-// ⚠️ Raw parser SOLO para /pago/webhook (firma de Wompi)
-app.use("/webhook", express.raw({ type: "*/*" }), webhookRoutes);
-
 // 🌐 JSON parser para el resto de rutas
 app.use(express.json());
 
-// 🔁 Módulo de envíos: recibe datos logísticos del cliente (dirección, ciudad, etc.)
-// Se conecta con el modelo Envio.js y se vincula a cada pago mediante id_pago
+// ⚠️ Raw parser SOLO para /webhook (firma de Wompi)
+app.use("/webhook", express.raw({ type: "application/json" }));
+app.use("/webhook", webhookRoutes);
+
+// 🔁 Módulo de envíos
 app.use('/envios', rutaEnvios);
 
 // 🔐 Validación de llaves y URI
@@ -64,7 +64,7 @@ app.get("/", (req, res) => {
   res.send("🚀 ¡Servidor funcionando correctamente!");
 });
 
-// 📦 Productos (rutas existentes)
+// 📦 Productos
 app.get("/productos", async (req, res) => {
   try {
     const productos = await Product.find();

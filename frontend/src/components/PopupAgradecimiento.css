@@ -8,7 +8,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 999;
+  z-index: 9999; /* Aumentado para asegurar visibilidad */
 }
 
 .popup-contenido {
@@ -18,6 +18,11 @@
   max-width: 400px;
   width: 90%;
   text-align: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); /* Mejora visual */
+}
+
+.popup-botones {
+  margin-top: 1rem;
 }
 
 .popup-botones button {
@@ -28,6 +33,7 @@
   color: white;
   border-radius: 6px;
   cursor: pointer;
+  transition: background-color 0.3s ease;
 }
 
 .popup-botones button:hover {

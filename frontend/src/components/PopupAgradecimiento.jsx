@@ -8,7 +8,7 @@ const PopupAgradecimiento = ({ nombreCliente, productos, total, onClose }) => {
         <h2>¡Gracias por tu compra{nombreCliente ? `, ${nombreCliente}` : ''}!</h2>
         <p>Resumen de tu pedido:</p>
         <ul>
-          {productos.map((p, i) => (
+          {Array.isArray(productos) && productos.map((p, i) => (
             <li key={i}>{p.nombre} x{p.cantidad}</li>
           ))}
         </ul>
