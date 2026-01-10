@@ -1,7 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react"; // 🆕 Agregado useContext
 import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import ResumenPago from "./ResumenPago";
+import PopupAgradecimiento from "./PopupAgradecimiento"; // 🆕 Importar el nuevo componente
+import { CarritoContext } from "../context/CarritoContext"; // 🆕 Importar contexto del carrito
 
 const EstadoPago = ({ apiUrl }) => {
   const { reference } = useParams();
@@ -10,6 +12,9 @@ const EstadoPago = ({ apiUrl }) => {
   const [ultimaConsulta, setUltimaConsulta] = useState(null);
   const [errorConsulta, setErrorConsulta] = useState(false);
   const [pago, setPago] = useState(null);
+  const [mostrarPopup, setMostrarPopup] = useState(false); // 🆕 Estado para mostrar el popup
+
+  const { carrito, total } = useContext(CarritoContext); // 🆕 Obtener carrito y total desde el contexto
 
   useEffect(() => {
     if (!apiUrl || !reference) {
@@ -50,6 +55,7 @@ const EstadoPago = ({ apiUrl }) => {
         // ✅ Toast según estado
         if (data.status === "APPROVED") {
           toast.success("✅ Pago aprobado");
+          setMostrarPopup(true); // 🆕 Mostrar popup si el pago fue aprobado
         } else if (data.status === "DECLINED") {
           toast.error("❌ Pago rechazado");
         } else if (data.status === "PENDING") {
@@ -155,6 +161,16 @@ const EstadoPago = ({ apiUrl }) => {
       >
         🔙 Volver a la tienda
       </button>
+
+      {/* 🆕 Mostrar popup si el pago fue aprobado */}
+      {mostrarPopup && (
+        <PopupAgradecimiento
+          nombreCliente={pago?.nombre}
+          productos={carrito}
+          total={total}
+          onClose={() => setMostrarPopup(false)}
+        />
+      )}
 
       <style>{`
         @keyframes spin {
