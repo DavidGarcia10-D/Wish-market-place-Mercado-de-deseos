@@ -100,7 +100,7 @@ router.post("/pse", async (req, res) => {
 
 const referencia = `PAGO_${Date.now()}`;
 // const FRONTEND_BASE_URL = process.env.FRONTEND_URL || "http://localhost:3000";
-const redirectURL = "https://wish-market-place-front.onrender.com"; // ✅ Redirección directa al home
+const redirectURL = `https://wish-market-place-front.onrender.com/estado-pago/${referencia}`; // ✅ Redirección directa al home
 
 const montoCentavos = parseInt(valor * 100, 10);
 const tipoUsuario = Number(user_type);

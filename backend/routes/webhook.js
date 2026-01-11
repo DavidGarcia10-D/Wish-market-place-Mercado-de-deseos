@@ -16,7 +16,7 @@ router.post("/", async (req, res) => {
 
     if (!Buffer.isBuffer(rawBody)) {
       console.error("❌ El cuerpo no es un Buffer. Revisa express.raw() en server.js");
-      return res.status(500).send("Formato de cuerpo inválido");
+      return res.status(500).json({ error: "Formato de cuerpo inválido" });
     }
 
     const localSignature = crypto
@@ -29,20 +29,20 @@ router.post("/", async (req, res) => {
 
     if (localSignature !== signature) {
       console.warn("❌ Firma inválida. Posible alteración del cuerpo.");
-      return res.status(401).send("Firma inválida");
+      return res.status(401).json({ error: "Firma inválida" });
     }
 
     const jsonBody = JSON.parse(rawBody.toString("utf8"));
 
     if (jsonBody.event !== "transaction.updated") {
       console.log("📭 Evento no manejado:", jsonBody.event);
-      return res.status(200).send("Evento ignorado");
+      return res.status(200).json({ ignored: true });
     }
 
     const { transaction } = jsonBody.data || {};
     if (!transaction?.reference || !transaction?.status) {
       console.error("❌ Faltan campos obligatorios:", jsonBody);
-      return res.status(400).send("Datos incompletos");
+      return res.status(400).json({ error: "Datos incompletos" });
     }
 
     console.log("📬 Webhook procesado:");
@@ -68,10 +68,10 @@ router.post("/", async (req, res) => {
       console.log("✅ Estado actualizado en BD:", actualizado.status);
     }
 
-    res.status(200).send("Webhook recibido y procesado");
+    return res.status(200).json({ received: true });
   } catch (error) {
     console.error("❌ Error al procesar webhook:", error.message);
-    res.status(500).send("Error interno del servidor");
+    return res.status(500).json({ error: "Error interno del servidor" });
   }
 });
 
