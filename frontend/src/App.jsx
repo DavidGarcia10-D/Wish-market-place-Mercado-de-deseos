@@ -1,7 +1,5 @@
-// frontend/src/App.jsx
-
 import React, { useState } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -21,51 +19,49 @@ const App = () => {
 
   return (
     <CarritoProvider>
-      <Router>
-        <Routes>
-          <Route
-            path="/"
-            element={
-              <div className="contenedor-tienda">
-                {/* 🛍️✨ Título mágico del sitio */}
-                <header className="header-tienda">
-                  <h1 className="titulo-tienda">
-                    🛍️ 🪄✨ Wish Marketplace <br /> ✨🪄 🛍️
-                  </h1>
-                  <p className="subtitulo-tienda">Mercado de deseos</p>
-                </header>
+      <Routes>
+        <Route
+          path="/"
+          element={
+            <div className="contenedor-tienda">
+              {/* 🛍️✨ Título mágico del sitio */}
+              <header className="header-tienda">
+                <h1 className="titulo-tienda">
+                  🛍️ 🪄✨ Wish Marketplace <br /> ✨🪄 🛍️
+                </h1>
+                <p className="subtitulo-tienda">Mercado de deseos</p>
+              </header>
 
-                {/* 🗂️ Selector de categoría */}
-                <Categoria
-                  setCategoria={setCategoriaSeleccionada}
-                  categoriaSeleccionada={categoriaSeleccionada}
-                />
+              {/* 🗂️ Selector de categoría */}
+              <Categoria
+                setCategoria={setCategoriaSeleccionada}
+                categoriaSeleccionada={categoriaSeleccionada}
+              />
 
-                {/* 🛒 Listado de productos */}
-                <Productos
-                  apiUrl={API_URL}
-                  categoria={categoriaSeleccionada}
-                />
+              {/* 🛒 Listado de productos */}
+              <Productos
+                apiUrl={API_URL}
+                categoria={categoriaSeleccionada}
+              />
 
-                {/* 🧺 Carrito de compras */}
-                <Carrito apiUrl={API_URL} usuarioId={"123456"} />
+              {/* 🧺 Carrito de compras */}
+              <Carrito apiUrl={API_URL} usuarioId={"123456"} />
 
-                {/* 💳 Formulario de pago */}
-                <Pago apiUrl={API_URL} />
+              {/* 💳 Formulario de pago */}
+              <Pago apiUrl={API_URL} />
 
-                {/* 🔔 Toasts de feedback visual */}
-                <ToastContainer position="top-right" autoClose={3000} theme="auto" />
-              </div>
-            }
-          />
+              {/* 🔔 Toasts de feedback visual */}
+              <ToastContainer position="top-right" autoClose={3000} theme="auto" />
+            </div>
+          }
+        />
 
-          {/* ✅ Ruta para estado de pago */}
-          <Route
-            path="/estado/:reference"
-            element={<EstadoPago apiUrl={API_URL} />}
-          />
-        </Routes>
-      </Router>
+        {/* ✅ Ruta para estado de pago */}
+        <Route
+          path="/estado-pago/:reference"
+          element={<EstadoPago apiUrl={API_URL} />}
+        />
+      </Routes>
     </CarritoProvider>
   );
 };
