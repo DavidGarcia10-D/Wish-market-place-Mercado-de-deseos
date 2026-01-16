@@ -18,7 +18,7 @@ router.post("/", async (req, res) => {
     // Validación: el cuerpo debe ser un Buffer para verificar la firma
     if (!Buffer.isBuffer(rawBody)) {
       console.error("❌ El cuerpo no es un Buffer. Revisa express.raw() en server.js");
-      return res.status(500).json({ error: "Formato de cuerpo inválido" });
+      return res.status(500).json({ status: "error", message: "Formato de cuerpo inválido" });
     }
 
     // Verificación de firma con HMAC SHA256
@@ -32,7 +32,7 @@ router.post("/", async (req, res) => {
 
     if (localSignature !== signature) {
       console.warn("❌ Firma inválida. Posible alteración del cuerpo.");
-      return res.status(401).json({ error: "Firma inválida" });
+      return res.status(401).json({ status: "unauthorized", message: "Firma inválida" });
     }
 
     // Parseo del cuerpo crudo a JSON
@@ -41,13 +41,13 @@ router.post("/", async (req, res) => {
     // Validación del tipo de evento
     if (jsonBody.event !== "transaction.updated") {
       console.log("📭 Evento no manejado:", jsonBody.event);
-      return res.status(200).json({ ignored: true });
+      return res.status(200).json({ status: "ignored" });
     }
 
     const { transaction } = jsonBody.data || {};
     if (!transaction?.reference || !transaction?.status) {
       console.error("❌ Faltan campos obligatorios:", jsonBody);
-      return res.status(400).json({ error: "Datos incompletos" });
+      return res.status(400).json({ status: "error", message: "Datos incompletos" });
     }
 
     console.log("📬 Webhook procesado:");
@@ -74,10 +74,10 @@ router.post("/", async (req, res) => {
       console.log("✅ Estado actualizado en BD:", actualizado.status);
     }
 
-    return res.status(200).json({ received: true });
+    return res.status(200).json({ status: "ok" });
   } catch (error) {
     console.error("❌ Error al procesar webhook:", error.message);
-    return res.status(500).json({ error: "Error interno del servidor" });
+    return res.status(500).json({ status: "error", message: "Error interno del servidor" });
   }
 });
 
