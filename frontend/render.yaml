@@ -2,7 +2,7 @@ services:
   - type: static
     name: wish-market-place-front
     env: static
-    buildCommand: npm run build
+    buildCommand: npm install && npm run build
     staticPublishPath: build
     routes:
       - type: rewrite
