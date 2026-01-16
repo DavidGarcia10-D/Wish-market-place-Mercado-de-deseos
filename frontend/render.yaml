@@ -3,7 +3,7 @@ services:
     name: wish-market-place-front
     env: static
     buildCommand: npm run build
-    staticPublishPath: frontend/build
+    staticPublishPath: build
     routes:
       - type: rewrite
         source: /*
