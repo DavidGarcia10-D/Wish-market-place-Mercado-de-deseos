@@ -23,12 +23,14 @@ app.use(cors({
   credentials: true
 }));
 
-// 🌐 JSON parser para el resto de rutas
-app.use(express.json());
-
-// ⚠️ Raw parser SOLO para /webhook (firma de Wompi)
+// ⚠️ Raw parser SOLO para /webhook (necesario para verificar firma de Wompi)
+// 🔄 Este middleware debe ir ANTES de express.json()
 app.use("/webhook", express.raw({ type: "application/json" }));
 app.use("/webhook", webhookRoutes);
+
+// 🌐 JSON parser para el resto de rutas
+// 🔄 Se aplica DESPUÉS del webhook para no interferir con el cuerpo crudo
+app.use(express.json());
 
 // 🔁 Módulo de envíos
 app.use('/envios', rutaEnvios);

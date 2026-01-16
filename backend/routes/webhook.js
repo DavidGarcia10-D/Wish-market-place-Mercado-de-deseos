@@ -5,20 +5,23 @@ require("dotenv").config();
 
 const Pago = require("../models/Pago");
 
+// Esta ruta debe recibir el cuerpo como Buffer (asegurado por express.raw() en server.js)
 router.post("/", async (req, res) => {
   try {
-    const rawBody = req.body;
+    const rawBody = req.body; // Buffer esperado
     const signature = req.header("X-Integrity");
 
     console.log("📥 Webhook recibido");
     console.log("📏 Tipo de req.body:", typeof rawBody);
     console.log("📦 ¿Es Buffer?:", Buffer.isBuffer(rawBody));
 
+    // Validación: el cuerpo debe ser un Buffer para verificar la firma
     if (!Buffer.isBuffer(rawBody)) {
       console.error("❌ El cuerpo no es un Buffer. Revisa express.raw() en server.js");
       return res.status(500).json({ error: "Formato de cuerpo inválido" });
     }
 
+    // Verificación de firma con HMAC SHA256
     const localSignature = crypto
       .createHmac("sha256", process.env.INTEGRITY_SECRET)
       .update(rawBody)
@@ -32,8 +35,10 @@ router.post("/", async (req, res) => {
       return res.status(401).json({ error: "Firma inválida" });
     }
 
+    // Parseo del cuerpo crudo a JSON
     const jsonBody = JSON.parse(rawBody.toString("utf8"));
 
+    // Validación del tipo de evento
     if (jsonBody.event !== "transaction.updated") {
       console.log("📭 Evento no manejado:", jsonBody.event);
       return res.status(200).json({ ignored: true });
@@ -50,6 +55,7 @@ router.post("/", async (req, res) => {
     console.log(`🔖 Estado: ${transaction.status}`);
     console.log(`🎫 CUS: ${transaction.cus || "N/A"}`);
 
+    // Actualización en base de datos
     const actualizado = await Pago.findOneAndUpdate(
       { reference: transaction.reference },
       {
