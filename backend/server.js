@@ -6,9 +6,8 @@ require("dotenv").config();
 
 const carritoRoutes = require("./routes/carrito");
 const pagoRoutes = require("./routes/pago");
-const webhookRoutes = require("./routes/webhook");
 const productosRoutes = require("./routes/productos");
-const rutaEnvios = require('./routes/envios');
+const rutaEnvios = require("./routes/envios");
 
 const app = express();
 
@@ -25,15 +24,13 @@ app.use(cors({
 
 // ⚠️ Raw parser SOLO para /webhook (necesario para verificar firma de Wompi)
 // 🔄 Este middleware debe ir ANTES de express.json()
-app.use("/webhook", express.raw({ type: "application/json" }));
-app.use("/webhook", webhookRoutes);
+app.post("/webhook", express.raw({ type: "application/json" }), require("./routes/webhook"));
 
 // 🌐 JSON parser para el resto de rutas
-// 🔄 Se aplica DESPUÉS del webhook para no interferir con el cuerpo crudo
 app.use(express.json());
 
 // 🔁 Módulo de envíos
-app.use('/envios', rutaEnvios);
+app.use("/envios", rutaEnvios);
 
 // 🔐 Validación de llaves y URI
 if (
