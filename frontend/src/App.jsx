@@ -1,8 +1,14 @@
 import React, { useState } from "react";
 import { Routes, Route } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 import Productos from "./components/Productos";
 import Categoria from "./components/Categoria";
 import Carrito from "./components/Carrito";
+import Pago from "./components/Pago";
+import EstadoPago from "./components/EstadoPago";
+
 import { CarritoProvider } from "./context/CarritoContext";
 
 const App = () => {
@@ -11,12 +17,34 @@ const App = () => {
   return (
     <CarritoProvider>
       <div style={{ padding: "2rem" }}>
-        <Categoria setCategoria={setCategoria} categoriaSeleccionada={categoria} />
-        <Carrito />
+        <Categoria
+          setCategoria={setCategoria}
+          categoriaSeleccionada={categoria}
+        />
+
+        <Productos
+          apiUrl={process.env.REACT_APP_API_URL}
+          categoria={categoria}
+        />
+
+        <Carrito
+          apiUrl={process.env.REACT_APP_API_URL}
+          usuarioId="123456"
+        />
+
+        <Pago apiUrl={process.env.REACT_APP_API_URL} />
+
+        <ToastContainer
+          position="top-right"
+          autoClose={3000}
+          theme="auto"
+        />
+
         <Routes>
+          <Route path="/" element={null} />
           <Route
-            path="/"
-            element={<Productos apiUrl={process.env.REACT_APP_API_URL} categoria={categoria} />}
+            path="/estado-pago/:reference"
+            element={<EstadoPago apiUrl={process.env.REACT_APP_API_URL} />}
           />
         </Routes>
       </div>
