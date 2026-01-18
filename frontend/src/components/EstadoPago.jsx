@@ -6,7 +6,7 @@ import PopupAgradecimiento from "./PopupAgradecimiento";
 import { CarritoContext } from "../context/CarritoContext";
 
 const EstadoPago = ({ apiUrl }) => {
-  const { reference } = useParams();
+  const { referencia } = useParams(); // ✅ CAMBIO AQUÍ
   const navigate = useNavigate();
   const [estado, setEstado] = useState(null);
   const [ultimaConsulta, setUltimaConsulta] = useState(null);
@@ -17,8 +17,8 @@ const EstadoPago = ({ apiUrl }) => {
   const { carrito, total } = useContext(CarritoContext);
 
   useEffect(() => {
-    if (!apiUrl || !reference) {
-      console.warn("⚠️ apiUrl o reference no están definidos en EstadoPago");
+    if (!apiUrl || !referencia) {
+      console.warn("⚠️ apiUrl o referencia no están definidos en EstadoPago");
       return;
     }
 
@@ -27,7 +27,7 @@ const EstadoPago = ({ apiUrl }) => {
 
     const consultarEstado = async () => {
       try {
-        const res = await fetch(`${apiUrl}/pago/${reference}`);
+        const res = await fetch(`${apiUrl}/pago/${referencia}`);
         if (!res.ok) {
           if (res.status === 404) {
             setEstado("NO_ENCONTRADO");
@@ -55,7 +55,6 @@ const EstadoPago = ({ apiUrl }) => {
         if (data.status === "APPROVED") {
           toast.success("✅ Pago aprobado");
           setMostrarPopup(true);
-          console.log("🟢 Popup debería mostrarse ahora");
         } else if (data.status === "DECLINED") {
           toast.error("❌ Pago rechazado");
         } else if (data.status === "PENDING") {
@@ -79,7 +78,7 @@ const EstadoPago = ({ apiUrl }) => {
       clearInterval(intervalo);
       clearTimeout(delayInicial);
     };
-  }, [reference, apiUrl]);
+  }, [referencia, apiUrl]); // ✅ CAMBIO AQUÍ
 
   const renderEstado = () => {
     if (errorConsulta) {
@@ -136,12 +135,10 @@ const EstadoPago = ({ apiUrl }) => {
     }
   };
 
-  console.log("📊 mostrarPopup:", mostrarPopup, "pago:", pago, "carrito:", carrito, "total:", total);
-
   return (
     <div style={{ padding: "2rem", textAlign: "center" }}>
       <h1>🧾 Estado del Pago</h1>
-      <p>Referencia: <strong>{reference}</strong></p>
+      <p>Referencia: <strong>{referencia}</strong></p>
 
       <div aria-live="polite" role="status">
         {renderEstado()}

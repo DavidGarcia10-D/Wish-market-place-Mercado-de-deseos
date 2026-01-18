@@ -43,7 +43,7 @@ const App = () => {
         <Routes>
           <Route path="/" element={null} />
           <Route
-            path="/estado-pago/:reference"
+            path="/estado-pago/:referencia" // ✅ CAMBIO AQUÍ
             element={<EstadoPago apiUrl={process.env.REACT_APP_API_URL} />}
           />
         </Routes>
