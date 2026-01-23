@@ -87,11 +87,6 @@ function Productos({ apiUrl, categoria }) {
       fontSize: "1rem",
       marginBottom: "0.5rem"
     },
-    stock: {
-      fontSize: "0.85rem",
-      color: "#888",
-      marginBottom: "1rem"
-    },
     boton: {
       backgroundColor: "#3498db",
       color: "#fff",
@@ -128,11 +123,6 @@ function Productos({ apiUrl, categoria }) {
               <h3 style={estilos.nombre}>{prod.nombre}</h3>
               <p style={estilos.descripcion}>{prod.descripcion}</p>
               <p style={estilos.precio}>💰 {formatearCOP(prod.precio)}</p>
-              {prod.stock === 0 ? (
-                <p style={{ ...estilos.stock, color: "red" }}>Agotado</p>
-              ) : (
-                <p style={estilos.stock}>Stock: {prod.stock}</p>
-              )}
               <button
                 style={{
                   ...estilos.boton,
