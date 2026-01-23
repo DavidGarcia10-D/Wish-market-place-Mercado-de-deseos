@@ -1,5 +1,4 @@
 /* 🎨 Estilos base para WISH MARKETPLACE */
-
 body {
   margin: 0;
   font-family: 'Poppins', sans-serif;
@@ -196,6 +195,7 @@ button.agotado {
 @media (prefers-color-scheme: dark) {
   body {
     background: linear-gradient(to bottom right, #1e1e1e, #2c2c2c);
+    color: #eee;
   }
 
   .contenedor-tienda {
@@ -265,7 +265,7 @@ button.agotado {
     border-top-color: #bb86fc;
   }
 
-  /* 🧾 Formulario de pago en modo oscuro */
+  /* 🧾 Inputs y selects en modo oscuro */
   input,
   select,
   textarea {
@@ -282,6 +282,14 @@ button.agotado {
   label {
     color: #eee;
     font-weight: bold;
+  }
+
+  /* Compatibilidad iOS/Safari */
+  input,
+  select {
+    -webkit-text-fill-color: #eee;
+    appearance: none;
+    -webkit-appearance: none;
   }
 }
 
