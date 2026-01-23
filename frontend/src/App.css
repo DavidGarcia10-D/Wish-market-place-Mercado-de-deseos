@@ -272,6 +272,9 @@ button.agotado {
     background-color: #2a2a2a;
     color: #eee;
     border: 1px solid #555;
+    -webkit-text-fill-color: #eee;
+    appearance: none;
+    -webkit-appearance: none;
   }
 
   input::placeholder,
@@ -284,12 +287,13 @@ button.agotado {
     font-weight: bold;
   }
 
-  /* Compatibilidad iOS/Safari */
-  input,
-  select {
+  /* ✨ Corrección para campos con autofill (Safari/iOS) */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0px 1000px #2a2a2a inset;
     -webkit-text-fill-color: #eee;
-    appearance: none;
-    -webkit-appearance: none;
+    border: 1px solid #555;
   }
 }
 
