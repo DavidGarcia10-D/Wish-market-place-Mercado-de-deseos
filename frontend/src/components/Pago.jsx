@@ -22,6 +22,7 @@ const Pago = ({ apiUrl }) => {
   const [mensaje, setMensaje] = useState("");
   const [idPago, setIdPago] = useState(null);
   const estilos = getPagoEstilos(loading);
+
   useEffect(() => {
     axios.get(`${apiUrl}/pago/bancos-wompi`)
       .then(res => {
@@ -40,6 +41,14 @@ const Pago = ({ apiUrl }) => {
 
   const validarEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   const validarTelefono = (tel) => /^3\d{9}$/.test(tel);
+
+  const formatCOP = (valor) => {
+    return new Intl.NumberFormat("es-CO", {
+      style: "currency",
+      currency: "COP",
+      minimumFractionDigits: 0
+    }).format(valor) + " COP";
+  };
 
   const pagarConPSE = async () => {
     setMensaje("⏳ Preparando redirección segura...");
@@ -109,68 +118,100 @@ const Pago = ({ apiUrl }) => {
     }
   };
 
-  const campoEstilo = {
-    display: "block",
-    width: "100%",
-    maxWidth: "400px",
-    margin: "8px auto",
-    padding: "10px",
-    fontSize: "1rem",
-    borderRadius: "6px",
-    border: "1px solid #ccc",
-    boxSizing: "border-box"
-  };
-
   const etiqueta = (emoji, texto) => (
-    <label style={{ display: "block", textAlign: "left", maxWidth: "400px", margin: "0 auto", fontWeight: "bold" }}>
+    <label className="label-pago">
       {emoji} {texto}
     </label>
   );
 
   return (
-    <div style={{ padding: "2rem", textAlign: "center" }}>
+    <div className="formulario-pago" style={{ padding: "2rem", textAlign: "center" }}>
       <h2>💳 Pagar con PSE</h2>
 
       {etiqueta("👤", "Nombre completo")}
-      <input type="text" value={nombre} onChange={(e) => {
-        const soloLetras = e.target.value.replace(/[^A-Za-zÁÉÍÓÚáéíóúÑñ\s]/g, '');
-        setNombre(soloLetras);
-      }} style={campoEstilo} />
+      <input
+        className="campo-pago"
+        type="text"
+        value={nombre}
+        onChange={(e) => {
+          const soloLetras = e.target.value.replace(/[^A-Za-zÁÉÍÓÚáéíóúÑñ\s]/g, '');
+          setNombre(soloLetras);
+        }}
+        placeholder="Tu nombre completo"
+      />
 
       {etiqueta("📧", "Correo electrónico")}
-      <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} style={campoEstilo} />
+      <input
+        className="campo-pago"
+        type="email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        placeholder="correo@ejemplo.com"
+      />
 
       {etiqueta("📱", "Teléfono")}
-      <input type="tel" value={phone} maxLength={10} onChange={(e) => {
-        const soloNumeros = e.target.value.replace(/[^0-9]/g, '');
-        setPhone(soloNumeros);
-      }} style={campoEstilo} />
-
-      {etiqueta("🪪", "Documento")}
-      <input type="text" value={document} maxLength={10} onChange={(e) => {
-        const soloNumeros = e.target.value.replace(/[^0-9]/g, '');
-        setDocument(soloNumeros);
-      }} style={campoEstilo} />
-
-      {etiqueta("🌆", "Ciudad")}
-      <input type="text" value={ciudad} onChange={(e) => setCiudad(e.target.value)} style={campoEstilo} />
-
-      {etiqueta("🧑‍💼", "Tipo de usuario")}
-      <select value={userType} onChange={(e) => setUserType(Number(e.target.value))} style={campoEstilo}>
-        <option value={0}>Persona Natural</option>
-        <option value={1}>Persona Jurídica</option>
-      </select>
+      <input
+        className="campo-pago"
+        type="tel"
+        value={phone}
+        maxLength={10}
+        onChange={(e) => {
+          const soloNumeros = e.target.value.replace(/[^0-9]/g, '');
+          setPhone(soloNumeros);
+        }}
+        placeholder="3XXXXXXXXX"
+      />
 
       {etiqueta("📄", "Tipo de documento")}
-      <select value={documentType} onChange={(e) => setDocumentType(e.target.value)} style={campoEstilo}>
+      <select
+        className="campo-pago"
+        value={documentType}
+        onChange={(e) => setDocumentType(e.target.value)}
+      >
         <option value="CC">Cédula</option>
         <option value="CE">Cédula Extranjera</option>
         <option value="TI">Tarjeta de Identidad</option>
         <option value="NIT">NIT</option>
       </select>
 
+      {etiqueta("🪪", "Número de documento")}
+      <input
+        className="campo-pago"
+        type="text"
+        value={document}
+        maxLength={20}
+        onChange={(e) => {
+          const soloNumeros = e.target.value.replace(/[^0-9]/g, '');
+          setDocument(soloNumeros);
+        }}
+        placeholder="Número de documento"
+      />
+
+      {etiqueta("🌆", "Ciudad")}
+      <input
+        className="campo-pago"
+        type="text"
+        value={ciudad}
+        onChange={(e) => setCiudad(e.target.value)}
+        placeholder="Ciudad"
+      />
+
+      {etiqueta("🧑‍💼", "Tipo de usuario")}
+      <select
+        className="campo-pago"
+        value={userType}
+        onChange={(e) => setUserType(Number(e.target.value))}
+      >
+        <option value={0}>Persona Natural</option>
+        <option value={1}>Persona Jurídica</option>
+      </select>
+
       {etiqueta("🏦", "Banco")}
-      <select value={bankCode} onChange={(e) => setBankCode(e.target.value)} style={campoEstilo}>
+      <select
+        className="campo-pago"
+        value={bankCode}
+        onChange={(e) => setBankCode(e.target.value)}
+      >
         <option value="">Selecciona tu banco</option>
         {bancos.map((banco, index) => (
           <option key={`${banco.financial_institution_code}-${index}`} value={banco.financial_institution_code}>
@@ -179,21 +220,13 @@ const Pago = ({ apiUrl }) => {
         ))}
       </select>
 
-      <h3 style={{ marginTop: "20px" }}>🧾 Total a pagar: ${total.toFixed(2)} COP</h3>
+      <h3 style={{ marginTop: "20px" }}>🧾 Total a pagar: {formatCOP(total)}</h3>
 
       {mensaje && <p style={{ color: loading ? "#555" : "green", fontWeight: "bold" }}>{mensaje}</p>}
 
       <button
+        className="boton-pagar"
         onClick={pagarConPSE}
-        style={{
-          backgroundColor: loading ? "#ccc" : "#4CAF50",
-          color: "white",
-          padding: "12px 24px",
-          border: "none",
-          borderRadius: "6px",
-          cursor: loading ? "not-allowed" : "pointer",
-          marginTop: "20px"
-        }}
         disabled={loading}
       >
         {loading ? "⏳ Procesando..." : "💰 Pagar ahora"}
@@ -207,7 +240,6 @@ const Pago = ({ apiUrl }) => {
             telefono={phone}
             ciudad={ciudad}
           />
-
         </div>
       )}
     </div>

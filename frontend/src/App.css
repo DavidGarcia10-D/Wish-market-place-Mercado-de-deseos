@@ -264,6 +264,25 @@ button.agotado {
     border-color: #444;
     border-top-color: #bb86fc;
   }
+
+  /* 🧾 Formulario de pago en modo oscuro */
+  input,
+  select,
+  textarea {
+    background-color: #2a2a2a;
+    color: #eee;
+    border: 1px solid #555;
+  }
+
+  input::placeholder,
+  select option {
+    color: #ccc;
+  }
+
+  label {
+    color: #eee;
+    font-weight: bold;
+  }
 }
 
 /* 📱 Responsive spinner y resumen */
