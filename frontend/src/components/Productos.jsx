@@ -11,7 +11,7 @@ function Productos({ apiUrl, categoria }) {
       style: "currency",
       currency: "COP",
       minimumFractionDigits: 0
-    }).format(valor);
+    }).format(valor) + "COP";
   };
 
   useEffect(() => {
