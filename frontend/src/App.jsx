@@ -2,6 +2,9 @@ import React, { useState } from "react";
 import { Routes, Route } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import "./app.css"; // ✅ Importa tus estilos personalizados
+
+
 
 import Productos from "./components/Productos";
 import Categoria from "./components/Categoria";
@@ -16,7 +19,10 @@ const App = () => {
 
   return (
     <CarritoProvider>
-      <div style={{ padding: "2rem" }}>
+      <div className="contenedor-tienda">
+        <h1 className="titulo-tienda">🛒 Wish Marketplace</h1>
+        <p className="subtitulo-tienda">Tecnología y estilo en un solo lugar</p>
+
         <Categoria
           setCategoria={setCategoria}
           categoriaSeleccionada={categoria}
@@ -43,7 +49,7 @@ const App = () => {
         <Routes>
           <Route path="/" element={null} />
           <Route
-            path="/estado-pago/:referencia" // ✅ CAMBIO AQUÍ
+            path="/estado-pago/:referencia"
             element={<EstadoPago apiUrl={process.env.REACT_APP_API_URL} />}
           />
         </Routes>
