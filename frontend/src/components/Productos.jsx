@@ -6,6 +6,14 @@ function Productos({ apiUrl, categoria }) {
   const [productos, setProductos] = useState([]);
   const { agregarAlCarrito } = useContext(CarritoContext);
 
+  const formatearCOP = (valor) => {
+    return new Intl.NumberFormat("es-CO", {
+      style: "currency",
+      currency: "COP",
+      minimumFractionDigits: 0
+    }).format(valor);
+  };
+
   useEffect(() => {
     const obtenerProductos = async () => {
       try {
@@ -54,12 +62,13 @@ function Productos({ apiUrl, categoria }) {
       boxShadow: "0 0 10px rgba(0,0,0,0.05)",
       padding: "1rem",
       textAlign: "center",
-      transition: "transform 0.2s ease"
+      transition: "transform 0.2s ease, box-shadow 0.2s ease",
+      cursor: "pointer"
     },
     imagen: {
       width: "100%",
-      height: "220px",         // ✅ Ajustado
-      objectFit: "contain",    // ✅ Ajustado
+      height: "220px",
+      objectFit: "contain",
       borderRadius: "8px",
       marginBottom: "1rem",
       border: "1px solid #eee"
@@ -104,7 +113,12 @@ function Productos({ apiUrl, categoria }) {
           <p>No hay productos disponibles en esta categoría.</p>
         ) : (
           productos.map((prod) => (
-            <div key={prod._id} style={estilos.card}>
+            <div
+              key={prod._id}
+              style={estilos.card}
+              onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.03)")}
+              onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
+            >
               <img
                 src={prod.imagenUrl}
                 alt={prod.nombre}
@@ -113,10 +127,20 @@ function Productos({ apiUrl, categoria }) {
               />
               <h3 style={estilos.nombre}>{prod.nombre}</h3>
               <p style={estilos.descripcion}>{prod.descripcion}</p>
-              <p style={estilos.precio}>${prod.precio.toLocaleString()}</p>
+              <p style={estilos.precio}>💰 {formatearCOP(prod.precio)}</p>
+              {prod.stock === 0 ? (
+                <p style={{ ...estilos.stock, color: "red" }}>Agotado</p>
+              ) : (
+                <p style={estilos.stock}>Stock: {prod.stock}</p>
+              )}
               <button
-                style={estilos.boton}
+                style={{
+                  ...estilos.boton,
+                  backgroundColor: prod.stock === 0 ? "#ccc" : "#3498db",
+                  cursor: prod.stock === 0 ? "not-allowed" : "pointer"
+                }}
                 onClick={() => handleAgregar(prod)}
+                disabled={prod.stock === 0}
               >
                 Agregar al carrito
               </button>
