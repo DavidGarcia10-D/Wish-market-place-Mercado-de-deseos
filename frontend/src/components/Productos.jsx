@@ -1,21 +1,9 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext } from "react";
 import { CarritoContext } from "../context/CarritoContext";
 import "./Productos.css";
 
-const Productos = ({ apiUrl, categoria }) => {
+const Productos = ({ productos = [] }) => {
   const { agregarAlCarrito } = useContext(CarritoContext);
-  const [productos, setProductos] = useState([]);
-
-  useEffect(() => {
-    const url = categoria
-      ? `${apiUrl}/productos?categoria=${encodeURIComponent(categoria)}`
-      : `${apiUrl}/productos`;
-
-    fetch(url)
-      .then((res) => res.json())
-      .then((data) => setProductos(data))
-      .catch((err) => console.error("Error al cargar productos:", err));
-  }, [apiUrl, categoria]);
 
   const formatCOP = (valor) =>
     new Intl.NumberFormat("es-CO", {
