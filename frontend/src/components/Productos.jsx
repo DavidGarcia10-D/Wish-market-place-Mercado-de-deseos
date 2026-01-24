@@ -1,26 +1,35 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { CarritoContext } from "../context/CarritoContext";
 import "./Productos.css";
 
-const Productos = ({ productos = [] }) => {
+const Productos = ({ apiUrl, categoria }) => {
   const { agregarAlCarrito } = useContext(CarritoContext);
+  const [productos, setProductos] = useState([]);
 
-  const formatCOP = (valor) => {
-    return new Intl.NumberFormat("es-CO", {
+  useEffect(() => {
+    const url = categoria
+      ? `${apiUrl}/productos?categoria=${encodeURIComponent(categoria)}`
+      : `${apiUrl}/productos`;
+
+    fetch(url)
+      .then((res) => res.json())
+      .then((data) => setProductos(data))
+      .catch((err) => console.error("Error al cargar productos:", err));
+  }, [apiUrl, categoria]);
+
+  const formatCOP = (valor) =>
+    new Intl.NumberFormat("es-CO", {
       style: "currency",
       currency: "COP",
       minimumFractionDigits: 0,
     }).format(valor);
-  };
 
   return (
     <div className="contenedor-productos">
       <h2 className="titulo-productos">🛍️ Nuestros productos</h2>
       <div className="grid-productos">
         {productos.length === 0 ? (
-          <p style={{ color: "#888", fontStyle: "italic" }}>
-            No hay productos disponibles.
-          </p>
+          <p style={{ color: "#888" }}>No hay productos disponibles.</p>
         ) : (
           productos.map((producto) => (
             <div key={producto.id} className="card-producto">
