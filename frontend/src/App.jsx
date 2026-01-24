@@ -50,7 +50,10 @@ const App = () => {
           categoriaSeleccionada={categoria}
         />
 
-        <Productos productos={productos} />
+        <Productos
+          apiUrl={process.env.REACT_APP_API_URL}
+          categoria={categoria}
+        />
 
         <Carrito
           apiUrl={process.env.REACT_APP_API_URL}
