@@ -61,16 +61,11 @@ const Pago = ({ apiUrl }) => {
   }, [apiUrl]);
 
   useEffect(() => {
-    const totalCalculado = carrito.reduce(
-      (acc, p) => acc + p.precio * p.cantidad,
-      0
-    );
+    const totalCalculado = carrito.reduce((acc, p) => acc + p.precio * p.cantidad, 0);
     setTotal(totalCalculado);
   }, [carrito]);
 
-  const validarEmail = (email) =>
-    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-
+  const validarEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   const validarTelefono = (tel) => /^3\d{9}$/.test(tel);
 
   const formatCOP = (valor) =>
@@ -87,21 +82,12 @@ const Pago = ({ apiUrl }) => {
       .filter(Boolean)
       .map(
         (palabra) =>
-          palabra.charAt(0).toUpperCase() +
-          palabra.slice(1).toLowerCase()
+          palabra.charAt(0).toUpperCase() + palabra.slice(1).toLowerCase()
       )
       .join(" ");
 
   const pagarConPSE = async () => {
-    if (
-      !nombre ||
-      !document ||
-      !documentType ||
-      !bankCode ||
-      !phone ||
-      !ciudad ||
-      !email
-    ) {
+    if (!nombre || !document || !documentType || !bankCode || !phone || !ciudad || !email) {
       showError("❌ Completa todos los campos.");
       return;
     }
@@ -121,16 +107,9 @@ const Pago = ({ apiUrl }) => {
       return;
     }
 
-    const ciudadNormalizada = ciudad
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .toLowerCase();
-
+    const ciudadNormalizada = ciudad.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
     const ciudadesNormalizadas = ciudadesColombia.map((c) =>
-      c
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .toLowerCase()
+      c.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase()
     );
 
     if (!ciudadesNormalizadas.includes(ciudadNormalizada)) {
@@ -158,8 +137,7 @@ const Pago = ({ apiUrl }) => {
         document_type: documentType,
         financial_institution_code: bankCode,
         nombre_cliente: capitalizar(nombre),
-        banco_nombre:
-          bancoSeleccionado?.financial_institution_name || "Desconocido",
+        banco_nombre: bancoSeleccionado?.financial_institution_name || "Desconocido",
         telefono_cliente: phone,
         user_type: userType,
         carrito: carrito.map((p) => ({
@@ -172,25 +150,20 @@ const Pago = ({ apiUrl }) => {
       const response = await axios.post(`${apiUrl}/pago/pse`, payload);
       const { success, url_pago, id_pago } = response.data;
 
-      if (!success || !url_pago)
-        throw new Error("URL de pago inválida.");
+      if (!success || !url_pago) throw new Error("URL de pago inválida.");
 
       setIdPago(id_pago);
       setMensaje("✅ Redirigiendo a Wompi...");
       window.location.href = url_pago;
     } catch (err) {
-      const backendMsg =
-        err.response?.data?.message ||
-        err.response?.data?.error ||
-        "";
+      const backendMsg = err.response?.data?.message || err.response?.data?.error || "";
       const wompiMsg = err.response?.data?.wompi_error || "";
       showError(`❌ Error: ${backendMsg || wompiMsg || err.message}`);
       setMensaje("");
       setLoading(false);
     }
   };
-
-  const campoEstilo = {
+    const campoEstilo = {
     display: "block",
     width: "100%",
     maxWidth: "400px",
@@ -225,13 +198,9 @@ const Pago = ({ apiUrl }) => {
         type="text"
         value={nombre}
         onChange={(e) => {
-          const limpio = e.target.value.replace(
-            /[^A-Za-zÁÉÍÓÚáéíóúÑñ\s]/g,
-            ""
-          );
+          const limpio = e.target.value.replace(/[^A-Za-zÁÉÍÓÚáéíóúÑñ\s]/g, "");
           setNombre(limpio);
         }}
-        onBlur={() => setNombre(capitalizar(nombre))}
         style={campoEstilo}
       />
 
@@ -284,10 +253,7 @@ const Pago = ({ apiUrl }) => {
         list="ciudades"
         value={ciudad}
         onChange={(e) => {
-          const limpio = e.target.value.replace(
-            /[^A-Za-zÁÉÍÓÚáéíóúÑñ\s]/g,
-            ""
-          );
+          const limpio = e.target.value.replace(/[^A-Za-zÁÉÍÓÚáéíóúÑñ\s]/g, "");
           setCiudad(limpio);
         }}
         style={campoEstilo}
@@ -337,7 +303,6 @@ const Pago = ({ apiUrl }) => {
 
       <button
         onClick={pagarConPSE}
-        disabled={loading}
         style={{
           backgroundColor: loading ? "#ccc" : "#4CAF50",
           color: "white",
@@ -347,6 +312,7 @@ const Pago = ({ apiUrl }) => {
           cursor: loading ? "not-allowed" : "pointer",
           marginTop: "20px",
         }}
+        disabled={loading}
       >
         {loading ? "⏳ Procesando..." : "💰 Pagar ahora"}
       </button>
