@@ -135,7 +135,7 @@ const Pago = ({ apiUrl }) => {
         document,
         document_type: documentType,
         financial_institution_code: bankCode,
-        nombre_cliente: nombre,
+        nombre_cliente: capitalizar(nombre),
         banco_nombre: bancoSeleccionado?.financial_institution_name || "Desconocido",
         telefono_cliente: phone,
         user_type: userType,
@@ -162,7 +162,7 @@ const Pago = ({ apiUrl }) => {
       setLoading(false);
     }
   };
-  const campoEstilo = {
+    const campoEstilo = {
     display: "block",
     width: "100%",
     maxWidth: "400px",
@@ -198,7 +198,7 @@ const Pago = ({ apiUrl }) => {
         value={nombre}
         onChange={(e) => {
           const limpio = e.target.value.replace(/[^A-Za-zÁÉÍÓÚáéíóúÑñ\s]/g, "");
-          setNombre(capitalizar(limpio));
+          setNombre(limpio);
         }}
         style={campoEstilo}
       />
@@ -253,7 +253,7 @@ const Pago = ({ apiUrl }) => {
         value={ciudad}
         onChange={(e) => {
           const limpio = e.target.value.replace(/[^A-Za-zÁÉÍÓÚáéíóúÑñ\s]/g, "");
-          setCiudad(capitalizar(limpio));
+          setCiudad(limpio);
         }}
         style={campoEstilo}
       />
@@ -320,9 +320,9 @@ const Pago = ({ apiUrl }) => {
         <div style={{ marginTop: "3rem" }}>
           <DatosEnvio
             idPago={idPago}
-            nombre={nombre}
+            nombre={capitalizar(nombre)}
             telefono={phone}
-            ciudad={ciudad}
+            ciudad={capitalizar(ciudad)}
           />
         </div>
       )}
