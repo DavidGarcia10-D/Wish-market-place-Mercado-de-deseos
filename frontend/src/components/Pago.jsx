@@ -22,7 +22,6 @@ const Pago = ({ apiUrl }) => {
   const [mensaje, setMensaje] = useState("");
   const [idPago, setIdPago] = useState(null);
 
-  // Cargar datos guardados
   useEffect(() => {
     const datosGuardados = JSON.parse(localStorage.getItem("datosPago"));
     if (datosGuardados) {
@@ -36,7 +35,6 @@ const Pago = ({ apiUrl }) => {
     }
   }, []);
 
-  // Guardar datos al cambiar
   useEffect(() => {
     const datos = {
       nombre,
@@ -70,29 +68,32 @@ const Pago = ({ apiUrl }) => {
   const validarEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   const validarTelefono = (tel) => /^3\d{9}$/.test(tel);
 
-  const formatCOP = (valor) => {
-    return new Intl.NumberFormat("es-CO", {
+  const formatCOP = (valor) =>
+    new Intl.NumberFormat("es-CO", {
       style: "currency",
       currency: "COP",
       minimumFractionDigits: 0,
     }).format(valor) + " COP";
-  };
 
   const capitalizar = (texto) =>
     texto
-      .toLowerCase()
-      .replace(/\s+/g, " ")
       .trim()
-      .replace(/\b\w/g, (letra) => letra.toUpperCase());
+      .split(" ")
+      .filter(Boolean)
+      .map(
+        (palabra) =>
+          palabra.charAt(0).toUpperCase() + palabra.slice(1).toLowerCase()
+      )
+      .join(" ");
 
   const pagarConPSE = async () => {
-    if (!email || !validarEmail(email)) {
-      showError("❌ Correo inválido.");
+    if (!nombre || !document || !documentType || !bankCode || !phone || !ciudad || !email) {
+      showError("❌ Completa todos los campos.");
       return;
     }
 
-    if (!nombre || !document || !documentType || !bankCode || !phone || !ciudad) {
-      showError("❌ Completa todos los campos.");
+    if (!validarEmail(email)) {
+      showError("❌ Correo inválido.");
       return;
     }
 
