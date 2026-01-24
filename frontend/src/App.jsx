@@ -1,10 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Routes, Route } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import "./app.css"; // ✅ Importa tus estilos personalizados
-
-
+import "./app.css";
 
 import Productos from "./components/Productos";
 import Categoria from "./components/Categoria";
@@ -16,6 +14,19 @@ import { CarritoProvider } from "./context/CarritoContext";
 
 const App = () => {
   const [categoria, setCategoria] = useState("");
+  const [modoOscuro, setModoOscuro] = useState(false);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    setModoOscuro(mediaQuery.matches);
+
+    const handleChange = (e) => setModoOscuro(e.matches);
+    mediaQuery.addEventListener("change", handleChange);
+
+    return () => mediaQuery.removeEventListener("change", handleChange);
+  }, []);
+
+  const temaToast = useMemo(() => (modoOscuro ? "dark" : "light"), [modoOscuro]);
 
   return (
     <CarritoProvider>
@@ -43,7 +54,7 @@ const App = () => {
         <ToastContainer
           position="top-right"
           autoClose={3000}
-          theme="auto"
+          theme={temaToast}
         />
 
         <Routes>

@@ -3,6 +3,7 @@ import axios from "axios";
 import { CarritoContext } from "../context/CarritoContext";
 import DatosEnvio from "./DatosEnvio";
 import { showError } from "../utils/toast";
+import { ciudadesColombia } from "../data/ciudades";
 
 const Pago = ({ apiUrl }) => {
   const { carrito } = useContext(CarritoContext);
@@ -21,9 +22,38 @@ const Pago = ({ apiUrl }) => {
   const [mensaje, setMensaje] = useState("");
   const [idPago, setIdPago] = useState(null);
 
+  // Cargar datos guardados
   useEffect(() => {
-    axios.get(`${apiUrl}/pago/bancos-wompi`)
-      .then(res => {
+    const datosGuardados = JSON.parse(localStorage.getItem("datosPago"));
+    if (datosGuardados) {
+      setNombre(datosGuardados.nombre || "");
+      setEmail(datosGuardados.email || "");
+      setPhone(datosGuardados.phone || "");
+      setCiudad(datosGuardados.ciudad || "");
+      setDocument(datosGuardados.document || "");
+      setDocumentType(datosGuardados.documentType || "CC");
+      setUserType(datosGuardados.userType ?? 0);
+    }
+  }, []);
+
+  // Guardar datos al cambiar
+  useEffect(() => {
+    const datos = {
+      nombre,
+      email,
+      phone,
+      ciudad,
+      document,
+      documentType,
+      userType,
+    };
+    localStorage.setItem("datosPago", JSON.stringify(datos));
+  }, [nombre, email, phone, ciudad, document, documentType, userType]);
+
+  useEffect(() => {
+    axios
+      .get(`${apiUrl}/pago/bancos-wompi`)
+      .then((res) => {
         if (Array.isArray(res.data)) setBancos(res.data);
       })
       .catch(() => {
@@ -44,41 +74,60 @@ const Pago = ({ apiUrl }) => {
     return new Intl.NumberFormat("es-CO", {
       style: "currency",
       currency: "COP",
-      minimumFractionDigits: 0
+      minimumFractionDigits: 0,
     }).format(valor) + " COP";
   };
 
-  const pagarConPSE = async () => {
-    setMensaje("⏳ Preparando redirección segura...");
-    setLoading(true);
+  const capitalizar = (texto) =>
+    texto
+      .toLowerCase()
+      .replace(/\s+/g, " ")
+      .trim()
+      .replace(/\b\w/g, (letra) => letra.toUpperCase());
 
+  const pagarConPSE = async () => {
     if (!email || !validarEmail(email)) {
       showError("❌ Correo inválido.");
-      setLoading(false); return;
+      return;
     }
 
     if (!nombre || !document || !documentType || !bankCode || !phone || !ciudad) {
       showError("❌ Completa todos los campos.");
-      setLoading(false); return;
+      return;
     }
 
     if (!validarTelefono(phone)) {
       showError("❌ Teléfono inválido.");
-      setLoading(false); return;
+      return;
     }
 
     if (![0, 1].includes(userType)) {
       showError("❌ Selecciona tipo de usuario.");
-      setLoading(false); return;
+      return;
+    }
+
+    const ciudadNormalizada = ciudad.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+    const ciudadesNormalizadas = ciudadesColombia.map((c) =>
+      c.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase()
+    );
+
+    if (!ciudadesNormalizadas.includes(ciudadNormalizada)) {
+      showError("❌ Selecciona una ciudad válida de la lista.");
+      return;
     }
 
     if (total < 1500) {
       showError("❌ Monto mínimo: $1.500 COP.");
-      setLoading(false); return;
+      return;
     }
 
+    setMensaje("⏳ Preparando redirección segura...");
+    setLoading(true);
+
     try {
-      const bancoSeleccionado = bancos.find(b => b.financial_institution_code === bankCode);
+      const bancoSeleccionado = bancos.find(
+        (b) => b.financial_institution_code === bankCode
+      );
 
       const payload = {
         valor: Number(total),
@@ -90,11 +139,11 @@ const Pago = ({ apiUrl }) => {
         banco_nombre: bancoSeleccionado?.financial_institution_name || "Desconocido",
         telefono_cliente: phone,
         user_type: userType,
-        carrito: carrito.map(p => ({
+        carrito: carrito.map((p) => ({
           nombre: p.nombre,
           precio: p.precio,
-          cantidad: p.cantidad
-        }))
+          cantidad: p.cantidad,
+        })),
       };
 
       const response = await axios.post(`${apiUrl}/pago/pse`, payload);
@@ -105,17 +154,14 @@ const Pago = ({ apiUrl }) => {
       setIdPago(id_pago);
       setMensaje("✅ Redirigiendo a Wompi...");
       window.location.href = url_pago;
-
     } catch (err) {
       const backendMsg = err.response?.data?.message || err.response?.data?.error || "";
       const wompiMsg = err.response?.data?.wompi_error || "";
       showError(`❌ Error: ${backendMsg || wompiMsg || err.message}`);
       setMensaje("");
-    } finally {
       setLoading(false);
     }
   };
-
   const campoEstilo = {
     display: "block",
     width: "100%",
@@ -125,11 +171,19 @@ const Pago = ({ apiUrl }) => {
     fontSize: "1rem",
     borderRadius: "6px",
     border: "1px solid #ccc",
-    boxSizing: "border-box"
+    boxSizing: "border-box",
   };
 
   const etiqueta = (emoji, texto) => (
-    <label style={{ display: "block", textAlign: "left", maxWidth: "400px", margin: "0 auto", fontWeight: "bold" }}>
+    <label
+      style={{
+        display: "block",
+        textAlign: "left",
+        maxWidth: "400px",
+        margin: "0 auto",
+        fontWeight: "bold",
+      }}
+    >
       {emoji} {texto}
     </label>
   );
@@ -139,22 +193,42 @@ const Pago = ({ apiUrl }) => {
       <h2>💳 Pagar con PSE</h2>
 
       {etiqueta("👤", "Nombre completo")}
-      <input type="text" value={nombre} onChange={(e) => {
-        const soloLetras = e.target.value.replace(/[^A-Za-zÁÉÍÓÚáéíóúÑñ\s]/g, '');
-        setNombre(soloLetras);
-      }} style={campoEstilo} />
+      <input
+        type="text"
+        value={nombre}
+        onChange={(e) => {
+          const limpio = e.target.value.replace(/[^A-Za-zÁÉÍÓÚáéíóúÑñ\s]/g, "");
+          setNombre(capitalizar(limpio));
+        }}
+        style={campoEstilo}
+      />
 
       {etiqueta("📧", "Correo electrónico")}
-      <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} style={campoEstilo} />
+      <input
+        type="email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value.trim())}
+        style={campoEstilo}
+      />
 
       {etiqueta("📱", "Teléfono")}
-      <input type="tel" value={phone} maxLength={10} onChange={(e) => {
-        const soloNumeros = e.target.value.replace(/[^0-9]/g, '');
-        setPhone(soloNumeros);
-      }} style={campoEstilo} />
+      <input
+        type="tel"
+        value={phone}
+        maxLength={10}
+        onChange={(e) => {
+          const soloNumeros = e.target.value.replace(/[^0-9]/g, "");
+          setPhone(soloNumeros.trim());
+        }}
+        style={campoEstilo}
+      />
 
       {etiqueta("📄", "Tipo de documento")}
-      <select value={documentType} onChange={(e) => setDocumentType(e.target.value)} style={campoEstilo}>
+      <select
+        value={documentType}
+        onChange={(e) => setDocumentType(e.target.value)}
+        style={campoEstilo}
+      >
         <option value="CC">Cédula</option>
         <option value="CE">Cédula Extranjera</option>
         <option value="TI">Tarjeta de Identidad</option>
@@ -162,33 +236,69 @@ const Pago = ({ apiUrl }) => {
       </select>
 
       {etiqueta("🪪", "Número de documento")}
-      <input type="text" value={document} maxLength={20} onChange={(e) => {
-        const soloNumeros = e.target.value.replace(/[^0-9]/g, '');
-        setDocument(soloNumeros);
-      }} style={campoEstilo} />
+      <input
+        type="text"
+        value={document}
+        maxLength={20}
+        onChange={(e) => {
+          const soloNumeros = e.target.value.replace(/[^0-9]/g, "");
+          setDocument(soloNumeros.trim());
+        }}
+        style={campoEstilo}
+      />
 
       {etiqueta("🌆", "Ciudad")}
-      <input type="text" value={ciudad} onChange={(e) => setCiudad(e.target.value)} style={campoEstilo} />
+      <input
+        list="ciudades"
+        value={ciudad}
+        onChange={(e) => {
+          const limpio = e.target.value.replace(/[^A-Za-zÁÉÍÓÚáéíóúÑñ\s]/g, "");
+          setCiudad(capitalizar(limpio));
+        }}
+        style={campoEstilo}
+      />
+      <datalist id="ciudades">
+        {ciudadesColombia.map((c, i) => (
+          <option key={i} value={c} />
+        ))}
+      </datalist>
 
       {etiqueta("🧑‍💼", "Tipo de usuario")}
-      <select value={userType} onChange={(e) => setUserType(Number(e.target.value))} style={campoEstilo}>
+      <select
+        value={userType}
+        onChange={(e) => setUserType(Number(e.target.value))}
+        style={campoEstilo}
+      >
         <option value={0}>Persona Natural</option>
         <option value={1}>Persona Jurídica</option>
       </select>
 
       {etiqueta("🏦", "Banco")}
-      <select value={bankCode} onChange={(e) => setBankCode(e.target.value)} style={campoEstilo}>
+      <select
+        value={bankCode}
+        onChange={(e) => setBankCode(e.target.value)}
+        style={campoEstilo}
+      >
         <option value="">Selecciona tu banco</option>
         {bancos.map((banco, index) => (
-          <option key={`${banco.financial_institution_code}-${index}`} value={banco.financial_institution_code}>
+          <option
+            key={`${banco.financial_institution_code}-${index}`}
+            value={banco.financial_institution_code}
+          >
             {banco.financial_institution_name}
           </option>
         ))}
       </select>
 
-      <h3 style={{ marginTop: "20px" }}>🧾 Total a pagar: {formatCOP(total)}</h3>
+      <h3 style={{ marginTop: "20px" }}>
+        🧾 Total a pagar: {formatCOP(total)}
+      </h3>
 
-      {mensaje && <p style={{ color: loading ? "#555" : "green", fontWeight: "bold" }}>{mensaje}</p>}
+      {mensaje && (
+        <p style={{ color: loading ? "#555" : "green", fontWeight: "bold" }}>
+          {mensaje}
+        </p>
+      )}
 
       <button
         onClick={pagarConPSE}
@@ -199,7 +309,7 @@ const Pago = ({ apiUrl }) => {
           border: "none",
           borderRadius: "6px",
           cursor: loading ? "not-allowed" : "pointer",
-          marginTop: "20px"
+          marginTop: "20px",
         }}
         disabled={loading}
       >
