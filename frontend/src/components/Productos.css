@@ -11,21 +11,25 @@
 
 .grid-productos {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 2rem;
+  padding: 1rem;
   justify-items: center;
 }
 
 .card-producto {
   background-color: #f9f9f9;
   border: 1px solid #ddd;
-  border-radius: 10px;
+  border-radius: 12px;
   padding: 1rem;
   width: 100%;
-  max-width: 250px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  max-width: 260px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   transition: transform 0.2s ease;
   color: #000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .card-producto:hover {
@@ -34,27 +38,29 @@
 
 .card-producto img {
   width: 100%;
-  height: 160px;
-  object-fit: cover;
+  max-height: 180px;
+  object-fit: contain;
   border-radius: 8px;
-  margin-bottom: 0.8rem;
+  margin-bottom: 1rem;
 }
 
 .card-producto h3 {
-  font-size: 1.1rem;
+  font-size: 1.15rem;
   margin: 0.5rem 0;
   color: #222;
+  text-align: center;
 }
 
 .card-producto p {
   font-size: 0.95rem;
   margin: 0.3rem 0;
   color: #555;
+  text-align: center;
 }
 
 .boton-agregar {
-  margin-top: 0.8rem;
-  padding: 0.5rem 1rem;
+  margin-top: auto;
+  padding: 0.6rem 1.2rem;
   background-color: #007bff;
   color: white;
   border: none;
