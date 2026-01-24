@@ -1,32 +1,136 @@
-import React, { useContext } from "react";
+import { useEffect, useState, useContext } from "react";
+import axios from "axios";
 import { CarritoContext } from "../context/CarritoContext";
-import "./Productos.css";
 
-const Productos = ({ productos = [] }) => {
+function Productos({ apiUrl, categoria }) {
+  const [productos, setProductos] = useState([]);
   const { agregarAlCarrito } = useContext(CarritoContext);
 
-  const formatCOP = (valor) =>
-    new Intl.NumberFormat("es-CO", {
+  const formatearCOP = (valor) => {
+    return new Intl.NumberFormat("es-CO", {
       style: "currency",
       currency: "COP",
-      minimumFractionDigits: 0,
-    }).format(valor);
+      minimumFractionDigits: 0
+    }).format(valor) + "COP";
+  };
+
+  useEffect(() => {
+    const obtenerProductos = async () => {
+      try {
+        const endpoint = categoria
+          ? `${apiUrl}/api/productos/categoria/${categoria}`
+          : `${apiUrl}/productos`;
+
+        const res = await axios.get(endpoint);
+        setProductos(res.data);
+      } catch (error) {
+        console.error("❌ Error al obtener productos:", error);
+      }
+    };
+
+    obtenerProductos();
+  }, [categoria, apiUrl]);
+
+  const handleAgregar = (producto) => {
+    if (typeof agregarAlCarrito === "function") {
+      agregarAlCarrito(producto);
+    } else {
+      console.error("❌ agregarAlCarrito no está definido como función");
+    }
+  };
+
+  const estilos = {
+    contenedor: {
+      padding: "2rem",
+      maxWidth: "1200px",
+      margin: "0 auto"
+    },
+    titulo: {
+      textAlign: "center",
+      fontSize: "2rem",
+      marginBottom: "2rem",
+      color: "#333"
+    },
+    grid: {
+      display: "grid",
+      gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+      gap: "2rem"
+    },
+    card: {
+      backgroundColor: "#fff",
+      borderRadius: "12px",
+      boxShadow: "0 0 10px rgba(0,0,0,0.05)",
+      padding: "1rem",
+      textAlign: "center",
+      transition: "transform 0.2s ease, box-shadow 0.2s ease",
+      cursor: "pointer"
+    },
+    imagen: {
+      width: "100%",
+      height: "220px",
+      objectFit: "contain",
+      borderRadius: "8px",
+      marginBottom: "1rem",
+      border: "1px solid #eee"
+    },
+    nombre: {
+      fontSize: "1.2rem",
+      margin: "0.5rem 0"
+    },
+    descripcion: {
+      fontSize: "0.9rem",
+      color: "#666",
+      marginBottom: "0.5rem"
+    },
+    precio: {
+      fontWeight: "bold",
+      fontSize: "1rem",
+      marginBottom: "0.5rem"
+    },
+    boton: {
+      backgroundColor: "#3498db",
+      color: "#fff",
+      border: "none",
+      padding: "0.5rem 1rem",
+      borderRadius: "6px",
+      cursor: "pointer"
+    }
+  };
 
   return (
-    <div className="contenedor-productos">
-      <h2 className="titulo-productos">🛍️ Nuestros productos</h2>
-      <div className="grid-productos">
+    <div style={estilos.contenedor}>
+      <h2 style={estilos.titulo}>
+        {categoria ? `🛍️ Productos de ${categoria}` : "🛍️ Todos los productos"}
+      </h2>
+
+      <div style={estilos.grid}>
         {productos.length === 0 ? (
-          <p style={{ color: "#888" }}>No hay productos disponibles.</p>
+          <p>No hay productos disponibles en esta categoría.</p>
         ) : (
-          productos.map((producto) => (
-            <div key={producto.id} className="card-producto">
-              <img src={producto.imagen} alt={producto.nombre} />
-              <h3>{producto.nombre}</h3>
-              <p>Precio: {formatCOP(producto.precio)}</p>
+          productos.map((prod) => (
+            <div
+              key={prod._id}
+              style={estilos.card}
+              onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.03)")}
+              onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
+            >
+              <img
+                src={prod.imagenUrl}
+                alt={prod.nombre}
+                style={estilos.imagen}
+                onError={(e) => (e.target.src = "/imagenes/default.jpg")}
+              />
+              <h3 style={estilos.nombre}>{prod.nombre}</h3>
+              <p style={estilos.descripcion}>{prod.descripcion}</p>
+              <p style={estilos.precio}>💰 {formatearCOP(prod.precio)}</p>
               <button
-                className="boton-agregar"
-                onClick={() => agregarAlCarrito(producto)}
+                style={{
+                  ...estilos.boton,
+                  backgroundColor: prod.stock === 0 ? "#ccc" : "#3498db",
+                  cursor: prod.stock === 0 ? "not-allowed" : "pointer"
+                }}
+                onClick={() => handleAgregar(prod)}
+                disabled={prod.stock === 0}
               >
                 Agregar al carrito
               </button>
@@ -36,6 +140,6 @@ const Productos = ({ productos = [] }) => {
       </div>
     </div>
   );
-};
+}
 
 export default Productos;
