@@ -73,6 +73,19 @@
   background-color: #0056b3;
 }
 
+/* ✅ Estilos para el enlace del producto */
+.enlace-producto {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  width: 100%;
+}
+
+.enlace-producto:hover {
+  opacity: 0.9;
+}
+
 /* 🌙 Modo oscuro */
 @media (prefers-color-scheme: dark) {
   .titulo-productos {
