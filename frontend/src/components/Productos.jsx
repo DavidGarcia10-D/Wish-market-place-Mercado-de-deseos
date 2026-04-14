@@ -49,7 +49,11 @@ const Productos = ({ apiUrl, categoria }) => {
               <div key={prod._id} className="card-producto">
                 <Link to={`/producto/${prod._id}`} className="enlace-producto">
                   <img
-                    src={prod.imagenes && prod.imagenes.length > 0 ? prod.imagenes[0] : ""}
+                    src={
+                      prod.imagenes && prod.imagenes.length > 0
+                        ? prod.imagenes[0]
+                        : prod.imagenUrl || "/imagenes/default.jpg"
+                    }
                     alt={prod.nombre}
                   />
                   <h3>{prod.nombre}</h3>

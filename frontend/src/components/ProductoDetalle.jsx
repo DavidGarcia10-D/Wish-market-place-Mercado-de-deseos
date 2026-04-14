@@ -13,7 +13,7 @@ const ProductoDetalle = () => {
     fetch(`${process.env.REACT_APP_API_URL}/api/productos/${id}`)
       .then((res) => res.json())
       .then((data) => {
-        console.log("📦 Producto recibido en detalle:", data); // 👈 Log para ver qué llega
+        console.log("📦 Producto recibido en detalle:", data);
         setProducto(data);
       })
       .catch((error) => console.error("❌ Error al obtener producto:", error));
@@ -36,9 +36,11 @@ const ProductoDetalle = () => {
       <p>{producto.descripcion}</p>
       <p>Precio: {formatearCOP(producto.precio)}</p>
 
-      {/* Imagen principal: primera del array */}
+      {/* Imagen principal con fallback */}
       {producto.imagenes && producto.imagenes.length > 0 ? (
         <img src={producto.imagenes[0]} alt={producto.nombre} />
+      ) : producto.imagenUrl ? (
+        <img src={producto.imagenUrl} alt={producto.nombre} />
       ) : (
         <p>Sin imagen disponible</p>
       )}
