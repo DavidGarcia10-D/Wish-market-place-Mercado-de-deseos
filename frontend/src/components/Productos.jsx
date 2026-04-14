@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
 import { CarritoContext } from "../context/CarritoContext";
-import { Link } from "react-router-dom"; // 👈 Importamos Link para la navegación
+import { Link } from "react-router-dom";
 import "./Productos.css";
 
 const Productos = ({ apiUrl, categoria }) => {
@@ -12,11 +12,11 @@ const Productos = ({ apiUrl, categoria }) => {
       try {
         const endpoint = categoria
           ? `${apiUrl}/api/productos/categoria/${categoria}`
-          : `${apiUrl}/api/productos`; // 👈 siempre usamos /api/productos
+          : `${apiUrl}/api/productos`;
 
         const res = await fetch(endpoint);
         const data = await res.json();
-        console.log("📦 Productos recibidos desde backend:", data); // 👈 Log para ver qué trae
+        console.log("📦 Productos recibidos desde backend:", data);
         setProductos(data);
       } catch (error) {
         console.error("❌ Error al obtener productos:", error);
@@ -44,21 +44,19 @@ const Productos = ({ apiUrl, categoria }) => {
           <p>No hay productos disponibles en esta categoría.</p>
         ) : (
           productos.map((prod) => {
-            console.log("🔎 Producto individual:", prod); // 👈 Log para ver cada objeto
+            console.log("🔎 Producto individual:", prod);
             return (
-              <div key={prod._id || prod.id} className="card-producto">
-                {/* 👇 Enlace hacia la pantalla de detalle */}
-                <Link
-                  to={`/producto/${prod._id || prod.id}`} // 👈 Usa _id o id según lo que venga
-                  className="enlace-producto"
-                >
-                  <img src={prod.imagenUrl} alt={prod.nombre} />
+              <div key={prod._id} className="card-producto">
+                <Link to={`/producto/${prod._id}`} className="enlace-producto">
+                  <img
+                    src={prod.imagenes && prod.imagenes.length > 0 ? prod.imagenes[0] : ""}
+                    alt={prod.nombre}
+                  />
                   <h3>{prod.nombre}</h3>
                   <p>{prod.descripcion}</p>
                   <p>💰 {formatearCOP(prod.precio)}</p>
                 </Link>
 
-                {/* Botón de agregar al carrito */}
                 <button
                   className="boton-agregar"
                   onClick={() => agregarAlCarrito(prod)}

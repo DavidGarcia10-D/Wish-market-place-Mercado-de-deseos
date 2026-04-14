@@ -12,7 +12,10 @@ const ProductoDetalle = () => {
   useEffect(() => {
     fetch(`${process.env.REACT_APP_API_URL}/api/productos/${id}`)
       .then((res) => res.json())
-      .then((data) => setProducto(data))
+      .then((data) => {
+        console.log("📦 Producto recibido en detalle:", data); // 👈 Log para ver qué llega
+        setProducto(data);
+      })
       .catch((error) => console.error("❌ Error al obtener producto:", error));
   }, [id]);
 
@@ -33,8 +36,12 @@ const ProductoDetalle = () => {
       <p>{producto.descripcion}</p>
       <p>Precio: {formatearCOP(producto.precio)}</p>
 
-      {/* Imagen principal */}
-      <img src={producto.imagenUrl} alt={producto.nombre} />
+      {/* Imagen principal: primera del array */}
+      {producto.imagenes && producto.imagenes.length > 0 ? (
+        <img src={producto.imagenes[0]} alt={producto.nombre} />
+      ) : (
+        <p>Sin imagen disponible</p>
+      )}
 
       {/* Botón agregar al carrito */}
       <button onClick={() => agregarAlCarrito(producto)}>
