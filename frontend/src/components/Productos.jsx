@@ -47,7 +47,10 @@ const Productos = ({ apiUrl, categoria }) => {
             console.log("🔎 Producto individual:", prod);
             return (
               <div key={prod._id} className="card-producto">
-                <Link to={`/producto/${prod._id}`} className="enlace-producto">
+                <Link
+                  to={`/producto/${prod._id}`}
+                  className="enlace-producto"
+                >
                   <img
                     src={
                       prod.imagenes && prod.imagenes.length > 0
