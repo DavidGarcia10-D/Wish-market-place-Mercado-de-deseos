@@ -9,6 +9,7 @@ import Categoria from "./components/Categoria";
 import Carrito from "./components/Carrito";
 import Pago from "./components/Pago";
 import EstadoPago from "./components/EstadoPago";
+import ProductoDetalle from "./components/ProductoDetalle"; // 👈 Importamos el detalle
 
 import { CarritoProvider } from "./context/CarritoContext";
 
@@ -28,7 +29,7 @@ const App = () => {
   }, []);
 
   useEffect(() => {
-    fetch(`${process.env.REACT_APP_API_URL}/productos`)
+    fetch(`${process.env.REACT_APP_API_URL}/api/productos`) // 👈 corregido para usar /api/productos
       .then((res) => res.json())
       .then((data) => {
         console.log("📦 Productos desde Mongo:", data);
@@ -73,6 +74,10 @@ const App = () => {
           <Route
             path="/estado-pago/:referencia"
             element={<EstadoPago apiUrl={process.env.REACT_APP_API_URL} />}
+          />
+          <Route
+            path="/producto/:id"
+            element={<ProductoDetalle />} // 👈 nueva ruta para detalle
           />
         </Routes>
       </div>

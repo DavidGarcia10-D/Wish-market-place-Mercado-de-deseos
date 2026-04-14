@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
 import { CarritoContext } from "../context/CarritoContext";
+import { Link } from "react-router-dom"; // 👈 Importamos Link para la navegación
 import "./Productos.css";
 
 const Productos = ({ apiUrl, categoria }) => {
@@ -11,7 +12,7 @@ const Productos = ({ apiUrl, categoria }) => {
       try {
         const endpoint = categoria
           ? `${apiUrl}/api/productos/categoria/${categoria}`
-          : `${apiUrl}/productos`;
+          : `${apiUrl}/api/productos`; // 👈 corregido para usar siempre /api/productos
 
         const res = await fetch(endpoint);
         const data = await res.json();
@@ -43,14 +44,19 @@ const Productos = ({ apiUrl, categoria }) => {
         ) : (
           productos.map((prod) => (
             <div key={prod._id} className="card-producto">
-              <img
-                src={prod.imagenUrl}
-                alt={prod.nombre}
-                onError={(e) => (e.target.src = "/imagenes/default.jpg")}
-              />
-              <h3>{prod.nombre}</h3>
-              <p>{prod.descripcion}</p>
-              <p>💰 {formatearCOP(prod.precio)}</p>
+              {/* 👇 Enlace hacia la pantalla de detalle */}
+              <Link to={`/producto/${prod._id}`} className="enlace-producto">
+                <img
+                  src={prod.imagenUrl}
+                  alt={prod.nombre}
+                  onError={(e) => (e.target.src = "/imagenes/default.jpg")}
+                />
+                <h3>{prod.nombre}</h3>
+                <p>{prod.descripcion}</p>
+                <p>💰 {formatearCOP(prod.precio)}</p>
+              </Link>
+
+              {/* Botón de agregar al carrito se mantiene igual */}
               <button
                 className="boton-agregar"
                 onClick={() => agregarAlCarrito(prod)}
