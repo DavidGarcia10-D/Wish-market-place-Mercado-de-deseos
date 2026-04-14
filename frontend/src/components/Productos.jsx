@@ -12,7 +12,7 @@ const Productos = ({ apiUrl, categoria }) => {
       try {
         const endpoint = categoria
           ? `${apiUrl}/api/productos/categoria/${categoria}`
-          : `${apiUrl}/api/productos`; // 👈 corregido para usar siempre /api/productos
+          : `${apiUrl}/api/productos`; // 👈 siempre usamos /api/productos
 
         const res = await fetch(endpoint);
         const data = await res.json();
@@ -46,17 +46,13 @@ const Productos = ({ apiUrl, categoria }) => {
             <div key={prod._id} className="card-producto">
               {/* 👇 Enlace hacia la pantalla de detalle */}
               <Link to={`/producto/${prod._id}`} className="enlace-producto">
-                <img
-                  src={prod.imagenUrl}
-                  alt={prod.nombre}
-                  onError={(e) => (e.target.src = "/imagenes/default.jpg")}
-                />
+                <img src={prod.imagenUrl} alt={prod.nombre} />
                 <h3>{prod.nombre}</h3>
                 <p>{prod.descripcion}</p>
                 <p>💰 {formatearCOP(prod.precio)}</p>
               </Link>
 
-              {/* Botón de agregar al carrito se mantiene igual */}
+              {/* Botón de agregar al carrito */}
               <button
                 className="boton-agregar"
                 onClick={() => agregarAlCarrito(prod)}

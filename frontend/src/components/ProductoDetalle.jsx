@@ -34,11 +34,7 @@ const ProductoDetalle = () => {
       <p>Precio: {formatearCOP(producto.precio)}</p>
 
       {/* Imagen principal */}
-      <img
-        src={producto.imagenUrl}
-        alt={producto.nombre}
-        onError={(e) => (e.target.src = "/imagenes/default.jpg")}
-      />
+      <img src={producto.imagenUrl} alt={producto.nombre} />
 
       {/* Botón agregar al carrito */}
       <button onClick={() => agregarAlCarrito(producto)}>
