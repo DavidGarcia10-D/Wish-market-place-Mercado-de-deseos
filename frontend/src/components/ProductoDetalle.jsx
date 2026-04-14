@@ -10,7 +10,7 @@ const ProductoDetalle = () => {
   const [producto, setProducto] = useState(null);
 
   useEffect(() => {
-    fetch(`/api/productos/${id}`)
+    fetch(`${process.env.REACT_APP_API_URL}/api/productos/${id}`)
       .then((res) => res.json())
       .then((data) => setProducto(data))
       .catch((error) => console.error("❌ Error al obtener producto:", error));
