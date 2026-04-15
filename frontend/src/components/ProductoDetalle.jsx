@@ -10,6 +10,8 @@ const ProductoDetalle = () => {
   const [producto, setProducto] = useState(null);
 
   useEffect(() => {
+    console.log("🌍 API URL usada:", process.env.REACT_APP_API_URL);
+
     fetch(`${process.env.REACT_APP_API_URL}/api/productos/${id}`)
       .then((res) => res.json())
       .then((data) => {
