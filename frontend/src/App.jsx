@@ -16,23 +16,13 @@ import { CarritoProvider } from "./context/CarritoContext";
 const App = () => {
   const [categoria, setCategoria] = useState("");
   const [modoOscuro, setModoOscuro] = useState(false);
-  const [productos, setProductos] = useState([]);
 
-  // Detectar modo oscuro
   useEffect(() => {
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
     setModoOscuro(mediaQuery.matches);
     const handleChange = (e) => setModoOscuro(e.matches);
     mediaQuery.addEventListener("change", handleChange);
     return () => mediaQuery.removeEventListener("change", handleChange);
-  }, []);
-
-  // Cargar productos desde la API
-  useEffect(() => {
-    fetch(`${process.env.REACT_APP_API_URL}/productos`)
-      .then((res) => res.json())
-      .then((data) => setProductos(data))
-      .catch((err) => console.error("Error cargando productos:", err));
   }, []);
 
   const temaToast = useMemo(() => (modoOscuro ? "dark" : "light"), [modoOscuro]);
@@ -74,10 +64,7 @@ const App = () => {
           />
 
           {/* Detalle de producto */}
-          <Route
-            path="/producto/:id"
-            element={<ProductoDetalle productos={productos} />}
-          />
+          <Route path="/producto/:id" element={<ProductoDetalle />} />
         </Routes>
 
         <ToastContainer
