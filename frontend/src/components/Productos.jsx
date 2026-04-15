@@ -39,9 +39,20 @@ const Productos = ({ apiUrl, categoria }) => {
         {categoria ? `🛍️ Productos de ${categoria}` : "🛍️ Todos los productos"}
       </h2>
 
-      {/* 🔎 Enlace fijo de prueba para descartar problemas de navegación */}
+      {/* 🔎 Enlace fijo de prueba muy visible */}
       <div style={{ marginBottom: "20px" }}>
-        <Link to="/producto/1" className="enlace-producto">
+        <Link
+          to="/producto/1"
+          style={{
+            color: "red",
+            fontSize: "22px",
+            fontWeight: "bold",
+            border: "2px solid red",
+            padding: "10px",
+            display: "inline-block",
+            backgroundColor: "yellow",
+          }}
+        >
           👉 Ir al producto 1 (prueba)
         </Link>
       </div>
