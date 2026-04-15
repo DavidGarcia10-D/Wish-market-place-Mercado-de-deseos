@@ -1,14 +1,36 @@
 import React from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
+import { useCarrito } from "../context/CarritoContext";
 
-const ProductoDetalle = () => {
+const ProductoDetalle = ({ productos }) => {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const { agregarAlCarrito } = useCarrito();
+
+  // Buscar producto por id
+  const producto = productos?.find((p) => p.id === parseInt(id));
+
+  if (!producto) {
+    return <p>Producto no encontrado</p>;
+  }
 
   return (
-    <div style={{ padding: "2rem", textAlign: "center" }}>
-      <h2>Detalle del producto</h2>
-      <p>ID recibido: {id}</p>
-      <p>Este es un componente de prueba aislada.</p>
+    <div className="detalle-producto">
+      <img
+        src={producto.imagen}
+        alt={producto.nombre}
+        className="detalle-imagen"
+      />
+      <h2>{producto.nombre}</h2>
+      <p>{producto.descripcion}</p>
+      <p>Precio: ${producto.precio}</p>
+
+      <div className="detalle-botones">
+        <button onClick={() => agregarAlCarrito(producto)}>
+          Agregar al carrito
+        </button>
+        <button onClick={() => navigate(-1)}>Regresar</button>
+      </div>
     </div>
   );
 };
