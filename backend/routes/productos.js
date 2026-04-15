@@ -1,44 +1,57 @@
-import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { useCarrito } from "../context/CarritoContext";
+const express = require('express');
+const router = express.Router();
+const Product = require('../models/Product'); // Importa el modelo de producto
 
-const ProductoDetalle = () => {
-  const { id } = useParams();
-  const navigate = useNavigate();
-  const { agregarAlCarrito } = useCarrito();
-  const [producto, setProducto] = useState(null);
+/**
+ * 📦 Ruta: Listar todos los productos
+ * GET /api/productos
+ * Devuelve todos los productos de la base de datos
+ */
+router.get('/', async (req, res) => {
+  try {
+    const productos = await Product.find();
+    res.status(200).json(productos);
+  } catch (error) {
+    console.error('❌ Error al listar productos:', error);
+    res.status(500).json({ mensaje: 'Error interno al listar productos' });
+  }
+});
 
-  useEffect(() => {
-    fetch(`${process.env.REACT_APP_API_URL}/api/productos/${id}`)
-      .then((res) => {
-        if (!res.ok) throw new Error("Producto no encontrado");
-        return res.json();
-      })
-      .then((data) => setProducto(data))
-      .catch((err) => console.error("Error cargando producto:", err));
-  }, [id]);
+/**
+ * 🧩 Ruta: Obtener productos por categoría
+ * GET /api/productos/categoria/:nombre
+ * Devuelve todos los productos que coincidan con la categoría solicitada
+ */
+router.get('/categoria/:nombre', async (req, res) => {
+  try {
+    const categoria = req.params.nombre;
+    const productos = await Product.find({ categoria: categoria });
 
-  if (!producto) return <p>Producto no encontrado</p>;
+    res.status(200).json(productos);
+  } catch (error) {
+    console.error('❌ Error al obtener productos por categoría:', error);
+    res.status(500).json({ mensaje: 'Error interno al filtrar productos' });
+  }
+});
 
-  return (
-    <div className="detalle-producto">
-      <img
-        src={producto.imagenUrl || (producto.imagenes?.[0] ?? "fallback.png")}
-        alt={producto.nombre}
-        className="detalle-imagen"
-      />
-      <h2>{producto.nombre}</h2>
-      <p>{producto.descripcion}</p>
-      <p>Precio: ${producto.precio}</p>
-      <p>Categoría: {producto.categoria}</p>
-      <p>Stock: {producto.stock}</p>
+/**
+ * 📦 Ruta: Obtener producto por ID
+ * GET /api/productos/:id
+ * Devuelve un producto específico según su _id
+ */
+router.get('/:id', async (req, res) => {
+  try {
+    const producto = await Product.findById(req.params.id);
 
-      <div className="detalle-botones">
-        <button onClick={() => agregarAlCarrito(producto)}>Agregar al carrito</button>
-        <button onClick={() => navigate(-1)}>Regresar</button>
-      </div>
-    </div>
-  );
-};
+    if (!producto) {
+      return res.status(404).json({ mensaje: 'Producto no encontrado' });
+    }
 
-export default ProductoDetalle;
+    res.status(200).json(producto);
+  } catch (error) {
+    console.error('❌ Error al obtener producto por ID:', error);
+    res.status(500).json({ mensaje: 'Error interno al buscar producto' });
+  }
+});
+
+module.exports = router;
