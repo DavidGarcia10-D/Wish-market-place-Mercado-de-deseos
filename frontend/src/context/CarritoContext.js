@@ -1,4 +1,4 @@
-import React, { createContext, useState } from "react";
+import React, { createContext, useState, useContext } from "react";
 
 export const CarritoContext = createContext();
 
@@ -21,4 +21,9 @@ export const CarritoProvider = ({ children }) => {
       {children}
     </CarritoContext.Provider>
   );
+};
+
+// ✅ Hook personalizado para usar el contexto
+export const useCarrito = () => {
+  return useContext(CarritoContext);
 };
