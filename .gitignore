@@ -1,0 +1,8 @@
+# dependencias
+node_modules/
+
+# carpeta de build
+build/
+
+# logs
+*.log
