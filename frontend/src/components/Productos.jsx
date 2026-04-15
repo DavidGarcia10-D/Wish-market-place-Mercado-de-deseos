@@ -39,6 +39,13 @@ const Productos = ({ apiUrl, categoria }) => {
         {categoria ? `🛍️ Productos de ${categoria}` : "🛍️ Todos los productos"}
       </h2>
 
+      {/* 🔎 Enlace fijo de prueba para descartar problemas de navegación */}
+      <div style={{ marginBottom: "20px" }}>
+        <Link to="/producto/1" className="enlace-producto">
+          👉 Ir al producto 1 (prueba)
+        </Link>
+      </div>
+
       <div className="grid-productos">
         {productos.length === 0 ? (
           <p>No hay productos disponibles en esta categoría.</p>
