@@ -1,12 +1,12 @@
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { CarritoContext } from "../context/CarritoContext";
+import { useCarrito } from "../context/CarritoContext";   // ✅ Usamos el hook correcto
 import DatosEnvio from "./DatosEnvio";
 import { showError } from "../utils/toast";
 import { ciudadesColombia } from "../data/ciudades";
 
 const Pago = ({ apiUrl }) => {
-  const { carrito } = useContext(CarritoContext);
+  const { carrito } = useCarrito();   // ✅ Consumimos el contexto con el hook
 
   const [email, setEmail] = useState("");
   const [nombre, setNombre] = useState("");
@@ -22,6 +22,7 @@ const Pago = ({ apiUrl }) => {
   const [mensaje, setMensaje] = useState("");
   const [idPago, setIdPago] = useState(null);
 
+  // ✅ Todos los useEffect dentro de la función
   useEffect(() => {
     const datosGuardados = JSON.parse(localStorage.getItem("datosPago"));
     if (datosGuardados) {
@@ -36,15 +37,7 @@ const Pago = ({ apiUrl }) => {
   }, []);
 
   useEffect(() => {
-    const datos = {
-      nombre,
-      email,
-      phone,
-      ciudad,
-      document,
-      documentType,
-      userType,
-    };
+    const datos = { nombre, email, phone, ciudad, document, documentType, userType };
     localStorage.setItem("datosPago", JSON.stringify(datos));
   }, [nombre, email, phone, ciudad, document, documentType, userType]);
 
@@ -80,10 +73,7 @@ const Pago = ({ apiUrl }) => {
       .trim()
       .split(" ")
       .filter(Boolean)
-      .map(
-        (palabra) =>
-          palabra.charAt(0).toUpperCase() + palabra.slice(1).toLowerCase()
-      )
+      .map((palabra) => palabra.charAt(0).toUpperCase() + palabra.slice(1).toLowerCase())
       .join(" ");
 
   const pagarConPSE = async () => {
@@ -126,9 +116,7 @@ const Pago = ({ apiUrl }) => {
     setLoading(true);
 
     try {
-      const bancoSeleccionado = bancos.find(
-        (b) => b.financial_institution_code === bankCode
-      );
+      const bancoSeleccionado = bancos.find((b) => b.financial_institution_code === bankCode);
 
       const payload = {
         valor: Number(total),
@@ -163,7 +151,8 @@ const Pago = ({ apiUrl }) => {
       setLoading(false);
     }
   };
-    const campoEstilo = {
+
+  const campoEstilo = {
     display: "block",
     width: "100%",
     maxWidth: "400px",

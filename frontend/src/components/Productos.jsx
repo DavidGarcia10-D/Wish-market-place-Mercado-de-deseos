@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useContext } from "react";
-import { CarritoContext } from "../context/CarritoContext";
+import React, { useState, useEffect } from "react";
+import { useCarrito } from "../context/CarritoContext";
 import { Link } from "react-router-dom";
 import "./Productos.css";
 
 const Productos = ({ apiUrl, categoria }) => {
-  const { agregarAlCarrito } = useContext(CarritoContext);
+  const { agregarAlCarrito } = useCarrito();   // ✅ Usamos el hook correcto
   const [productos, setProductos] = useState([]);
 
   useEffect(() => {
@@ -39,63 +39,39 @@ const Productos = ({ apiUrl, categoria }) => {
         {categoria ? `🛍️ Productos de ${categoria}` : "🛍️ Todos los productos"}
       </h2>
 
-      {/* 🔎 Enlace fijo de prueba muy visible */}
-      <div style={{ marginBottom: "20px" }}>
-        <Link
-          to="/producto/1"
-          style={{
-            color: "red",
-            fontSize: "22px",
-            fontWeight: "bold",
-            border: "2px solid red",
-            padding: "10px",
-            display: "inline-block",
-            backgroundColor: "yellow",
-          }}
-        >
-          👉 Ir al producto 1 (prueba)
-        </Link>
-      </div>
-
       <div className="grid-productos">
         {productos.length === 0 ? (
           <p>No hay productos disponibles en esta categoría.</p>
         ) : (
-          productos.map((prod) => {
-            console.log("🔎 Producto individual:", prod);
-            return (
-              <div key={prod._id} className="card-producto">
-                <Link
-                  to={`/producto/${prod._id}`}
-                  className="enlace-producto"
-                >
-                  <img
-                    src={
-                      prod.imagenes && prod.imagenes.length > 0
-                        ? prod.imagenes[0]
-                        : prod.imagenUrl || "/imagenes/default.jpg"
-                    }
-                    alt={prod.nombre}
-                  />
-                  <h3>{prod.nombre}</h3>
-                  <p>{prod.descripcion}</p>
-                  <p>💰 {formatearCOP(prod.precio)}</p>
-                </Link>
+          productos.map((prod) => (
+            <div key={prod._id} className="card-producto">
+              <Link to={`/producto/${prod._id}`} className="enlace-producto">
+                <img
+                  src={
+                    prod.imagenes && prod.imagenes.length > 0
+                      ? prod.imagenes[0]
+                      : prod.imagenUrl || "/imagenes/default.jpg"
+                  }
+                  alt={prod.nombre}
+                />
+                <h3>{prod.nombre}</h3>
+                <p>{prod.descripcion}</p>
+                <p>💰 {formatearCOP(prod.precio)}</p>
+              </Link>
 
-                <button
-                  className="boton-agregar"
-                  onClick={() => agregarAlCarrito(prod)}
-                  disabled={prod.stock === 0}
-                  style={{
-                    backgroundColor: prod.stock === 0 ? "#ccc" : undefined,
-                    cursor: prod.stock === 0 ? "not-allowed" : undefined,
-                  }}
-                >
-                  Agregar al carrito
-                </button>
-              </div>
-            );
-          })
+              <button
+                className="boton-agregar"
+                onClick={() => agregarAlCarrito(prod)}
+                disabled={prod.stock === 0}
+                style={{
+                  backgroundColor: prod.stock === 0 ? "#ccc" : undefined,
+                  cursor: prod.stock === 0 ? "not-allowed" : undefined,
+                }}
+              >
+                Agregar al carrito
+              </button>
+            </div>
+          ))
         )}
       </div>
     </div>

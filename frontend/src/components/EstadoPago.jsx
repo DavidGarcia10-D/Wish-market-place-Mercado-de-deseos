@@ -1,12 +1,12 @@
-import React, { useEffect, useState, useContext } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import ResumenPago from "./ResumenPago";
 import PopupAgradecimiento from "./PopupAgradecimiento";
-import { CarritoContext } from "../context/CarritoContext";
+import { useCarrito } from "../context/CarritoContext";   // ✅ Usamos el hook correcto
 
 const EstadoPago = ({ apiUrl }) => {
-  const { referencia } = useParams(); // ✅ CAMBIO AQUÍ
+  const { referencia } = useParams();
   const navigate = useNavigate();
   const [estado, setEstado] = useState(null);
   const [ultimaConsulta, setUltimaConsulta] = useState(null);
@@ -14,7 +14,8 @@ const EstadoPago = ({ apiUrl }) => {
   const [pago, setPago] = useState(null);
   const [mostrarPopup, setMostrarPopup] = useState(false);
 
-  const { carrito, total } = useContext(CarritoContext);
+  const { carrito } = useCarrito();   // ✅ Consumimos el contexto con el hook
+  const total = carrito.reduce((acc, p) => acc + p.precio * p.cantidad, 0);
 
   useEffect(() => {
     if (!apiUrl || !referencia) {
@@ -78,7 +79,7 @@ const EstadoPago = ({ apiUrl }) => {
       clearInterval(intervalo);
       clearTimeout(delayInicial);
     };
-  }, [referencia, apiUrl]); // ✅ CAMBIO AQUÍ
+  }, [referencia, apiUrl]);
 
   const renderEstado = () => {
     if (errorConsulta) {

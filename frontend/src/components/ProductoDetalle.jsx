@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useCarrito } from "../context/CarritoContext";
+import "./ProductoDetalle.css";
 
 const ProductoDetalle = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { agregarAlCarrito } = useCarrito();
   const [producto, setProducto] = useState(null);
+  const [imagenActiva, setImagenActiva] = useState(null);
 
   useEffect(() => {
     fetch(`${process.env.REACT_APP_API_URL}/api/productos/${id}`)
@@ -14,7 +16,10 @@ const ProductoDetalle = () => {
         if (!res.ok) throw new Error("Producto no encontrado");
         return res.json();
       })
-      .then((data) => setProducto(data))
+      .then((data) => {
+        setProducto(data);
+        setImagenActiva(data.imagenUrl || data.imagenes?.[0] || "fallback.png");
+      })
       .catch((err) => console.error("Error cargando producto:", err));
   }, [id]);
 
@@ -22,11 +27,32 @@ const ProductoDetalle = () => {
 
   return (
     <div className="detalle-producto">
-      <img
-        src={producto.imagenUrl || (producto.imagenes?.[0] ?? "fallback.png")}
-        alt={producto.nombre}
-        className="detalle-imagen"
-      />
+      {/* Imagen principal */}
+      <div className="detalle-imagen-principal">
+        <img src={imagenActiva} alt={producto.nombre} />
+      </div>
+
+      {/* Miniaturas */}
+      <div className="detalle-miniaturas">
+        {producto.imagenUrl && (
+          <img
+            src={producto.imagenUrl}
+            alt="principal"
+            onClick={() => setImagenActiva(producto.imagenUrl)}
+            className={imagenActiva === producto.imagenUrl ? "miniatura-activa" : ""}
+          />
+        )}
+        {producto.imagenes?.map((img, index) => (
+          <img
+            key={index}
+            src={img}
+            alt={`miniatura ${index}`}
+            onClick={() => setImagenActiva(img)}
+            className={imagenActiva === img ? "miniatura-activa" : ""}
+          />
+        ))}
+      </div>
+
       <h2>{producto.nombre}</h2>
       <p>{producto.descripcion}</p>
       <p>Precio: ${producto.precio}</p>

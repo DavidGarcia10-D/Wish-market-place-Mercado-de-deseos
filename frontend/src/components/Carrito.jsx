@@ -1,29 +1,10 @@
-// frontend/src/components/Carrito.jsx
-
-import React, { useContext } from "react";
-import { CarritoContext } from "../context/CarritoContext";
+import React from "react";
+import { useCarrito } from "../context/CarritoContext";
 import { showSuccess } from "../utils/toast";
 import "./Carrito.css";
 
 const Carrito = () => {
-  const { carrito, setCarrito } = useContext(CarritoContext);
-
-  const eliminarDelCarrito = (id) => {
-    const nuevoCarrito = carrito.filter(item => item._id !== id);
-    setCarrito(nuevoCarrito);
-    showSuccess("❌ Producto eliminado del carrito");
-  };
-
-  const modificarCantidad = (id, delta) => {
-    const nuevoCarrito = carrito.map(item => {
-      if (item._id === id) {
-        const nuevaCantidad = Math.max(item.cantidad + delta, 1);
-        return { ...item, cantidad: nuevaCantidad };
-      }
-      return item;
-    });
-    setCarrito(nuevoCarrito);
-  };
+  const { carrito, eliminarDelCarrito, vaciarCarrito, modificarCantidad } = useCarrito();
 
   const total = carrito.reduce((acc, item) => acc + item.precio * item.cantidad, 0);
 
@@ -43,7 +24,7 @@ const Carrito = () => {
                 src={item.imagenUrl || "/imagenes/default.jpg"}
                 alt={item.nombre}
                 className="carrito-imagen"
-                onError={(e) => e.target.src = "/imagenes/default.jpg"}
+                onError={(e) => (e.target.src = "/imagenes/default.jpg")}
               />
               <div className="carrito-info">
                 <h4 className="carrito-nombre">{item.nombre}</h4>
@@ -52,21 +33,27 @@ const Carrito = () => {
                   {new Intl.NumberFormat("es-CO", {
                     style: "currency",
                     currency: "COP",
-                    minimumFractionDigits: 0
+                    minimumFractionDigits: 0,
                   }).format(item.precio)}
                 </p>
 
                 <div className="carrito-cantidad-control">
                   <button
                     className="carrito-boton-cantidad"
-                    onClick={() => modificarCantidad(item._id, -1)}
+                    onClick={() => {
+                      modificarCantidad(item._id, -1);
+                      showSuccess("🔄 Cantidad actualizada");
+                    }}
                   >
                     −
                   </button>
                   <span>{item.cantidad}</span>
                   <button
                     className="carrito-boton-cantidad"
-                    onClick={() => modificarCantidad(item._id, 1)}
+                    onClick={() => {
+                      modificarCantidad(item._id, 1);
+                      showSuccess("🔄 Cantidad actualizada");
+                    }}
                   >
                     +
                   </button>
@@ -74,7 +61,10 @@ const Carrito = () => {
 
                 <button
                   className="carrito-boton-eliminar"
-                  onClick={() => eliminarDelCarrito(item._id)}
+                  onClick={() => {
+                    eliminarDelCarrito(item._id);
+                    showSuccess("❌ Producto eliminado del carrito");
+                  }}
                 >
                   ❌ Eliminar
                 </button>
@@ -87,9 +77,13 @@ const Carrito = () => {
             {new Intl.NumberFormat("es-CO", {
               style: "currency",
               currency: "COP",
-              minimumFractionDigits: 0
+              minimumFractionDigits: 0,
             }).format(total)}
           </h3>
+
+          <button className="carrito-boton-vaciar" onClick={vaciarCarrito}>
+            🗑️ Vaciar carrito
+          </button>
         </div>
       )}
     </div>
