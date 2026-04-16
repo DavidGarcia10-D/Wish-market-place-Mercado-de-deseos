@@ -18,7 +18,8 @@ const ProductoDetalle = () => {
       })
       .then((data) => {
         setProducto(data);
-        setImagenActiva(data.imagenUrl || data.imagenes?.[0] || "fallback.png");
+        // ✅ Usamos la primera imagen como principal
+        setImagenActiva(data.imagenes?.[0] || "/imagenes/default.jpg");
       })
       .catch((err) => console.error("Error cargando producto:", err));
   }, [id]);
@@ -34,14 +35,6 @@ const ProductoDetalle = () => {
 
       {/* Miniaturas */}
       <div className="detalle-miniaturas">
-        {producto.imagenUrl && (
-          <img
-            src={producto.imagenUrl}
-            alt="principal"
-            onClick={() => setImagenActiva(producto.imagenUrl)}
-            className={imagenActiva === producto.imagenUrl ? "miniatura-activa" : ""}
-          />
-        )}
         {producto.imagenes?.map((img, index) => (
           <img
             key={index}

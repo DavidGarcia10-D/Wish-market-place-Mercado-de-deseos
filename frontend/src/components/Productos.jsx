@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import "./Productos.css";
 
 const Productos = ({ apiUrl, categoria }) => {
-  const { agregarAlCarrito } = useCarrito();   // ✅ Usamos el hook correcto
+  const { agregarAlCarrito } = useCarrito();
   const [productos, setProductos] = useState([]);
 
   useEffect(() => {
@@ -50,7 +50,7 @@ const Productos = ({ apiUrl, categoria }) => {
                   src={
                     prod.imagenes && prod.imagenes.length > 0
                       ? prod.imagenes[0]
-                      : prod.imagenUrl || "/imagenes/default.jpg"
+                      : "/imagenes/default.jpg"
                   }
                   alt={prod.nombre}
                 />

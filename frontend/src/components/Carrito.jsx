@@ -21,7 +21,7 @@ const Carrito = () => {
           {carrito.map(item => (
             <div key={item._id} className="carrito-item">
               <img
-                src={item.imagenUrl || "/imagenes/default.jpg"}
+                src={item.imagenes && item.imagenes.length > 0 ? item.imagenes[0] : "/imagenes/default.jpg"}
                 alt={item.nombre}
                 className="carrito-imagen"
                 onError={(e) => (e.target.src = "/imagenes/default.jpg")}
