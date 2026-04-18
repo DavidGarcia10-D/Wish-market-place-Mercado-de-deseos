@@ -10,6 +10,7 @@ import Carrito from "./components/Carrito";
 import Pago from "./components/Pago";
 import EstadoPago from "./components/EstadoPago";
 import ProductoDetalle from "./components/ProductoDetalle";
+import CarritoWidget from "./components/CarritoWidget";
 
 import { CarritoProvider } from "./context/CarritoContext";
 
@@ -39,22 +40,27 @@ const App = () => {
         />
 
         <Routes>
-          {/* Página principal con productos, carrito y pago */}
+          {/* Página principal con productos */}
           <Route
             path="/"
             element={
-              <>
-                <Productos
-                  apiUrl={process.env.REACT_APP_API_URL}
-                  categoria={categoria}
-                />
-                <Carrito
-                  apiUrl={process.env.REACT_APP_API_URL}
-                  usuarioId="123456"
-                />
-                <Pago apiUrl={process.env.REACT_APP_API_URL} />
-              </>
+              <Productos
+                apiUrl={process.env.REACT_APP_API_URL}
+                categoria={categoria}
+              />
             }
+          />
+
+          {/* Carrito */}
+          <Route
+            path="/carrito"
+            element={<Carrito apiUrl={process.env.REACT_APP_API_URL} usuarioId="123456" />}
+          />
+
+          {/* Pago */}
+          <Route
+            path="/pago"
+            element={<Pago apiUrl={process.env.REACT_APP_API_URL} />}
           />
 
           {/* Estado del pago */}
@@ -66,6 +72,9 @@ const App = () => {
           {/* Detalle de producto */}
           <Route path="/producto/:id" element={<ProductoDetalle />} />
         </Routes>
+
+        {/* Widget fijo en todas las pantallas excepto /pago */}
+        <CarritoWidget modoOscuro={modoOscuro} />
 
         <ToastContainer
           position="top-right"
