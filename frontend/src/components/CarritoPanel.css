@@ -1,0 +1,27 @@
+.carrito-panel-botones {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.carrito-vaciar {
+  background: #d9534f;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.carrito-vaciar:hover {
+  background: #c9302c;
+}
+
+.carrito-finalizar {
+  background: #4CAF50;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+}
