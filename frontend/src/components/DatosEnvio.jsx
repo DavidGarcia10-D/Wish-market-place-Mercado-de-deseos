@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 
-const DatosEnvio = ({ idPago, nombre, telefono, ciudad }) => {
+const DatosEnvio = ({ idPago, nombre, telefono, ciudad, apiUrl }) => {
   const [direccion, setDireccion] = useState("");
   const [mensaje, setMensaje] = useState("");
   const [error, setError] = useState("");
@@ -19,7 +19,15 @@ const DatosEnvio = ({ idPago, nombre, telefono, ciudad }) => {
   };
 
   const etiqueta = (emoji, texto) => (
-    <label style={{ display: "block", textAlign: "left", maxWidth: "400px", margin: "0 auto", fontWeight: "bold" }}>
+    <label
+      style={{
+        display: "block",
+        textAlign: "left",
+        maxWidth: "400px",
+        margin: "0 auto",
+        fontWeight: "bold"
+      }}
+    >
       {emoji} {texto}
     </label>
   );
@@ -27,6 +35,11 @@ const DatosEnvio = ({ idPago, nombre, telefono, ciudad }) => {
   const guardarEnvio = async () => {
     setError("");
     setMensaje("");
+
+    if (!idPago) {
+      setError("❌ No hay referencia de pago válida.");
+      return;
+    }
 
     if (!direccion || direccion.length < 5) {
       setError("❌ Ingresa una dirección válida.");
@@ -42,7 +55,7 @@ const DatosEnvio = ({ idPago, nombre, telefono, ciudad }) => {
         direccion
       };
 
-      const res = await axios.post(`${process.env.REACT_APP_API_URL}/envios/crear-envio`, payload);
+      await axios.post(`${apiUrl}/envios/crear-envio`, payload);
       setMensaje("✅ Datos de envío guardados correctamente.");
     } catch (err) {
       setError("❌ Error al guardar el envío. Intenta nuevamente.");
@@ -50,7 +63,14 @@ const DatosEnvio = ({ idPago, nombre, telefono, ciudad }) => {
   };
 
   return (
-    <div style={{ padding: "2rem", textAlign: "center", borderTop: "1px solid #eee", marginTop: "2rem" }}>
+    <div
+      style={{
+        padding: "2rem",
+        textAlign: "center",
+        borderTop: "1px solid #eee",
+        marginTop: "2rem"
+      }}
+    >
       <h3>📦 Datos de envío</h3>
 
       {etiqueta("🏠", "Dirección de entrega")}
@@ -77,8 +97,16 @@ const DatosEnvio = ({ idPago, nombre, telefono, ciudad }) => {
         📬 Guardar envío
       </button>
 
-      {mensaje && <p style={{ color: "green", fontWeight: "bold", marginTop: "1rem" }}>{mensaje}</p>}
-      {error && <p style={{ color: "red", fontWeight: "bold", marginTop: "1rem" }}>{error}</p>}
+      {mensaje && (
+        <p style={{ color: "green", fontWeight: "bold", marginTop: "1rem" }}>
+          {mensaje}
+        </p>
+      )}
+      {error && (
+        <p style={{ color: "red", fontWeight: "bold", marginTop: "1rem" }}>
+          {error}
+        </p>
+      )}
     </div>
   );
 };

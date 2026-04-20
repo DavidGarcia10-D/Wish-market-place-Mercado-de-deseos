@@ -313,6 +313,7 @@ const Pago = ({ apiUrl }) => {
             nombre={capitalizar(nombre)}
             telefono={phone}
             ciudad={capitalizar(ciudad)}
+            apiUrl={apiUrl}
           />
         </div>
       )}
