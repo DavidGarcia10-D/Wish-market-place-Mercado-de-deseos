@@ -13,6 +13,7 @@ const app = express();
 
 // 🌍 Orígenes permitidos para CORS
 const allowedOrigins = [
+  "http://localhost:3000",
   "http://localhost:5000",
   "https://wish-market-place-front.onrender.com"
 ];
