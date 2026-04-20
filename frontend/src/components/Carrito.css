@@ -167,4 +167,37 @@
   .carrito-boton-vaciar:hover {
     background-color: #f39c12;
   }
+  .carrito-acciones {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.carrito-boton-finalizar {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.carrito-boton-finalizar:hover {
+  background-color: #45a049;
+  transform: scale(1.05);
+}
+
+/* 🌙 Modo oscuro */
+@media (prefers-color-scheme: dark) {
+  .carrito-boton-finalizar {
+    background-color: #2ecc71;
+  }
+
+  .carrito-boton-finalizar:hover {
+    background-color: #27ae60;
+  }
+}
 }

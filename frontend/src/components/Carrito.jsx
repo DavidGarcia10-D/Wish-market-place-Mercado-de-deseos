@@ -1,10 +1,12 @@
 import React from "react";
 import { useCarrito } from "../context/CarritoContext";
 import { showSuccess } from "../utils/toast";
+import { useNavigate } from "react-router-dom";   // 👈 Importar
 import "./Carrito.css";
 
 const Carrito = () => {
   const { carrito, eliminarDelCarrito, vaciarCarrito, modificarCantidad } = useCarrito();
+  const navigate = useNavigate();   // 👈 Hook para navegar
 
   const total = carrito.reduce((acc, item) => acc + item.precio * item.cantidad, 0);
 
@@ -81,9 +83,18 @@ const Carrito = () => {
             }).format(total)}
           </h3>
 
-          <button className="carrito-boton-vaciar" onClick={vaciarCarrito}>
-            🗑️ Vaciar carrito
-          </button>
+          <div className="carrito-acciones">
+            <button className="carrito-boton-vaciar" onClick={vaciarCarrito}>
+              🗑️ Vaciar carrito
+            </button>
+
+            <button
+              className="carrito-boton-finalizar"
+              onClick={() => navigate("/pago")}   // 👈 Redirige al formulario de pago
+            >
+              ✅ Finalizar compra
+            </button>
+          </div>
         </div>
       )}
     </div>

@@ -33,6 +33,38 @@ const Productos = ({ apiUrl, categoria }) => {
       minimumFractionDigits: 0,
     }).format(valor);
 
+  // 👉 Función de animación
+  const lanzarAnimacion = (elemento) => {
+    const carritoIcono = document.querySelector(".carrito-widget-icono");
+    if (!carritoIcono) return;
+
+    const rectProducto = elemento.getBoundingClientRect();
+    const rectCarrito = carritoIcono.getBoundingClientRect();
+
+    const burbuja = document.createElement("div");
+    burbuja.className = "burbuja-animada";
+    burbuja.style.left = rectProducto.left + "px";
+    burbuja.style.top = rectProducto.top + "px";
+    document.body.appendChild(burbuja);
+
+    burbuja.animate(
+      [
+        { transform: `translate(0,0) scale(1)` },
+        {
+          transform: `translate(${rectCarrito.left - rectProducto.left}px, 
+                                ${rectCarrito.top - rectProducto.top}px) scale(0.3)`
+        }
+      ],
+      {
+        duration: 800,
+        easing: "ease-in-out"
+      }
+    ).onfinish = () => {
+      burbuja.remove();
+      // El contador del carrito ya se incrementa automáticamente con agregarAlCarrito
+    };
+  };
+
   return (
     <div className="contenedor-productos">
       <h2 className="titulo-productos">
@@ -61,7 +93,10 @@ const Productos = ({ apiUrl, categoria }) => {
 
               <button
                 className="boton-agregar"
-                onClick={() => agregarAlCarrito(prod)}
+                onClick={(e) => {
+                  agregarAlCarrito(prod);
+                  lanzarAnimacion(e.target); // 👈 Dispara la animación
+                }}
                 disabled={prod.stock === 0}
                 style={{
                   backgroundColor: prod.stock === 0 ? "#ccc" : undefined,
