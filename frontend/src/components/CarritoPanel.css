@@ -1,27 +1,114 @@
+.carrito-panel-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+}
+
+.carrito-panel {
+  background: #fff;
+  border-radius: 12px;
+  padding: 2rem;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.carrito-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.carrito-item img {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-right: 1rem;
+}
+
+.carrito-info {
+  flex: 1;
+}
+
+.carrito-controles {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0.5rem 0;
+}
+
+.carrito-eliminar {
+  background: transparent;
+  border: none;
+  color: #f44336;
+  cursor: pointer;
+}
+
+.carrito-eliminar:hover {
+  color: #d32f2f;
+}
+
 .carrito-panel-botones {
   display: flex;
-  justify-content: space-between;
-  margin-top: 20px;
+  justify-content: center;   /* ✅ centra horizontalmente */
+  gap: 1rem;                 /* ✅ espacio entre botones */
+  margin-top: 1.5rem;
 }
 
 .carrito-vaciar {
-  background: #d9534f;
+  background-color: #f44336; /* rojo fuerte */
   color: white;
   border: none;
-  padding: 10px 16px;
+  padding: 0.6rem 1.2rem;
   border-radius: 6px;
   cursor: pointer;
+  transition: background-color 0.2s ease;
 }
 
 .carrito-vaciar:hover {
-  background: #c9302c;
+  background-color: #d32f2f;
 }
 
 .carrito-finalizar {
-  background: #4CAF50;
+  background-color: #4CAF50; /* verde fuerte */
   color: white;
   border: none;
-  padding: 10px 16px;
+  padding: 0.6rem 1.2rem;
   border-radius: 6px;
   cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.carrito-finalizar:hover {
+  background-color: #388E3C;
+}
+
+/* 🌙 Ajustes para modo oscuro */
+@media (prefers-color-scheme: dark) {
+  .carrito-panel {
+    background: #1e1e1e;
+    color: #f0f0f0;
+  }
+
+  .carrito-vaciar {
+    background-color: #ff6666;
+  }
+  .carrito-vaciar:hover {
+    background-color: #cc4444;
+  }
+
+  .carrito-finalizar {
+    background-color: #66bb6a;
+  }
+  .carrito-finalizar:hover {
+    background-color: #4caf50;
+  }
 }
