@@ -33,8 +33,8 @@ const Productos = ({ apiUrl, categoria }) => {
       minimumFractionDigits: 0,
     }).format(valor);
 
-  // 👉 Función de animación
-  const lanzarAnimacion = (elemento) => {
+  // 👉 Función de animación con imagen del producto
+  const lanzarAnimacion = (elemento, imagenProducto) => {
     const carritoIcono = document.querySelector(".carrito-widget-icono");
     if (!carritoIcono) return;
 
@@ -45,14 +45,23 @@ const Productos = ({ apiUrl, categoria }) => {
     burbuja.className = "burbuja-animada";
     burbuja.style.left = rectProducto.left + "px";
     burbuja.style.top = rectProducto.top + "px";
+
+    // ✅ usar imagen del producto como fondo
+    if (imagenProducto) {
+      burbuja.style.backgroundImage = `url(${imagenProducto})`;
+      burbuja.style.backgroundSize = "cover";
+      burbuja.style.backgroundPosition = "center";
+    }
+
     document.body.appendChild(burbuja);
 
     burbuja.animate(
       [
-        { transform: `translate(0,0) scale(1)` },
+        { transform: "translate(0,0) scale(1)", opacity: 1 },
         {
           transform: `translate(${rectCarrito.left - rectProducto.left}px, 
-                                ${rectCarrito.top - rectProducto.top}px) scale(0.3)`
+                                ${rectCarrito.top - rectProducto.top}px) scale(0.3)`,
+          opacity: 0
         }
       ],
       {
@@ -61,7 +70,6 @@ const Productos = ({ apiUrl, categoria }) => {
       }
     ).onfinish = () => {
       burbuja.remove();
-      // El contador del carrito ya se incrementa automáticamente con agregarAlCarrito
     };
   };
 
@@ -95,7 +103,7 @@ const Productos = ({ apiUrl, categoria }) => {
                 className="boton-agregar"
                 onClick={(e) => {
                   agregarAlCarrito(prod);
-                  lanzarAnimacion(e.target); // 👈 Dispara la animación
+                  lanzarAnimacion(e.target, prod.imagenes?.[0]); // ✅ pasa la imagen
                 }}
                 disabled={prod.stock === 0}
                 style={{

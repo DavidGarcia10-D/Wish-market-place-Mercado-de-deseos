@@ -116,3 +116,16 @@
     background-color: #267acc;
   }
 }
+
+/* 🎯 Burbuja animada que vuela al carrito */
+.burbuja-animada {
+  position: fixed; /* importante para usar coordenadas absolutas de pantalla */
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #4CAF50; /* color base si no usas imagen */
+  background-size: cover;
+  background-position: center;
+  pointer-events: none;
+  z-index: 9999;
+}

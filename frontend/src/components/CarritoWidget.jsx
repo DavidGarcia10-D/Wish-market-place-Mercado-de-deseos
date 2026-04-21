@@ -9,9 +9,6 @@ const CarritoWidget = ({ modoOscuro }) => {
   const navigate = useNavigate();
   const [animar, setAnimar] = useState(false);
 
-  // Ocultar el widget en la pantalla de pago
-  if (location.pathname === "/pago") return null;
-
   const totalItems = carrito.reduce((acc, item) => acc + item.cantidad, 0);
 
   // Efecto rebote cuando cambia el contador
@@ -23,13 +20,18 @@ const CarritoWidget = ({ modoOscuro }) => {
     }
   }, [totalItems]);
 
+  // ✅ El return condicional va después de los hooks
+  if (location.pathname === "/pago") {
+    return null;
+  }
+
   return (
     <div
       className={`carrito-widget ${modoOscuro ? "oscuro" : "claro"}`}
       onClick={() => navigate("/carrito")}
       title="Ver carrito"
     >
-      🛒
+      <span className="carrito-widget-icono">🛒</span> {/* ✅ destino de la animación */}
       {totalItems > 0 && (
         <span
           className={`carrito-widget-contador ${animar ? "rebote" : ""}`}
