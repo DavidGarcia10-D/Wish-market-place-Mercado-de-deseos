@@ -58,35 +58,36 @@
 
 .carrito-panel-botones {
   display: flex;
-  justify-content: center;   /* ✅ centra horizontalmente */
+  justify-content: center;   /* ✅ misma alineación en claro y oscuro */
   gap: 1rem;                 /* ✅ espacio entre botones */
   margin-top: 1.5rem;
 }
 
-.carrito-vaciar {
-  background-color: #f44336; /* rojo fuerte */
-  color: white;
-  border: none;
+.carrito-vaciar,
+.carrito-finalizar {
+  flex: 1;                  /* ✅ mismo ancho */
+  max-width: 200px;         /* ✅ evita que se estiren demasiado */
+  text-align: center;
   padding: 0.6rem 1.2rem;
+  border: none;
   border-radius: 6px;
   cursor: pointer;
   transition: background-color 0.2s ease;
 }
 
+/* Colores modo claro */
+.carrito-vaciar {
+  background-color: #f44336;
+  color: white;
+}
 .carrito-vaciar:hover {
   background-color: #d32f2f;
 }
 
 .carrito-finalizar {
-  background-color: #4CAF50; /* verde fuerte */
+  background-color: #4CAF50;
   color: white;
-  border: none;
-  padding: 0.6rem 1.2rem;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
 }
-
 .carrito-finalizar:hover {
   background-color: #388E3C;
 }
