@@ -15,7 +15,8 @@ const app = express();
 const allowedOrigins = [
   "http://localhost:3000",
   "http://localhost:5000",
-  "https://wish-market-place-front.onrender.com"
+  "https://wish-market-place-front.onrender.com",
+  "https://wish-market-place-mercado-de-deseos-rjk7t9tw2.vercel.app/"
 ];
 
 app.use(cors({
