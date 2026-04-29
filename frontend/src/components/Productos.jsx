@@ -33,7 +33,7 @@ const Productos = ({ apiUrl, categoria }) => {
       minimumFractionDigits: 0,
     }).format(valor);
 
-  // 👉 Función de animación con imagen del producto
+  // 👉 Animación burbuja al carrito
   const lanzarAnimacion = (elemento, imagenProducto) => {
     const carritoIcono = document.querySelector(".carrito-widget-icono");
     if (!carritoIcono) return;
@@ -46,7 +46,6 @@ const Productos = ({ apiUrl, categoria }) => {
     burbuja.style.left = rectProducto.left + "px";
     burbuja.style.top = rectProducto.top + "px";
 
-    // ✅ usar imagen del producto como fondo
     if (imagenProducto) {
       burbuja.style.backgroundImage = `url(${imagenProducto})`;
       burbuja.style.backgroundSize = "cover";
@@ -61,12 +60,12 @@ const Productos = ({ apiUrl, categoria }) => {
         {
           transform: `translate(${rectCarrito.left - rectProducto.left}px, 
                                 ${rectCarrito.top - rectProducto.top}px) scale(0.3)`,
-          opacity: 0
-        }
+          opacity: 0,
+        },
       ],
       {
         duration: 800,
-        easing: "ease-in-out"
+        easing: "ease-in-out",
       }
     ).onfinish = () => {
       burbuja.remove();
@@ -83,38 +82,62 @@ const Productos = ({ apiUrl, categoria }) => {
         {productos.length === 0 ? (
           <p>No hay productos disponibles en esta categoría.</p>
         ) : (
-          productos.map((prod) => (
-            <div key={prod._id} className="card-producto">
-              <Link to={`/producto/${prod._id}`} className="enlace-producto">
-                <img
-                  src={
-                    prod.imagenes && prod.imagenes.length > 0
-                      ? prod.imagenes[0]
-                      : "/imagenes/default.jpg"
-                  }
-                  alt={prod.nombre}
-                />
-                <h3>{prod.nombre}</h3>
-                <p>{prod.descripcion}</p>
-                <p>💰 {formatearCOP(prod.precio)}</p>
-              </Link>
+          productos.map((prod) => {
+            const [imagenActual, setImagenActual] = useState(0);
+            let intervalo;
 
-              <button
-                className="boton-agregar"
-                onClick={(e) => {
-                  agregarAlCarrito(prod);
-                  lanzarAnimacion(e.target, prod.imagenes?.[0]); // ✅ pasa la imagen
-                }}
-                disabled={prod.stock === 0}
-                style={{
-                  backgroundColor: prod.stock === 0 ? "#ccc" : undefined,
-                  cursor: prod.stock === 0 ? "not-allowed" : undefined,
-                }}
+            const iniciarHover = () => {
+              if (prod.imagenes?.length > 1) {
+                intervalo = setInterval(() => {
+                  setImagenActual((prev) => (prev + 1) % prod.imagenes.length);
+                }, 1500);
+              }
+            };
+
+            const detenerHover = () => {
+              clearInterval(intervalo);
+              setImagenActual(0);
+            };
+
+            return (
+              <div
+                key={prod._id}
+                className="card-producto"
+                onMouseEnter={iniciarHover}
+                onMouseLeave={detenerHover}
               >
-                Agregar al carrito
-              </button>
-            </div>
-          ))
+                <Link to={`/producto/${prod._id}`} className="enlace-producto">
+                  <img
+                    src={
+                      prod.imagenes && prod.imagenes.length > 0
+                        ? prod.imagenes[imagenActual]
+                        : "/imagenes/default.jpg"
+                    }
+                    alt={prod.nombre}
+                    className="imagen-producto"
+                  />
+                  <h3>{prod.nombre}</h3>
+                  <p>{prod.descripcion}</p>
+                  <p>💰 {formatearCOP(prod.precio)}</p>
+                </Link>
+
+                <button
+                  className="boton-agregar"
+                  onClick={(e) => {
+                    agregarAlCarrito(prod);
+                    lanzarAnimacion(e.target, prod.imagenes?.[0]);
+                  }}
+                  disabled={prod.stock === 0}
+                  style={{
+                    backgroundColor: prod.stock === 0 ? "#ccc" : undefined,
+                    cursor: prod.stock === 0 ? "not-allowed" : undefined,
+                  }}
+                >
+                  Agregar al carrito
+                </button>
+              </div>
+            );
+          })
         )}
       </div>
     </div>
