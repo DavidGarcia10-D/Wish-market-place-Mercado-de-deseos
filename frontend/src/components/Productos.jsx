@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useCarrito } from "../context/CarritoContext";
-import { Link } from "react-router-dom";
+import CardProducto from "./CardProducto"; // ✅ nuevo componente
 import "./Productos.css";
 
 const Productos = ({ apiUrl, categoria }) => {
@@ -16,7 +16,6 @@ const Productos = ({ apiUrl, categoria }) => {
 
         const res = await fetch(endpoint);
         const data = await res.json();
-        console.log("📦 Productos recibidos desde backend:", data);
         setProductos(data);
       } catch (error) {
         console.error("❌ Error al obtener productos:", error);
@@ -33,7 +32,6 @@ const Productos = ({ apiUrl, categoria }) => {
       minimumFractionDigits: 0,
     }).format(valor);
 
-  // 👉 Animación burbuja al carrito
   const lanzarAnimacion = (elemento, imagenProducto) => {
     const carritoIcono = document.querySelector(".carrito-widget-icono");
     if (!carritoIcono) return;
@@ -82,62 +80,15 @@ const Productos = ({ apiUrl, categoria }) => {
         {productos.length === 0 ? (
           <p>No hay productos disponibles en esta categoría.</p>
         ) : (
-          productos.map((prod) => {
-            const [imagenActual, setImagenActual] = useState(0);
-            let intervalo;
-
-            const iniciarHover = () => {
-              if (prod.imagenes?.length > 1) {
-                intervalo = setInterval(() => {
-                  setImagenActual((prev) => (prev + 1) % prod.imagenes.length);
-                }, 1500);
-              }
-            };
-
-            const detenerHover = () => {
-              clearInterval(intervalo);
-              setImagenActual(0);
-            };
-
-            return (
-              <div
-                key={prod._id}
-                className="card-producto"
-                onMouseEnter={iniciarHover}
-                onMouseLeave={detenerHover}
-              >
-                <Link to={`/producto/${prod._id}`} className="enlace-producto">
-                  <img
-                    src={
-                      prod.imagenes && prod.imagenes.length > 0
-                        ? prod.imagenes[imagenActual]
-                        : "/imagenes/default.jpg"
-                    }
-                    alt={prod.nombre}
-                    className="imagen-producto"
-                  />
-                  <h3>{prod.nombre}</h3>
-                  <p>{prod.descripcion}</p>
-                  <p>💰 {formatearCOP(prod.precio)}</p>
-                </Link>
-
-                <button
-                  className="boton-agregar"
-                  onClick={(e) => {
-                    agregarAlCarrito(prod);
-                    lanzarAnimacion(e.target, prod.imagenes?.[0]);
-                  }}
-                  disabled={prod.stock === 0}
-                  style={{
-                    backgroundColor: prod.stock === 0 ? "#ccc" : undefined,
-                    cursor: prod.stock === 0 ? "not-allowed" : undefined,
-                  }}
-                >
-                  Agregar al carrito
-                </button>
-              </div>
-            );
-          })
+          productos.map((prod) => (
+            <CardProducto
+              key={prod._id}
+              prod={prod}
+              agregarAlCarrito={agregarAlCarrito}
+              lanzarAnimacion={lanzarAnimacion}
+              formatearCOP={formatearCOP}
+            />
+          ))
         )}
       </div>
     </div>
