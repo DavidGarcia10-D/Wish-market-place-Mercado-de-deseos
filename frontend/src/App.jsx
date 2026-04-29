@@ -11,6 +11,7 @@ import Pago from "./components/Pago";
 import EstadoPago from "./components/EstadoPago";
 import ProductoDetalle from "./components/ProductoDetalle";
 import CarritoWidget from "./components/CarritoWidget";
+import Footer from "./components/Footer";   // ✅ Importamos el Footer
 
 import { CarritoProvider } from "./context/CarritoContext";
 
@@ -30,7 +31,7 @@ const App = () => {
 
   return (
     <CarritoProvider>
-      <div className="contenedor-tienda">
+      <div className={`contenedor-tienda ${modoOscuro ? "dark" : "light"}`}>
         <h1 className="titulo-tienda">🛒 Wish Marketplace</h1>
         <p className="subtitulo-tienda">Tecnología y estilo en un solo lugar</p>
 
@@ -81,6 +82,9 @@ const App = () => {
           autoClose={3000}
           theme={temaToast}
         />
+
+        {/* ✅ Footer con soporte para modo oscuro */}
+        <Footer modoOscuro={modoOscuro} />
       </div>
     </CarritoProvider>
   );
