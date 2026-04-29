@@ -25,7 +25,7 @@ const Privacidad = ({ modoOscuro }) => {
   return (
     <div style={estiloFinal}>
       <h1>Política de Privacidad</h1>
-      <p><strong>Última actualización:</strong> 6 de octubre de 2025</p>
+      <p><strong>Última actualización:</strong> 29 de Abril de 2026</p>
 
       <p>
         Wish Marketplace – Mercado de Deseos gestiona esta tienda y sitio web,

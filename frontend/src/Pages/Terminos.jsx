@@ -25,7 +25,7 @@ const Terminos = ({ modoOscuro }) => {
   return (
     <div style={estiloFinal}>
       <h1>Términos de Servicio</h1>
-      <p><strong>Última actualización:</strong> 6 de octubre de 2025</p>
+      <p><strong>Última actualización:</strong> 29 de Abril de 2026</p>
 
       <h2>Información General</h2>
       <p>

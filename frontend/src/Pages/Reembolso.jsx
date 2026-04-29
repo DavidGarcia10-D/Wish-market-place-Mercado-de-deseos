@@ -23,7 +23,7 @@ const Reembolso = ({ modoOscuro }) => {
   return (
     <div style={estiloFinal}>
       <h1>Política de Reembolso</h1>
-      <p><strong>Última actualización:</strong> 6 de octubre de 2025</p>
+      <p><strong>Última actualización:</strong> 29 de Abril de 2026</p>
 
       <h2>Procedimiento de cambio</h2>
       <p>
