@@ -2,12 +2,25 @@ import React from "react";
 
 const Terminos = ({ modoOscuro }) => {
   const estilos = {
-    base: { padding: "1rem", lineHeight: "1.6" },
-    light: { backgroundColor: "#f5f5f5", color: "#333" },
-    dark: { backgroundColor: "#222", color: "#f5f5f5" },
+    base: {
+      padding: "1rem",
+      lineHeight: "1.6",
+      textAlign: "center", // ✅ Centrar todo el texto
+    },
+    light: {
+      backgroundColor: "#f5f5f5",
+      color: "#333",
+    },
+    dark: {
+      backgroundColor: "#222",
+      color: "#f5f5f5",
+    },
   };
 
-  const estiloFinal = { ...estilos.base, ...(modoOscuro ? estilos.dark : estilos.light) };
+  const estiloFinal = {
+    ...estilos.base,
+    ...(modoOscuro ? estilos.dark : estilos.light),
+  };
 
   return (
     <div style={estiloFinal}>

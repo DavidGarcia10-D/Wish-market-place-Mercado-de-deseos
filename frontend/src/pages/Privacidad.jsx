@@ -5,6 +5,7 @@ const Privacidad = ({ modoOscuro }) => {
     base: {
       padding: "1rem",
       lineHeight: "1.6",
+      textAlign: "center", // ✅ Centrar todo el texto
     },
     light: {
       backgroundColor: "#f5f5f5",
@@ -41,7 +42,7 @@ const Privacidad = ({ modoOscuro }) => {
       </p>
 
       <h2>Información personal que recopilamos</h2>
-      <ul>
+      <ul style={{ listStylePosition: "inside" }}>
         <li>Detalles de contacto: nombre, dirección, teléfono, correo electrónico.</li>
         <li>Información financiera: datos de tarjetas y transacciones.</li>
         <li>Información de cuenta: usuario, contraseña, preferencias.</li>
@@ -59,7 +60,7 @@ const Privacidad = ({ modoOscuro }) => {
       </p>
 
       <h2>Cómo utilizamos su información</h2>
-      <ul>
+      <ul style={{ listStylePosition: "inside" }}>
         <li>Prestar y mejorar los Servicios.</li>
         <li>Marketing y publicidad personalizada.</li>
         <li>Seguridad y prevención de fraudes.</li>
@@ -71,13 +72,6 @@ const Privacidad = ({ modoOscuro }) => {
       <p>
         Podemos compartir su información con proveedores (ej. Wompi para pagos),
         partners comerciales, afiliados y en casos de requerimientos legales.
-      </p>
-
-      <h2>Relación con Shopify</h2>
-      <p>
-        Nuestros Servicios se alojan en Shopify, que recopila y procesa
-        información personal para mejorar la plataforma. Para más detalles, puede
-        consultar la Política de privacidad de Shopify.
       </p>
 
       <p>
