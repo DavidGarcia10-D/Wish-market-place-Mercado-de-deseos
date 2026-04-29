@@ -56,7 +56,7 @@ const Footer = ({ modoOscuro }) => {
       <div style={{ marginBottom: "0.5rem" }}>
         <a href="/privacidad" style={{ color: colorLink, margin: "0 10px", textDecoration: "none" }}>Política de Privacidad</a>
         <a href="/terminos" style={{ color: colorLink, margin: "0 10px", textDecoration: "none" }}>Términos y Condiciones</a>
-        <a href="/devoluciones" style={{ color: colorLink, margin: "0 10px", textDecoration: "none" }}>Política de Devoluciones</a>
+        <a href="/reembolso" style={{ color: colorLink, margin: "0 10px", textDecoration: "none" }}>Política de Devoluciones</a>
       </div>
 
       <p>© 2026 Wish Marketplace – Mercado de Deseos</p>

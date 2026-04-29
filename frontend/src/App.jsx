@@ -15,6 +15,11 @@ import Footer from "./components/Footer";   // ✅ Importamos el Footer
 
 import { CarritoProvider } from "./context/CarritoContext";
 
+// ✅ Importaciones correctas con mayúscula
+import Privacidad from "./pages/Privacidad";
+import Terminos from "./pages/Terminos";
+import Reembolso from "./pages/Reembolso";
+
 const App = () => {
   const [categoria, setCategoria] = useState("");
   const [modoOscuro, setModoOscuro] = useState(false);
@@ -72,6 +77,11 @@ const App = () => {
 
           {/* Detalle de producto */}
           <Route path="/producto/:id" element={<ProductoDetalle />} />
+
+          {/* ✅ Páginas legales */}
+          <Route path="/privacidad" element={<Privacidad modoOscuro={modoOscuro} />} />
+          <Route path="/terminos" element={<Terminos modoOscuro={modoOscuro} />} />
+          <Route path="/reembolso" element={<Reembolso modoOscuro={modoOscuro} />} />
         </Routes>
 
         {/* Widget fijo en todas las pantallas excepto /pago */}
